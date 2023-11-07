@@ -1,0 +1,7 @@
+### Project ###
+/analysis-result-logs
+
+**/.gradle
+**/build
+.idea
+/.idea/

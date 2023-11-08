@@ -1,5 +1,7 @@
 ### Project ###
 /analysis-result-logs
+/stars-auna-json-files
+/stars-auna-json-files.zip
 
 # Exclude astah .lock files
 *.lock

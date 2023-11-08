@@ -1,6 +1,9 @@
 ### Project ###
 /analysis-result-logs
 
+# Exclude astah .lock files
+*.lock
+
 **/.gradle
 **/build
 .idea

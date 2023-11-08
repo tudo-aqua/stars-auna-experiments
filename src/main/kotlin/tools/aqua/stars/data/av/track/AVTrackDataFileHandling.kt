@@ -41,6 +41,9 @@ import tools.aqua.stars.importer.auna.ViconPose
 fun importDataFiles(folderPath: Path): Map<DataSource, List<Any>> {
   // Get all files for the given folderPath
   val folderContents = folderPath.toFile().walk().filter { it.isFile }.toList()
+  require(folderContents.any()){
+    "There is no content in the folder '$folderPath'"
+  }
   val dataSourceToContentMap = mutableMapOf<DataSource, List<Any>>()
   folderContents.forEach { currentFile ->
     if (currentFile.nameWithoutExtension.contains("cam")) {

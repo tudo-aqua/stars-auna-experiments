@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.experiments
+package tools.aqua.stars.importer.auna
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

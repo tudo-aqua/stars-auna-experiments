@@ -1,5 +1,5 @@
 /*
- * Copyright $YEAR The STARS auNa Experiments Authors
+ * Copyright $YEAR The STARS AuNa Experiments Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

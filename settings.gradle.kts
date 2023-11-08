@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The STARS auNa Experiments Authors
+ * Copyright 2023 The STARS AuNa Experiments Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,4 +17,4 @@
 
 plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0" }
 
-rootProject.name = "stars-auNA-experiments"
+rootProject.name = "stars-auna-experiments"

@@ -44,16 +44,13 @@ fun importDataFiles(folderPath: Path): Map<DataSource, List<Any>> {
   folderContents.forEach { currentFile ->
     if (currentFile.nameWithoutExtension.contains("cam")) {
       dataSourceToContentMap.putIfAbsent(
-        DataSource.CAM, getJsonContentOfPath<List<CAM>>(currentFile.toPath())
-      )
+          DataSource.CAM, getJsonContentOfPath<List<CAM>>(currentFile.toPath()))
     } else if (currentFile.nameWithoutExtension.contains("odom")) {
       dataSourceToContentMap.putIfAbsent(
-        DataSource.ODOMETRY, getJsonContentOfPath<List<Odometry>>(currentFile.toPath())
-      )
+          DataSource.ODOMETRY, getJsonContentOfPath<List<Odometry>>(currentFile.toPath()))
     } else if (currentFile.nameWithoutExtension.contains("vicon_pose")) {
       dataSourceToContentMap.putIfAbsent(
-        DataSource.VICON_POSE, getJsonContentOfPath<List<ViconPose>>(currentFile.toPath())
-      )
+          DataSource.VICON_POSE, getJsonContentOfPath<List<ViconPose>>(currentFile.toPath()))
     } else {
       error("Unknown file contents: $currentFile")
     }

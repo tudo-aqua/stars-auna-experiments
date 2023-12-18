@@ -22,7 +22,7 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
-import tools.aqua.stars.data.av.track.importDataFiles
+import tools.aqua.stars.importer.auna.importDataFiles
 
 fun main() {
   downloadAndUnzipExperimentsData()

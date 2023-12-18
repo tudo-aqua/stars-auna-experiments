@@ -22,12 +22,17 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
+import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.importDataFiles
 
 fun main() {
   downloadAndUnzipExperimentsData()
   val path = File(SIMULATION_RUN_FOLDER).toPath()
   val sourcesToContentMap = importDataFiles(path)
+  val messages: List<Message> =
+      sourcesToContentMap
+          .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
+          .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
   sourcesToContentMap.forEach { (dataSource, entries) ->
     println("From DataSource '$dataSource' there are ${entries.count()} entries.")
   }

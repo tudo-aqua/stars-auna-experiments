@@ -39,6 +39,17 @@ with different detail levels.
 - `*-finer.txt` contains all possible results of the metric
 - `*-finest.txt` contains all possible results of the metric including meta information
 
+## Meta data information
+
+The scenario data has the following properties:
+- `robot width`: 0.4m
+- `robot length`: 0.2m
+- `track width`: 1.4m (each 0.7m orthogonal from the center)
+- `velocity goal`: Depends on the data set, is either 3m/s or 0.8 m/s
+- `standstill distance`: 1.25m
+- `time distance`: 0.25s
+- `target distance at any time`: `standstill distance` + `time distance` * `speed`
+
 #### (Optional) Git Hooks
 If you want to use our proposed Git Hooks you can execute the following command:
 ```shell

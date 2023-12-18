@@ -28,6 +28,7 @@ import tools.aqua.stars.importer.auna.importDataFiles
 
 fun main() {
   downloadAndUnzipExperimentsData()
+  downloadWaypointsData()
   val path = File(SIMULATION_RUN_FOLDER).toPath()
   val sourcesToContentMap = importDataFiles(path)
   /** Holds a sorted [List] of all [Message]s. Sorted by [Time.seconds] and [Time.nanoseconds]. */
@@ -78,7 +79,7 @@ fun downloadAndUnzipExperimentsData() {
  */
 fun simulationDataMissing() {
   error(
-      "The experiments data is not available. Either download it: https://tu-dortmund.sciebo.de/s/gHctg8boFkKgcCF/download or set " +
+      "The experiments data is not available. Either download it: https://tu-dortmund.sciebo.de/s/gHctg8boFkKgcCF/download and https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs or set " +
           "DOWNLOAD_EXPERIMENTS_DATA to 'true'")
 }
 
@@ -86,6 +87,26 @@ fun simulationDataMissing() {
 fun downloadExperimentsData() {
   URL("https://tu-dortmund.sciebo.de/s/gHctg8boFkKgcCF/download").openStream().use {
     Files.copy(it, Paths.get("$DOWNLOAD_FOLDER_NAME.zip"))
+  }
+}
+
+/** Download the waypoint data and saves it in the root directory of the project. */
+fun downloadWaypointsData() {
+  val waypointsFileName = "flw_waypoints.csv"
+  if (!File(waypointsFileName).exists()) {
+    println("The waypoints data is missing.")
+    if (DOWNLOAD_EXPERIMENTS_DATA) {
+      println("Start with downloading the waypoints data.")
+      URL("https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs").openStream().use {
+        Files.copy(it, Paths.get("flw_waypoints.csv"))
+      }
+      println("Finished downloading.")
+    } else {
+      simulationDataMissing()
+    }
+  }
+  if (!File("flw_waypoints.csv").exists()) {
+    simulationDataMissing()
   }
 }
 

@@ -45,14 +45,14 @@ import tools.aqua.stars.core.types.EntityType
 data class Robot(
     override val id: Int,
     override val tickData: TickData,
-    val posOnLane: Double,
-    val lateralOffset: Double,
-    val velocity: Double,
-    val acceleration: Double,
-    val posOnLaneCAM: Double,
-    val lateralOffsetCAM: Double,
-    val velocityCAM: Double,
-    val accelerationCAM: Double,
-    val dataSource: DataSource,
+    val posOnLane: Double = 0.0,
+    val lateralOffset: Double = 0.0,
+    val velocity: Double = 0.0,
+    val acceleration: Double = 0.0,
+    val posOnLaneCAM: Double = 0.0,
+    val lateralOffsetCAM: Double = 0.0,
+    val velocityCAM: Double = 0.0,
+    val accelerationCAM: Double = 0.0,
+    val dataSource: DataSource = DataSource.NOT_SET,
     val lane: Lane
 ) : EntityType<Robot, TickData, Segment>

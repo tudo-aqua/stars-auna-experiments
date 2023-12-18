@@ -21,5 +21,6 @@ package tools.aqua.stars.data.av.track
 enum class DataSource() {
   VICON_POSE,
   ODOMETRY,
-  CAM
+  CAM,
+  NOT_SET
 }

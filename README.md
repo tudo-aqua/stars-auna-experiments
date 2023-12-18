@@ -38,3 +38,9 @@ with different detail levels.
 - `*-fine.txt` contains a more detailed result of the metric
 - `*-finer.txt` contains all possible results of the metric
 - `*-finest.txt` contains all possible results of the metric including meta information
+
+#### (Optional) Git Hooks
+If you want to use our proposed Git Hooks you can execute the following command:
+```shell
+git config --local core.hooksPath .githooks
+```

@@ -32,7 +32,8 @@ fun main() {
   val messages: List<Message> =
       sourcesToContentMap
           .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
-          .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
+          .sortedWith(
+              compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
   sourcesToContentMap.forEach { (dataSource, entries) ->
     println("From DataSource '$dataSource' there are ${entries.count()} entries.")
   }

@@ -17,10 +17,9 @@
 
 package tools.aqua.stars.data.av.track
 
-/**
- * This class represent simple (x,y)-coordinates
- *
- * @param x The x value for this coordinate
- * @param y The y value for this coordinate
- */
-data class Waypoint(val x: Double, val y: Double)
+/** This enum holds all possible triggers for new value updates of the [Robot]s. */
+enum class DataSource() {
+  VICON_POSE,
+  ODOMETRY,
+  CAM
+}

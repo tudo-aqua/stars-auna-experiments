@@ -23,12 +23,14 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
 import tools.aqua.stars.importer.auna.Message
+import tools.aqua.stars.importer.auna.Time
 import tools.aqua.stars.importer.auna.importDataFiles
 
 fun main() {
   downloadAndUnzipExperimentsData()
   val path = File(SIMULATION_RUN_FOLDER).toPath()
   val sourcesToContentMap = importDataFiles(path)
+  /** Holds a sorted [List] of all [Message]s. Sorted by [Time.seconds] and [Time.nanoseconds]. */
   val messages: List<Message> =
       sourcesToContentMap
           .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }

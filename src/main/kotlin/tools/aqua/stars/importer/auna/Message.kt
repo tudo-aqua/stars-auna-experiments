@@ -21,18 +21,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CAM(
-    @SerialName("msg") override val header: Header,
-    @SerialName("robot_name") val robotName: String,
-    @SerialName("x") val x: Double,
-    @SerialName("y") val y: Double,
-    @SerialName("z") val z: Double,
-    @SerialName("drive_direction") val driveDirection: Int,
-    @SerialName("theta") val theta: Double,
-    @SerialName("thetadot") val thetaDot: Double,
-    @SerialName("v") val v: Double,
-    @SerialName("vdot") val vDot: Double,
-    @SerialName("curv") val curv: Double,
-    @SerialName("vehicle_length") val vehicleLength: Double,
-    @SerialName("vehicle_width") val vehicleWidth: Double
-) : Message
+sealed interface Message {
+  @SerialName("msg") val header: Header
+}

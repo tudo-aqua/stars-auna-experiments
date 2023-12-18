@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Odometry(
-    @SerialName("msg") val header: Header,
+    @SerialName("msg") override val header: Header,
     @SerialName("pose") val pose: PoseWithCovariance,
     @SerialName("twist") val twist: TwistWithCovariance
-)
+) : Message

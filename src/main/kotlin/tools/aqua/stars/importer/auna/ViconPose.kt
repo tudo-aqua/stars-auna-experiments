@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ViconPose(
-    @SerialName("msg") val header: Header,
+    @SerialName("msg") override val header: Header,
     @SerialName("child_frame_id") val childFrameId: String,
     @SerialName("transform") val transform: Transform
-)
+) : Message

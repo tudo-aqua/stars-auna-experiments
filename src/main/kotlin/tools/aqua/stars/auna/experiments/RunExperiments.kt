@@ -25,6 +25,7 @@ import java.util.zip.ZipFile
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
 import tools.aqua.stars.importer.auna.importDataFiles
+import tools.aqua.stars.importer.auna.loadWaypoints
 
 fun main() {
   downloadAndUnzipExperimentsData()
@@ -92,22 +93,23 @@ fun downloadExperimentsData() {
 
 /** Download the waypoint data and saves it in the root directory of the project. */
 fun downloadWaypointsData() {
-  val waypointsFileName = "flw_waypoints.csv"
+  val waypointsFileName = WAYPOINTS_FILE_NAME
   if (!File(waypointsFileName).exists()) {
     println("The waypoints data is missing.")
     if (DOWNLOAD_EXPERIMENTS_DATA) {
       println("Start with downloading the waypoints data.")
-      URL("https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs").openStream().use {
-        Files.copy(it, Paths.get("flw_waypoints.csv"))
+      URL("https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs/download").openStream().use {
+        Files.copy(it, Paths.get(WAYPOINTS_FILE_NAME))
       }
       println("Finished downloading.")
     } else {
       simulationDataMissing()
     }
   }
-  if (!File("flw_waypoints.csv").exists()) {
+  if (!File(WAYPOINTS_FILE_NAME).exists()) {
     simulationDataMissing()
   }
+  val waypoints = loadWaypoints()
 }
 
 /**

@@ -18,6 +18,7 @@
 package tools.aqua.stars.importer.auna
 
 import java.io.File
+import java.io.InputStream
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.exists
@@ -27,7 +28,9 @@ import kotlin.io.path.isDirectory
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import tools.aqua.stars.auna.experiments.WAYPOINTS_FILE_NAME
 import tools.aqua.stars.data.av.track.DataSource
+import tools.aqua.stars.data.av.track.Waypoint
 
 /**
  * This function imports all file contents under the given [folderPath] and returns a map which maps
@@ -98,4 +101,26 @@ inline fun <reified T> getJsonContentOfPath(inputFilePath: Path): T {
   // If none of the supported file extensions is present, throw an Exception
   error(
       "Unexpected file extension: ${inputFilePath.extension}. Supported extensions: '.json', '.zip'")
+}
+
+fun loadWaypoints(): List<Waypoint> {
+  if (!File(WAYPOINTS_FILE_NAME).exists()) {
+    error(
+        "The Waypoints file does not exist. Either download it under https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs/download, or set the DOWNLOAD_EXPERIMENTS_DATA flag to true.")
+  }
+  val waypoints = readCsv(File(WAYPOINTS_FILE_NAME).inputStream())
+  return waypoints
+}
+
+fun readCsv(inputStream: InputStream): List<Waypoint> {
+  val reader = inputStream.bufferedReader()
+  val header = reader.readLine()
+  return reader
+      .lineSequence()
+      .filter { it.isNotBlank() }
+      .map {
+        val (x, y) = it.split(',', ignoreCase = false, limit = 2)
+        Waypoint(x.trim().toDouble(), y.trim().toDouble())
+      }
+      .toList()
 }

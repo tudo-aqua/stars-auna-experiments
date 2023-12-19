@@ -19,8 +19,9 @@ package tools.aqua.stars.auna.experiments
 
 // The download size is approximately 60MB!
 // Manual download via: https://tu-dortmund.sciebo.de/s/gHctg8boFkKgcCF/download and
-// https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs
+// https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs/download
 val DOWNLOAD_EXPERIMENTS_DATA = true
 
 val DOWNLOAD_FOLDER_NAME = "stars-auna-json-files"
 val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\json\\0_8_m_s"
+val WAYPOINTS_FILE_NAME = "flw_waypoints.csv"

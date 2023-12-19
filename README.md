@@ -50,6 +50,9 @@ The scenario data has the following properties:
 - `time distance`: 0.25s
 - `target distance at any time`: `standstill distance` + `time distance` * `speed`
 
+## Track overview
+![flw_track_waypoints.png](images%2Fflw_track_waypoints.png)
+
 #### (Optional) Git Hooks
 If you want to use our proposed Git Hooks you can execute the following command:
 ```shell

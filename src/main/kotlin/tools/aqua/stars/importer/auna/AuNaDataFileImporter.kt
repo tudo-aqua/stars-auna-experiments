@@ -120,7 +120,8 @@ fun readCsv(inputStream: InputStream): List<Waypoint> {
       .filter { it.isNotBlank() }
       .map {
         val (x, y) = it.split(',', ignoreCase = false, limit = 2)
-        Waypoint(x.trim().toDouble(), y.trim().toDouble())
+        // As the x and y values are flipped in the CSV, we have to flip them back here
+        Waypoint(x=y.trim().toDouble(), y=x.trim().toDouble())
       }
       .toList()
 }

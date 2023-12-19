@@ -25,7 +25,6 @@ import java.util.zip.ZipFile
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
 import tools.aqua.stars.importer.auna.importDataFiles
-import tools.aqua.stars.importer.auna.loadWaypoints
 
 fun main() {
   downloadAndUnzipExperimentsData()
@@ -109,7 +108,6 @@ fun downloadWaypointsData() {
   if (!File(WAYPOINTS_FILE_NAME).exists()) {
     simulationDataMissing()
   }
-  val waypoints = loadWaypoints()
 }
 
 /**

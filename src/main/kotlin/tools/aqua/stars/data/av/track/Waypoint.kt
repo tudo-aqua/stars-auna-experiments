@@ -22,5 +22,6 @@ package tools.aqua.stars.data.av.track
  *
  * @param x The x value for this coordinate
  * @param y The y value for this coordinate
+ * @param distanceToStart The distance to the start of the [Lane]
  */
-data class Waypoint(val x: Double, val y: Double)
+data class Waypoint(val x: Double, val y: Double, var distanceToStart: Double = -1.0)

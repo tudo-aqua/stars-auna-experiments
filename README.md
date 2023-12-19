@@ -56,6 +56,14 @@ The scenario data has the following properties:
 ## Track overview (Scatter)
 ![flw_track_waypoints_scatter.png](images%2Fflw_track_waypoints_scatter.png)
 
+## Track segmentation
+As it is visible in the scatter plot above, the straight parts of the track are only mapped by two points.
+Therefore, we extracted these 4 coordinates for the two straights. We identified the following points:
+- (x=-7.09735979561802,y=-1.89133616892839) (lower left corner)
+- (x=2.93225065116357, y=-3.27073098672295) (lower right corner)
+- (x=-6.09016702472381,y=3.17436982808834) (upper left corner)
+- (x=2.7643231790252, y=4.33303506387608) (upper right corner)
+
 #### (Optional) Git Hooks
 If you want to use our proposed Git Hooks you can execute the following command:
 ```shell

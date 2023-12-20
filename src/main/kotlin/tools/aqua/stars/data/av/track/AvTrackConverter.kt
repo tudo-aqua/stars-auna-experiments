@@ -22,6 +22,51 @@ import kotlin.math.sqrt
 import tools.aqua.stars.importer.auna.*
 
 /**
+ * Slices the [List] of [TickData] into [Segment]s based on the [Lane] of the leading [Robot].
+ *
+ * @param sourceFile The file from which the [TickData] was loaded.
+ * @param ticks The [List] of [TickData].
+ * @return [List] of [Segment]s based on the given [List] of [TickData].
+ */
+fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Segment> {
+  // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
+  // robots are tracked. For the analysis we only want the ticks in which all three robots are
+  // tracked.
+  val cleanedTicks = ticks.filter { it.entities.count() == 3 }
+  check(cleanedTicks.any()) { "There is no TickData provided!" }
+  check(cleanedTicks[0].entities.size == 3) {
+    "The first Tick does not contain exactly 3 entities!"
+  }
+  check(
+      cleanedTicks[0].entities[0].lane == cleanedTicks[0].entities[1].lane &&
+          cleanedTicks[0].entities[1].lane == cleanedTicks[0].entities[2].lane) {
+        "The entities do not start on the same lane!"
+      }
+  // Calculate the leading robot by getting the maximum posOnLane property (meaning, the robot is
+  // furthest ahead)
+  val leadingRobot = cleanedTicks[0].entities.maxBy { it.posOnLane ?: -1.0 }
+
+  var currentLane = leadingRobot.lane
+  val currentSegmentTicks = mutableListOf<TickData>()
+  val segments = mutableListOf<Segment>()
+  cleanedTicks.forEach { tickData ->
+    val currentLeadingRobot = tickData.entities.first { it.id == leadingRobot.id }
+    // The leading robot is still on the same lane.
+    if (currentLeadingRobot.lane == currentLane) {
+      currentSegmentTicks += tickData
+    } else {
+      // The leading robot switched lanes. Add previous ticks as segment to list.
+      segments += Segment(sourceFile, currentSegmentTicks)
+      // Reset tracking variables
+      currentLane = currentLeadingRobot.lane
+      currentSegmentTicks.clear()
+    }
+  }
+
+  return segments
+}
+
+/**
  * Returns a [List] of [TickData] based on the given [List] of [Message]s.
  *
  * @param messages The [List] of [Message]s. Each [Message] results in a new [TickData].

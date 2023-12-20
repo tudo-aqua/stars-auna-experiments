@@ -20,13 +20,11 @@ package tools.aqua.stars.importer.auna
 import java.io.File
 import java.nio.file.Path
 import java.util.zip.ZipFile
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.inputStream
-import kotlin.io.path.isDirectory
+import kotlin.io.path.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import tools.aqua.stars.auna.experiments.WAYPOINTS_FILE_NAME
 import tools.aqua.stars.data.av.track.DataSource
 
 /**
@@ -56,6 +54,15 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
     }
   }
   return dataSourceToContentMap
+}
+
+/**
+ * Import the [Track] data from the JSON file.
+ *
+ * @return The parsed [Track] object.
+ */
+fun importTrackData(): Track {
+  return getJsonContentOfPath(Path(WAYPOINTS_FILE_NAME))
 }
 
 /**

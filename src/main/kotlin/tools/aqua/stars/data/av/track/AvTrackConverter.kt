@@ -21,6 +21,13 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import tools.aqua.stars.importer.auna.*
 
+/**
+ * Returns a [List] of [TickData] based on the given [List] of [Message]s.
+ *
+ * @param messages The [List] of [Message]s. Each [Message] results in a new [TickData].
+ * @param waypoints A [List] of all available [Waypoint]s. It is used internally to calculate the
+ *   related [Lane] and nearest [Waypoint] for each [Robot].
+ */
 fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): List<TickData> {
   val ticks = mutableListOf<TickData>()
   val robotIds = mutableSetOf<Int>()
@@ -58,7 +65,18 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
   return ticks
 }
 
-/**  */
+/**
+ * Returns the [Robot] based on the given [Message]. It takes the previous [Robot] state (namely
+ * [latestRobot]) and the message type into consideration.
+ *
+ * @param message The [Message] from which the [Robot] state should be calculated from.
+ * @param latestRobot The previous [Robot] state. Might be null.
+ * @param robotId The id of the [Robot] which sent the [Message].
+ * @param tickData The [TickData] to which the returned [Robot] belongs to.
+ * @param waypoints A [List] of [Waypoint]s. It is used to calculate the related [Lane] and nearest
+ *   [Waypoint].
+ * @return The [Robot] object based on the given [Message].
+ */
 fun getRobotFromMessageAndLatestInformation(
     message: Message,
     latestRobot: Robot?,
@@ -134,15 +152,22 @@ fun calculatePosOnLaneAndLateralOffset(
   check(waypoints.count() > 1) { "There have to be at least two waypoints provided." }
   val distances =
       waypoints
-          .map { calculateDistance(robotPosition.x, robotPosition.y, it.x, it.y) to it }
+          .map { calculateDistance(robotPosition, Vector(it.x, it.y, 0.0)) to it }
           .sortedBy { it.first }
   val nearestWaypoint = distances.first()
 
   return nearestWaypoint.second to nearestWaypoint.first
 }
 
-fun calculateDistance(x1: Double, y1: Double, x2: Double, y2: Double): Double {
-  return sqrt((x2 - x1).pow(2) + (y2 - y1).pow(2))
+/**
+ * Calculate the distance between two given [Vector]s.
+ *
+ * @param point1 The first [Vector].
+ * @param point2 The second [Vector].
+ * @return The distance between [point1] and [point2].
+ */
+fun calculateDistance(point1: Vector, point2: Vector): Double {
+  return sqrt((point2.x - point1.x).pow(2) + (point2.y - point1.y).pow(2))
 }
 
 /**

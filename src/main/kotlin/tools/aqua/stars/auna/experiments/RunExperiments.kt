@@ -22,7 +22,13 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
-import tools.aqua.stars.data.av.track.getTicksFromMessages
+import kotlin.io.path.name
+import tools.aqua.stars.core.evaluation.TSCEvaluation
+import tools.aqua.stars.core.metric.metrics.evaluation.*
+import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
+import tools.aqua.stars.core.metric.metrics.postEvaluation.MissingPredicateCombinationsPerProjectionMetric
+import tools.aqua.stars.data.av.track.*
+import tools.aqua.stars.data.av.track.TickData
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
 import tools.aqua.stars.importer.auna.importDataFiles
@@ -30,18 +36,49 @@ import tools.aqua.stars.importer.auna.importDataFiles
 fun main() {
   downloadAndUnzipExperimentsData()
   downloadWaypointsData()
+
+  val tsc = tsc()
+  val segments = loadSegments()
+
+  val tscEvaluation =
+      TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
+
+  tscEvaluation.registerMetricProvider(SegmentCountMetric())
+  tscEvaluation.registerMetricProvider(SegmentDurationPerIdentifierMetric())
+  tscEvaluation.registerMetricProvider(TotalSegmentTimeLengthMetric())
+  val validTSCInstancesPerProjectionMetric =
+      ValidTSCInstancesPerProjectionMetric<Robot, TickData, Segment>()
+  tscEvaluation.registerMetricProvider(InvalidTSCInstancesPerProjectionMetric())
+  tscEvaluation.registerMetricProvider(MissedTSCInstancesPerProjectionMetric())
+  tscEvaluation.registerMetricProvider(
+      MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric))
+  tscEvaluation.registerMetricProvider(FailedMonitorsMetric(validTSCInstancesPerProjectionMetric))
+
+  tscEvaluation.runEvaluation()
+}
+
+fun loadSegments(): Sequence<Segment> {
   val path = File(SIMULATION_RUN_FOLDER).toPath()
   val sourcesToContentMap = importDataFiles(path)
-  /** Holds a sorted [List] of all [Message]s. Sorted by [Time.seconds] and [Time.nanoseconds]. */
-  val messages: List<Message> =
-      sourcesToContentMap
-          .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
-          .sortedWith(
-              compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
-  getTicksFromMessages(messages)
-  sourcesToContentMap.forEach { (dataSource, entries) ->
-    println("From DataSource '$dataSource' there are ${entries.count()} entries.")
-  }
+  val messages = sortMessagesBySentTime(sourcesToContentMap)
+  //  val waypoints = loadWaypoints() //TODO
+  val ticks = getTicksFromMessages(messages, waypoints = listOf()) // TODO add correct waypoints
+  val segments = segmentTicksIntoSegments(path.name, ticks)
+  // Holds the [Segment]s that still need to be calculated for the [Sequence] of [Segment]s
+  val segmentBuffer = ArrayDeque(segments)
+  return generateSequence { segmentBuffer.removeFirst() }
+}
+
+/**
+ * Creates a sorted [List] of all [Message]s. Sorted by [Time.seconds] and [Time.nanoseconds].
+ *
+ * @param messageSourceToContentMap A [Map] which maps a [DataSource] to all its [Message]s.
+ * @return A sorted [List] of [Message]s.
+ */
+fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>): List<Message> {
+  return messageSourceToContentMap
+      .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
+      .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
 }
 
 /**

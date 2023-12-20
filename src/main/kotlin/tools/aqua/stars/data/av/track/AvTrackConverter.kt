@@ -21,7 +21,7 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import tools.aqua.stars.importer.auna.*
 
-fun getTicksFromMessages(messages: List<Message>): List<TickData> {
+fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): List<TickData> {
   val ticks = mutableListOf<TickData>()
   val robotIds = mutableSetOf<Int>()
   messages.forEach { message ->
@@ -43,13 +43,22 @@ fun getTicksFromMessages(messages: List<Message>): List<TickData> {
     // Save copy in caching list
     robots.addAll(otherRobotInformationCopy)
 
+    // Get the latest information for the robot that sent the current message
+    val latestRobotInformation = getLatestRobotInformation(ticks, robotId)
+    // Get Robot information form current message
+    val currentRobot =
+        getRobotFromMessageAndLatestInformation(
+            message, latestRobotInformation, robotId, tickData, waypoints)
+    // Add current Robot information to robot cache list
+    robots.add(currentRobot)
+
     // Update entities of tickData to the caching list of robots
     tickData.entities = robots
   }
-  println(robotIds)
   return ticks
 }
 
+/**  */
 fun getRobotFromMessageAndLatestInformation(
     message: Message,
     latestRobot: Robot?,

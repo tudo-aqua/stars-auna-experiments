@@ -36,7 +36,7 @@ import tools.aqua.stars.data.av.track.DataSource
  * @param folderPath The folder in which the files to import are stored
  * @return A [Map] from a [DataSource] to a [List] of its contents
  */
-fun importDataFiles(folderPath: Path): Map<DataSource, List<Any>> {
+fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
   // Get all files for the given folderPath
   val folderContents = folderPath.toFile().walk().filter { it.isFile }.toList()
   require(folderContents.any()) { "There is no content in the folder '$folderPath'" }

@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Lane(
     @SerialName("id") val id: Int,
-    @SerialName("midpoints") val midpoints: List<Waypoint>,
+    @SerialName("waypoints") val waypoints: List<Waypoint>,
     @SerialName("length") val length: Double,
     @SerialName("width") val width: Double = 1.4
 ) {

@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.importer.auna
 
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,4 +27,11 @@ data class Odometry(
     @SerialName("msg") override val header: Header,
     @SerialName("pose") val pose: PoseWithCovariance,
     @SerialName("twist") val twist: TwistWithCovariance
-) : Message
+) : Message {
+  fun getVelocity(): Double {
+    val velocityVector = this.twist.twist.linear
+    return sqrt(velocityVector.x.pow(2) + velocityVector.y.pow(2) + velocityVector.z.pow(2))
+  }
+
+  fun getAngularVelocity() {}
+}

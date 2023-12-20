@@ -45,14 +45,30 @@ import tools.aqua.stars.core.types.EntityType
 data class Robot(
     override val id: Int,
     override val tickData: TickData,
-    val posOnLane: Double = 0.0,
-    val lateralOffset: Double = 0.0,
-    val velocity: Double = 0.0,
-    val acceleration: Double = 0.0,
-    val posOnLaneCAM: Double = 0.0,
-    val lateralOffsetCAM: Double = 0.0,
-    val velocityCAM: Double = 0.0,
-    val accelerationCAM: Double = 0.0,
+    val posOnLane: Double? = 0.0,
+    val lateralOffset: Double? = 0.0,
+    val velocity: Double? = 0.0,
+    val acceleration: Double? = 0.0,
+    val posOnLaneCAM: Double? = 0.0,
+    val lateralOffsetCAM: Double? = 0.0,
+    val velocityCAM: Double? = 0.0,
+    val accelerationCAM: Double? = 0.0,
     val dataSource: DataSource = DataSource.NOT_SET,
-    val lane: Lane
-) : EntityType<Robot, TickData, Segment>
+    val lane: Lane?
+) : EntityType<Robot, TickData, Segment> {
+  fun copyToNewTick(newTickData: TickData): Robot {
+    return Robot(
+        id = this.id,
+        tickData = newTickData,
+        posOnLane = this.posOnLane,
+        lateralOffset = this.lateralOffset,
+        velocity = this.velocity,
+        acceleration = this.acceleration,
+        posOnLaneCAM = this.posOnLaneCAM,
+        lateralOffsetCAM = this.lateralOffsetCAM,
+        velocityCAM = this.velocityCAM,
+        accelerationCAM = this.accelerationCAM,
+        dataSource = this.dataSource,
+        lane = this.lane)
+  }
+}

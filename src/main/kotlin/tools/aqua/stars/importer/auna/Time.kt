@@ -24,4 +24,8 @@ import kotlinx.serialization.Serializable
 data class Time(
     @SerialName("seconds") val seconds: Double,
     @SerialName("nanoseconds") val nanoseconds: Double
-)
+) {
+  fun toDoubleValue(): Double {
+    return seconds + (nanoseconds / 1e9) // 1e9 represents one billion (nanoseconds in a second)
+  }
+}

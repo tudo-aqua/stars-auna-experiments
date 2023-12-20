@@ -22,6 +22,7 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
+import tools.aqua.stars.data.av.track.getTicksFromMessages
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
 import tools.aqua.stars.importer.auna.importDataFiles
@@ -37,6 +38,7 @@ fun main() {
           .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
           .sortedWith(
               compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
+  getTicksFromMessages(messages)
   sourcesToContentMap.forEach { (dataSource, entries) ->
     println("From DataSource '$dataSource' there are ${entries.count()} entries.")
   }

@@ -23,5 +23,5 @@ package tools.aqua.stars.auna.experiments
 val DOWNLOAD_EXPERIMENTS_DATA = true
 
 val DOWNLOAD_FOLDER_NAME = "stars-auna-json-files"
-val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\json\\0_8_m_s"
+val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\json\\3_0_m_s"
 val WAYPOINTS_FILE_NAME = "flw_waypoints.csv"

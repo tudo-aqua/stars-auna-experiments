@@ -22,6 +22,26 @@ import kotlin.math.sqrt
 import tools.aqua.stars.importer.auna.*
 
 /**
+ * Converts the given serialized [Track] into a [List] of [Lane]s.
+ *
+ * @param track The [Track] that should be converted.
+ * @return The converted [List] of [Lane]s.
+ */
+fun convertTrackToLanes(track: Track): List<Lane> {
+  val lanes = mutableListOf<Lane>()
+  track.lanes.forEach {
+    val newLane = Lane(length = it.length, width = it.width, waypoints = listOf())
+    val waypoints =
+        it.waypoints.map { wp ->
+          Waypoint(x = wp.x, y = wp.y, lane = newLane, distanceToStart = wp.distanceToStart)
+        }
+    newLane.waypoints = waypoints
+    lanes += newLane
+  }
+  return lanes
+}
+
+/**
  * Slices the [List] of [TickData] into [Segment]s based on the [Lane] of the leading [Robot].
  *
  * @param sourceFile The file from which the [TickData] was loaded.

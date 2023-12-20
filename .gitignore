@@ -2,7 +2,7 @@
 /analysis-result-logs
 /stars-auna-json-files
 /stars-auna-json-files.zip
-flw_waypoints.csv
+flw_waypoints.json
 
 # Exclude astah .lock files
 *.lock

@@ -13,6 +13,9 @@ The analysis requires the recorded data. To receive the data, there are two opti
     1. Go to the [TU Dortmund Sciebo artifact](https://tu-dortmund.sciebo.de/s/gHctg8boFkKgcCF) where the experiment data is stored
     2. Download the `stars-auna-json-files.zip`
     3. Place the Zip-File into the root folder of this project.
+    4. Go to the [TU Dortmund Sciebo artifact (track)](https://tu-dortmund.sciebo.de/s/OKFiTtZ4Bby0Y5p) where the track data is stored
+    5. Download the `flw_waypoints.json`
+    6. Place the JSON-File into the root folder of this project
 
 **Remark:** The downloaded data has a size of approximately 60MB. The downloaded zip-file will be extracted during
 the analysis. Make sure, that you have at least 600MB of free space.

@@ -121,13 +121,13 @@ fun downloadAndUnzipExperimentsData() {
  */
 fun simulationDataMissing() {
   error(
-      "The experiments data is not available. Either download it: https://tu-dortmund.sciebo.de/s/gHctg8boFkKgcCF/download and https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs or set " +
+      "The experiments data is not available. Either download it: $DRIVING_DATA_DOWNLOAD_URL and $TRACK_DATA_DOWNLOAD_URL or set " +
           "DOWNLOAD_EXPERIMENTS_DATA to 'true'")
 }
 
 /** Download the experiments data and saves it in the root directory of the project. */
 fun downloadExperimentsData() {
-  URL("https://tu-dortmund.sciebo.de/s/gHctg8boFkKgcCF/download").openStream().use {
+  URL(DRIVING_DATA_DOWNLOAD_URL).openStream().use {
     Files.copy(it, Paths.get("$DOWNLOAD_FOLDER_NAME.zip"))
   }
 }
@@ -139,7 +139,7 @@ fun downloadWaypointsData() {
     println("The waypoints data is missing.")
     if (DOWNLOAD_EXPERIMENTS_DATA) {
       println("Start with downloading the waypoints data.")
-      URL("https://tu-dortmund.sciebo.de/s/wkQslKeZjjMaqCs/download").openStream().use {
+      URL(TRACK_DATA_DOWNLOAD_URL).openStream().use {
         Files.copy(it, Paths.get(WAYPOINTS_FILE_NAME))
       }
       println("Finished downloading.")

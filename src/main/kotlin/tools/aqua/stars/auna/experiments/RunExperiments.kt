@@ -31,14 +31,17 @@ import tools.aqua.stars.data.av.track.*
 import tools.aqua.stars.data.av.track.TickData
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
-import tools.aqua.stars.importer.auna.importDataFiles
+import tools.aqua.stars.importer.auna.importDrivingData
+import tools.aqua.stars.importer.auna.importTrackData
 
 fun main() {
   downloadAndUnzipExperimentsData()
   downloadWaypointsData()
 
   val tsc = tsc()
-  val segments = loadSegments()
+  val track = importTrackData()
+  val lanes = convertTrackToLanes(track)
+  val segments = loadSegments(lanes)
 
   val tscEvaluation =
       TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
@@ -57,12 +60,12 @@ fun main() {
   tscEvaluation.runEvaluation()
 }
 
-fun loadSegments(): Sequence<Segment> {
+fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
   val path = File(SIMULATION_RUN_FOLDER).toPath()
-  val sourcesToContentMap = importDataFiles(path)
+  val sourcesToContentMap = importDrivingData(path)
   val messages = sortMessagesBySentTime(sourcesToContentMap)
-  //  val waypoints = loadWaypoints() //TODO
-  val ticks = getTicksFromMessages(messages, waypoints = listOf()) // TODO add correct waypoints
+  val waypoints = lanes.flatMap { it.waypoints }
+  val ticks = getTicksFromMessages(messages, waypoints = waypoints)
   val segments = segmentTicksIntoSegments(path.name, ticks)
   // Holds the [Segment]s that still need to be calculated for the [Sequence] of [Segment]s
   val segmentBuffer = ArrayDeque(segments)

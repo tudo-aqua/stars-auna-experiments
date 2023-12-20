@@ -126,6 +126,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
 
     // Update entities of tickData to the caching list of robots
     tickData.entities = robots
+    ticks += tickData
   }
   return ticks
 }

@@ -19,7 +19,7 @@ package tools.aqua.stars.data.av.track
 
 import de.sciss.kdtree.KdPoint
 import de.sciss.kdtree.KdTree
-import de.sciss.kdtree.NNSolverOrchestrator
+import de.sciss.kdtree.NNSolver
 import tools.aqua.stars.importer.auna.*
 
 /**
@@ -76,8 +76,12 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
     if (currentLeadingRobot.lane == currentLane) {
       currentSegmentTicks += tickData
     } else {
-      // The leading robot switched lanes. Add previous ticks as segment to list.
-      segments += Segment(sourceFile, currentSegmentTicks)
+      if (currentSegmentTicks.size > 0) {
+        // The leading robot switched lanes. Add previous ticks as segment to list.
+        val newSegment = Segment(sourceFile, currentSegmentTicks)
+        segments += newSegment
+        currentSegmentTicks.forEach { it.segment = newSegment }
+      }
       // Reset tracking variables
       currentLane = currentLeadingRobot.lane
       currentSegmentTicks.clear()
@@ -219,16 +223,14 @@ fun calculatePosOnLaneAndLateralOffset(
     waypoints: List<Waypoint>
 ): Pair<Waypoint, Double> {
   check(waypoints.count() > 1) { "There have to be at least two waypoints provided." }
-  val workerThreadsCount = Runtime.getRuntime().availableProcessors()
   val dimensions = 2
 
   val searchPoints = waypoints.map { KdPoint(listOf(it.x, it.y)) }
   val tree = KdTree(dimensions, searchPoints)
 
-  val solverOrchestrator = NNSolverOrchestrator(tree, workerThreadsCount)
+  val solver = NNSolver(tree)
 
-  val nearestPoints = solverOrchestrator.findNearestPoints(searchPoints)
-  val nearestPoint = nearestPoints.first()
+  val nearestPoint = solver.getClosestPoint(KdPoint(listOf(robotPosition.x, robotPosition.y)))
   val nearestWaypoint =
       waypoints.first { it.x == nearestPoint.values[0] && it.y == nearestPoint.values[1] }
 

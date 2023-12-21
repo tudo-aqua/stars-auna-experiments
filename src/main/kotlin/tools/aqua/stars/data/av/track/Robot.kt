@@ -71,4 +71,8 @@ data class Robot(
         dataSource = this.dataSource,
         lane = this.lane)
   }
+
+  override fun toString(): String {
+    return "Robot(id=$id)"
+  }
 }

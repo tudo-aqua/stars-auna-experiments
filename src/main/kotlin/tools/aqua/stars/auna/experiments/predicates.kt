@@ -30,10 +30,7 @@ const val MAX_DISTANCE_TO_FRONT_ROBOT = 0.5 // in m
 // Each Robot must not have a lateral offset of more than MAX_LATERAL_OFFSET
 val maxLateralOffset =
     predicate(Robot::class) { _, v ->
-      globally(v) { v ->
-        (v.lateralOffset
-            ?: 0.0) <= MAX_LATERAL_OFFSET && (v.lateralOffsetCAM ?: 0.0) <= MAX_LATERAL_OFFSET
-      }
+      globally(v) { v -> (v.lateralOffset ?: 0.0) <= MAX_LATERAL_OFFSET }
     }
 
 // The distance to the robot in front should not exceed MAX_DISTANCE_TO_FRONT_ROBOT

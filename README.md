@@ -45,8 +45,8 @@ with different detail levels.
 ## Meta data information
 
 The scenario data has the following properties:
-- `robot width`: 0.4m
-- `robot length`: 0.2m
+- `robot width`: 0.2m
+- `robot length`: 0.4m
 - `track width`: 1.4m (each 0.7m orthogonal from the center)
 - `velocity goal`: Depends on the data set, is either 3m/s or 0.8 m/s
 - `standstill distance`: 1.25m

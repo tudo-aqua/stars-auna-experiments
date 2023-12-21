@@ -24,4 +24,8 @@ package tools.aqua.stars.data.av.track
  * @param width The width of the [Lane] in meters
  * @param waypoints The [List] of [Waypoint]s which represent the ideal line for this [Lane]
  */
-data class Lane(val length: Double, val width: Double, var waypoints: List<Waypoint>)
+data class Lane(val length: Double, val width: Double, var waypoints: List<Waypoint>) {
+  override fun toString(): String {
+    return "Lane(length=$length, width=$width, waypoints=${waypoints.count()})"
+  }
+}

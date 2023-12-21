@@ -29,4 +29,8 @@ data class Waypoint(
     val y: Double,
     var distanceToStart: Double = -1.0,
     var lane: Lane
-)
+) {
+  override fun toString(): String {
+    return "Waypoint(x=$x, y=$y, distanceToStart=$distanceToStart, lane=${lane})"
+  }
+}

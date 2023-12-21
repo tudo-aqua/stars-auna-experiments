@@ -80,13 +80,17 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
         // The leading robot switched lanes. Add previous ticks as segment to list.
         val newSegment = Segment(sourceFile, currentSegmentTicks)
         segments += newSegment
-        currentSegmentTicks.forEach { it.segment = newSegment }
+        newSegment.tickData.forEach { it.segment = newSegment }
       }
       // Reset tracking variables
       currentLane = currentLeadingRobot.lane
       currentSegmentTicks.clear()
+      currentSegmentTicks += tickData
     }
   }
+  println(
+      "Checksum: Cleaned Ticks: ${cleanedTicks.size} and Segment ticks: ${segments.sumOf { it.tickData.size }}")
+  check(cleanedTicks.all { tick -> segments.any { it.tickData.contains(tick) } })
 
   return segments
 }

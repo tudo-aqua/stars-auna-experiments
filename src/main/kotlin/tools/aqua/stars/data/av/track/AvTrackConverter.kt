@@ -17,8 +17,9 @@
 
 package tools.aqua.stars.data.av.track
 
-import kotlin.math.pow
-import kotlin.math.sqrt
+import de.sciss.kdtree.KdPoint
+import de.sciss.kdtree.KdTree
+import de.sciss.kdtree.NNSolverOrchestrator
 import tools.aqua.stars.importer.auna.*
 
 /**
@@ -96,6 +97,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
 fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): List<TickData> {
   val ticks = mutableListOf<TickData>()
   val robotIds = mutableSetOf<Int>()
+  val latestRobotInformationMap: MutableMap<Int, Robot?> = mutableMapOf()
   messages.forEach { message ->
     // Create caching list for newly created Robot objects
     val robots = mutableListOf<Robot>()
@@ -107,8 +109,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
     // Save robot id
     robotIds.add(robotId)
     // Get the latest information for all other robots to be copied later on
-    val latestOtherRobotInformation =
-        robotIds.minus(robotId).map { getLatestRobotInformation(ticks, it) }
+    val latestOtherRobotInformation = robotIds.minus(robotId).map { latestRobotInformationMap[it] }
     // Copy the latest information of all other robots with the current tickData
     val otherRobotInformationCopy =
         latestOtherRobotInformation.mapNotNull { it?.copyToNewTick(tickData) }
@@ -116,17 +117,19 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
     robots.addAll(otherRobotInformationCopy)
 
     // Get the latest information for the robot that sent the current message
-    val latestRobotInformation = getLatestRobotInformation(ticks, robotId)
+    val latestRobotInformation = latestRobotInformationMap[robotId]
     // Get Robot information form current message
     val currentRobot =
         getRobotFromMessageAndLatestInformation(
             message, latestRobotInformation, robotId, tickData, waypoints)
+    latestRobotInformationMap[robotId] = currentRobot
     // Add current Robot information to robot cache list
     robots.add(currentRobot)
 
     // Update entities of tickData to the caching list of robots
     tickData.entities = robots
     ticks += tickData
+    println("Calculated ${ticks.count()}/${messages.count()} ticks")
   }
   return ticks
 }
@@ -216,40 +219,21 @@ fun calculatePosOnLaneAndLateralOffset(
     waypoints: List<Waypoint>
 ): Pair<Waypoint, Double> {
   check(waypoints.count() > 1) { "There have to be at least two waypoints provided." }
-  val distances =
-      waypoints
-          .map { calculateDistance(robotPosition, Vector(it.x, it.y, 0.0)) to it }
-          .sortedBy { it.first }
-  val nearestWaypoint = distances.first()
+  val workerThreadsCount = Runtime.getRuntime().availableProcessors()
+  val dimensions = 2
 
-  return nearestWaypoint.second to nearestWaypoint.first
-}
+  val searchPoints = waypoints.map { KdPoint(listOf(it.x, it.y)) }
+  val tree = KdTree(dimensions, searchPoints)
 
-/**
- * Calculate the distance between two given [Vector]s.
- *
- * @param point1 The first [Vector].
- * @param point2 The second [Vector].
- * @return The distance between [point1] and [point2].
- */
-fun calculateDistance(point1: Vector, point2: Vector): Double {
-  return sqrt((point2.x - point1.x).pow(2) + (point2.y - point1.y).pow(2))
-}
+  val solverOrchestrator = NNSolverOrchestrator(tree, workerThreadsCount)
 
-/**
- * Traces back all currently available [ticks] and searches for the latest information of the
- * [Robot] with [robotId].
- *
- * @param ticks The [List] of [TickData] that is already processed and in which should be searched.
- * @param robotId The id of the [Robot] for which the information should be gathered.
- * @return The information of the [Robot] of identifier [robotId]. null when the [robotId] was not
- *   yet processed.
- */
-fun getLatestRobotInformation(ticks: List<TickData>, robotId: Int): Robot? {
-  return ticks
-      .sortedByDescending { it.currentTick }
-      .flatMap { it.entities }
-      .firstOrNull { it.id == robotId }
+  val nearestPoints = solverOrchestrator.findNearestPoints(searchPoints)
+  val nearestPoint = nearestPoints.first()
+  val nearestWaypoint =
+      waypoints.first { it.x == nearestPoint.values[0] && it.y == nearestPoint.values[1] }
+
+  return nearestWaypoint to
+      nearestPoint.getDistanceSquared(KdPoint(listOf(robotPosition.x, robotPosition.y)))
 }
 
 /**

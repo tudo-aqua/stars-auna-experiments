@@ -37,10 +37,14 @@ import tools.aqua.stars.importer.auna.importTrackData
 fun main() {
   downloadAndUnzipExperimentsData()
   downloadWaypointsData()
+  println("Finished downloading files")
 
   val tsc = tsc()
+  println("Import Track Data")
   val track = importTrackData()
+  println("Convert Track Data")
   val lanes = convertTrackToLanes(track)
+  println("Load Segments")
   val segments = loadSegments(lanes)
 
   val tscEvaluation =
@@ -57,6 +61,7 @@ fun main() {
       MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric))
   tscEvaluation.registerMetricProvider(FailedMonitorsMetric(validTSCInstancesPerProjectionMetric))
 
+  println("Run Evaluation")
   tscEvaluation.runEvaluation()
 }
 
@@ -65,11 +70,11 @@ fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
   val sourcesToContentMap = importDrivingData(path)
   val messages = sortMessagesBySentTime(sourcesToContentMap)
   val waypoints = lanes.flatMap { it.waypoints }
+  println("Calculate ticks")
   val ticks = getTicksFromMessages(messages, waypoints = waypoints)
+  println("Slice Ticks into Segments")
   val segments = segmentTicksIntoSegments(path.name, ticks)
-  // Holds the [Segment]s that still need to be calculated for the [Sequence] of [Segment]s
-  val segmentBuffer = ArrayDeque(segments)
-  return generateSequence { segmentBuffer.removeFirst() }
+  return segments.asSequence()
 }
 
 /**

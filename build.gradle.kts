@@ -40,6 +40,7 @@ dependencies {
   implementation("tools.aqua:stars-data-av:$starsVersion")
   implementation("tools.aqua:stars-importer-carla:$starsVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+  implementation("de.sciss:kdtree:0.1.1")
 }
 
 spotless {

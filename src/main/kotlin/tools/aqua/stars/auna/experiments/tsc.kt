@@ -27,8 +27,20 @@ fun tsc() =
         root<Robot, TickData, Segment> {
           all("TSCRoot") {
             projectionIDs = mapOf(projRec(("all")))
-            leaf("Max lateral offset") { monitorFunction = { ctx -> maxLateralOffset.holds(ctx) } }
+            leaf("Max lateral offset") {
+              condition = { ctx -> maxLateralOffset.holds(ctx) }
+              monitorFunction = { ctx -> maxLateralOffset.holds(ctx) }
+            }
             leaf("Max distance to front robot") {
+              condition = { ctx ->
+                ctx.entityIds.any { robotId1 ->
+                  ctx.entityIds.any { robotId2 ->
+                    robotId1 != robotId2 &&
+                        maxDistanceToPreviousVehicle.holds(
+                            ctx, actor1Id = robotId1, actor2Id = robotId2)
+                  }
+                }
+              }
               monitorFunction = { ctx ->
                 ctx.entityIds.any { robotId1 ->
                   ctx.entityIds.any { robotId2 ->

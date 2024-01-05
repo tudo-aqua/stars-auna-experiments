@@ -28,7 +28,6 @@ import tools.aqua.stars.core.metric.metrics.evaluation.*
 import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
 import tools.aqua.stars.core.metric.metrics.postEvaluation.MissingPredicateCombinationsPerProjectionMetric
 import tools.aqua.stars.data.av.track.*
-import tools.aqua.stars.data.av.track.TickData
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
 import tools.aqua.stars.importer.auna.importDrivingData
@@ -55,6 +54,7 @@ fun main() {
   tscEvaluation.registerMetricProvider(TotalSegmentTimeLengthMetric())
   val validTSCInstancesPerProjectionMetric =
       ValidTSCInstancesPerProjectionMetric<Robot, TickData, Segment>()
+  tscEvaluation.registerMetricProvider(validTSCInstancesPerProjectionMetric)
   tscEvaluation.registerMetricProvider(InvalidTSCInstancesPerProjectionMetric())
   tscEvaluation.registerMetricProvider(MissedTSCInstancesPerProjectionMetric())
   tscEvaluation.registerMetricProvider(

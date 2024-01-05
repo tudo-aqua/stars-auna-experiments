@@ -78,7 +78,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
     } else {
       if (currentSegmentTicks.size > 0) {
         // The leading robot switched lanes. Add previous ticks as segment to list.
-        val newSegment = Segment(sourceFile, currentSegmentTicks)
+        val newSegment = Segment(sourceFile, currentSegmentTicks.toList())
         segments += newSegment
         newSegment.tickData.forEach { it.segment = newSegment }
       }
@@ -88,9 +88,15 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
       currentSegmentTicks += tickData
     }
   }
-  println(
-      "Checksum: Cleaned Ticks: ${cleanedTicks.size} and Segment ticks: ${segments.sumOf { it.tickData.size }}")
-  check(cleanedTicks.all { tick -> segments.any { it.tickData.contains(tick) } })
+  // Add remaining ticks to segments.
+  val newSegment = Segment(sourceFile, currentSegmentTicks.toList())
+  segments += newSegment
+  newSegment.tickData.forEach { it.segment = newSegment }
+
+  // Check that all ticks are contained in the segments.
+  check(cleanedTicks.all { tick -> segments.any { it.tickData.contains(tick) } }) {
+    "There are Ticks that are not present in the Segments!"
+  }
 
   return segments
 }

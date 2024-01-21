@@ -178,6 +178,8 @@ fun getRobotFromMessageAndLatestInformation(
           lateralOffset = latestRobot?.lateralOffset,
           velocity = latestRobot?.velocity,
           acceleration = latestRobot?.acceleration,
+          position = latestRobot?.position,
+          rotation = latestRobot?.rotation,
           posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
           lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
           velocityCAM = message.v, // From Message
@@ -193,6 +195,8 @@ fun getRobotFromMessageAndLatestInformation(
             lateralOffset = latestRobot?.lateralOffset,
             velocity = message.getVelocity(), // From Message
             acceleration = 0.0, // TODO
+            position = latestRobot?.position,
+            rotation = latestRobot?.rotation,
             posOnLaneCAM = latestRobot?.posOnLaneCAM,
             lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
             velocityCAM = latestRobot?.velocityCAM,
@@ -209,6 +213,8 @@ fun getRobotFromMessageAndLatestInformation(
           lateralOffset = posOnLaneAndLateralOffset.second, // From Message
           velocity = latestRobot?.velocity,
           acceleration = latestRobot?.acceleration,
+          position = message.transform.translation,
+          rotation = message.transform.rotation,
           posOnLaneCAM = latestRobot?.posOnLaneCAM,
           lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
           velocityCAM = latestRobot?.velocityCAM,

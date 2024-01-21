@@ -18,6 +18,8 @@
 package tools.aqua.stars.data.av.track
 
 import tools.aqua.stars.core.types.EntityType
+import tools.aqua.stars.importer.auna.Quaternion
+import tools.aqua.stars.importer.auna.Vector
 
 /**
  * This class implements the [EntityType] and represents the main entity of the AVTrackDataClasses.
@@ -31,6 +33,8 @@ import tools.aqua.stars.core.types.EntityType
  *   middle of the [lane] in driving direction".
  * @param velocity The velocity of the Robot for the current [TickData]
  * @param acceleration The acceleration of the Robot for the current [TickData]
+ * @param position The latest ViconPose transform position for the current [TickData].
+ * @param rotation The latest ViconPose transform rotation for the current [TickData].
  * @param posOnLaneCAM The latest CAM position on the [Lane], which is the distance to the beginning
  *   of the [Lane] in meters
  * @param lateralOffsetCAM The latest CAM offset to the optimal line of the [lane]. A positive value
@@ -49,6 +53,8 @@ data class Robot(
     val lateralOffset: Double? = 0.0,
     val velocity: Double? = 0.0,
     val acceleration: Double? = 0.0,
+    val position: Vector? = Vector(0.0, 0.0, 0.0),
+    val rotation: Quaternion? = Quaternion(0.0, 0.0, 0.0, 0.0),
     val posOnLaneCAM: Double? = 0.0,
     val lateralOffsetCAM: Double? = 0.0,
     val velocityCAM: Double? = 0.0,
@@ -64,6 +70,8 @@ data class Robot(
         lateralOffset = this.lateralOffset,
         velocity = this.velocity,
         acceleration = this.acceleration,
+        position = this.position,
+        rotation = this.rotation,
         posOnLaneCAM = this.posOnLaneCAM,
         lateralOffsetCAM = this.lateralOffsetCAM,
         velocityCAM = this.velocityCAM,

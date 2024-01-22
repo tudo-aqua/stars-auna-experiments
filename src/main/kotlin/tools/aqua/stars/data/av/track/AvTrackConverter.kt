@@ -53,7 +53,8 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
   // robots are tracked. For the analysis we only want the ticks in which all three robots are
   // tracked.
-  val cleanedTicks = ticks.filter { it.entities.count() == 3 }
+  val cleanedTicks =
+      ticks.filter { it.entities.count() == 3 && it.entities.all { it.lane != null } }
   check(cleanedTicks.any()) { "There is no TickData provided!" }
   check(cleanedTicks[0].entities.size == 3) {
     "The first Tick does not contain exactly 3 entities!"
@@ -178,6 +179,8 @@ fun getRobotFromMessageAndLatestInformation(
           lateralOffset = latestRobot?.lateralOffset,
           velocity = latestRobot?.velocity,
           acceleration = latestRobot?.acceleration,
+          position = latestRobot?.position,
+          rotation = latestRobot?.rotation,
           posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
           lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
           velocityCAM = message.v, // From Message
@@ -193,6 +196,8 @@ fun getRobotFromMessageAndLatestInformation(
             lateralOffset = latestRobot?.lateralOffset,
             velocity = message.getVelocity(), // From Message
             acceleration = 0.0, // TODO
+            position = latestRobot?.position,
+            rotation = latestRobot?.rotation,
             posOnLaneCAM = latestRobot?.posOnLaneCAM,
             lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
             velocityCAM = latestRobot?.velocityCAM,
@@ -209,6 +214,8 @@ fun getRobotFromMessageAndLatestInformation(
           lateralOffset = posOnLaneAndLateralOffset.second, // From Message
           velocity = latestRobot?.velocity,
           acceleration = latestRobot?.acceleration,
+          position = message.transform.translation,
+          rotation = message.transform.rotation,
           posOnLaneCAM = latestRobot?.posOnLaneCAM,
           lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
           velocityCAM = latestRobot?.velocityCAM,

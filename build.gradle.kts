@@ -63,4 +63,4 @@ tasks.test { useJUnitPlatform() }
 
 kotlin { jvmToolchain(17) }
 
-application { mainClass.set("tools.aqua.stars.auna.experiments.RunExperimentsKt") }
+application { mainClass.set("tools.aqua.stars.exporter.auna.AuNaDataExporterKt") }

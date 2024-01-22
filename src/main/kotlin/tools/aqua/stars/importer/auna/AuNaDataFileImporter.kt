@@ -38,17 +38,20 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
   // Get all files for the given folderPath
   val folderContents = folderPath.toFile().walk().filter { it.isFile }.toList()
   require(folderContents.any()) { "There is no content in the folder '$folderPath'" }
-  val dataSourceToContentMap = mutableMapOf<DataSource, List<Any>>()
+  val dataSourceToContentMap = mutableMapOf<DataSource, MutableList<Any>>()
+  dataSourceToContentMap.putIfAbsent(DataSource.CAM, mutableListOf())
+  dataSourceToContentMap.putIfAbsent(DataSource.ODOMETRY, mutableListOf())
+  dataSourceToContentMap.putIfAbsent(DataSource.VICON_POSE, mutableListOf())
   folderContents.forEach { currentFile ->
     if (currentFile.nameWithoutExtension.contains("cam")) {
-      dataSourceToContentMap.putIfAbsent(
-          DataSource.CAM, getJsonContentOfPath<List<CAM>>(currentFile.toPath()))
+      dataSourceToContentMap[DataSource.CAM]?.addAll(
+          getJsonContentOfPath<List<CAM>>(currentFile.toPath()))
     } else if (currentFile.nameWithoutExtension.contains("odom")) {
-      dataSourceToContentMap.putIfAbsent(
-          DataSource.ODOMETRY, getJsonContentOfPath<List<Odometry>>(currentFile.toPath()))
+      dataSourceToContentMap[DataSource.ODOMETRY]?.addAll(
+          getJsonContentOfPath<List<Odometry>>(currentFile.toPath()))
     } else if (currentFile.nameWithoutExtension.contains("vicon_pose")) {
-      dataSourceToContentMap.putIfAbsent(
-          DataSource.VICON_POSE, getJsonContentOfPath<List<ViconPose>>(currentFile.toPath()))
+      dataSourceToContentMap[DataSource.VICON_POSE]?.addAll(
+          getJsonContentOfPath<List<ViconPose>>(currentFile.toPath()))
     } else {
       error("Unknown file contents: $currentFile")
     }

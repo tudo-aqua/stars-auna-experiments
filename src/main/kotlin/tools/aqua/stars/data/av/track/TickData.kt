@@ -31,4 +31,11 @@ data class TickData(override val currentTick: Double, override var entities: Lis
     TickDataType<Robot, TickData, Segment> {
   /** Holds a reference to the [Segment] in which this [TickData] is included and analyzed */
   override lateinit var segment: Segment
+
+  override fun equals(other: Any?): Boolean {
+    if (other is TickData) {
+      return this.currentTick == other.currentTick
+    }
+    return super.equals(other)
+  }
 }

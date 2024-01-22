@@ -53,7 +53,8 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
   // robots are tracked. For the analysis we only want the ticks in which all three robots are
   // tracked.
-  val cleanedTicks = ticks.filter { it.entities.count() == 3 }
+  val cleanedTicks =
+      ticks.filter { it.entities.count() == 3 && it.entities.all { it.lane != null } }
   check(cleanedTicks.any()) { "There is no TickData provided!" }
   check(cleanedTicks[0].entities.size == 3) {
     "The first Tick does not contain exactly 3 entities!"

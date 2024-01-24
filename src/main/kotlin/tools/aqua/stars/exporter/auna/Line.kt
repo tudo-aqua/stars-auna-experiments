@@ -24,6 +24,11 @@ import kotlinx.serialization.Serializable
  * This class represents a line (e.g. an outer or inner line of a lane) of the static data to be
  * rendered in the STARS-visualizer tool.
  *
+ * @property width The width of this [Line].
  * @property coordinates The coordinates of the line as a point curve of [Location] in a [List].
  */
-@Serializable data class Line(@SerialName("coordinates") val coordinates: List<Location>)
+@Serializable
+data class Line(
+    @SerialName("width") val width: Float,
+    @SerialName("coordinates") val coordinates: List<Location>
+)

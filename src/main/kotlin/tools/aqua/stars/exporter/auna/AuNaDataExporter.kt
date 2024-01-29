@@ -31,7 +31,9 @@ import tools.aqua.stars.importer.auna.importTrackData
 
 const val OUTPUT_DIR = "./"
 const val OUTPUT_FILE_NAME = "auna_visualizer"
+
 const val DEFAULT_ACTOR_TYPE_ID = "robot"
+const val DEFAULT_LANE_ELEVATION = 0.0
 
 /** A [List] of all [ActorType]s used in this experiment. */
 val ACTOR_TYPES =
@@ -54,7 +56,23 @@ fun main() {
   val track = importTrackData()
   println("Convert Track Data")
   val lanes = convertTrackToLanes(track)
-  // TODO: Static Data export
+  println("Static Data: Parse Lanes")
+  val staticData =
+      StaticData(
+          lines =
+              lanes.map { lane ->
+                Line(
+                    width = lane.width.toFloat(),
+                    coordinates =
+                        lane.waypoints.map { waypoint ->
+                          Location(waypoint.x, waypoint.y, DEFAULT_LANE_ELEVATION)
+                        })
+              })
+  println("Static Data: Export Lines")
+  val staticDataJson = Json.encodeToString(staticData)
+  val staticDataFilePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_static.json"
+  File(staticDataFilePath).writeText(staticDataJson)
+  println("Static Data: Export to file $staticDataFilePath finished successfully!")
   println("Dynamic Data: Load Segments")
   val segments = loadSegments(lanes)
   println("Dynamic Data: Parse Segments")

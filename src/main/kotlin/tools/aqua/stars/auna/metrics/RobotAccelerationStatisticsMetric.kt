@@ -64,20 +64,31 @@ class RobotAccelerationStatisticsMetric(
     segmentToRobotIdToRobotStateMap.forEach { segmentToRobotIdToRobotStateMap ->
       val robotIdToRobotStates = segmentToRobotIdToRobotStateMap.second
       val segment = segmentToRobotIdToRobotStateMap.first
-      robotIdToRobotStates.forEach { (robotId, robotStates) ->
-        val legendEntry = "Robot $robotId for Segment ${segment.getSegmentIdentifier()}"
-        val folderName = "robot-acceleration-statistics_${segment.getSegmentIdentifier()}"
-        val fileName = "${folderName}_robot_$robotId"
-        val yValues = robotStates.mapNotNull { it.acceleration }
 
-        val maxTimeStamp = robotStates.maxOf { it.tickData.currentTick }
+      val combinedValuesMap = mutableMapOf<String, List<Number>>()
+      val folderName = "robot-acceleration-statistics"
+      val subFolderName = segment.getSegmentIdentifier()
+
+      robotIdToRobotStates.forEach { (robotId, robotStates) ->
+        val legendEntry = "Robot $robotId"
+        val fileName = "${subFolderName}_robot_$robotId"
+        val yValues = robotStates.map { it.acceleration ?: 0.0 }
+
+        combinedValuesMap[legendEntry] = yValues
 
         plotDataAsLineChart(
-            plot = getPlot(legendEntry, yValues, "x", "y", "Acceleration for"),
-            yAxisScaleMaxValue = maxTimeStamp,
+            plot =
+                getPlot(legendEntry, yValues, "tick", "acceleration (m/s^2)", "Acceleration for"),
             folder = folderName,
+            subFolder = subFolderName,
             fileName = fileName)
       }
+
+      plotDataAsLineChart(
+          plot = getPlot(combinedValuesMap, "time", "acceleration", "Acceleration for"),
+          folder = folderName,
+          subFolder = subFolderName,
+          fileName = "${subFolderName}_combined")
     }
   }
 }

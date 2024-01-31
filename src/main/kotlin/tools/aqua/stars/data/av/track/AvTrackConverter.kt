@@ -82,7 +82,6 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
         val newSegment = Segment(sourceFile, currentSegmentTicks.toList())
         segments += newSegment
         newSegment.tickData.forEach { it.segment = newSegment }
-        return segments
       }
       // Reset tracking variables
       currentLane = currentLeadingRobot.lane

@@ -28,8 +28,10 @@ fun tsc() =
           all("TSCRoot") {
             projectionIDs = mapOf(projRec(("all")))
             leaf("Max lateral offset") {
-              condition = { ctx -> maxLateralOffset.holds(ctx) }
-              monitorFunction = { ctx -> maxLateralOffset.holds(ctx) }
+              condition = { ctx -> ctx.entityIds.all { maxLateralOffset.holds(ctx, actorId = it) } }
+              monitorFunction = { ctx ->
+                ctx.entityIds.all { maxLateralOffset.holds(ctx, actorId = it) }
+              }
             }
             leaf("Max distance to front robot") {
               condition = { ctx ->

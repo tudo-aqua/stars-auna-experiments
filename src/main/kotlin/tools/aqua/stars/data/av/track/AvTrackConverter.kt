@@ -92,12 +92,6 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   // Add remaining ticks to segments.
   val newSegment = Segment(sourceFile, currentSegmentTicks.toList())
   segments += newSegment
-  newSegment.tickData.forEach { it.segment = newSegment }
-
-  // Check that all ticks are contained in the segments.
-  check(cleanedTicks.all { tick -> segments.any { it.tickData.contains(tick) } }) {
-    "There are Ticks that are not present in the Segments!"
-  }
 
   return segments
 }

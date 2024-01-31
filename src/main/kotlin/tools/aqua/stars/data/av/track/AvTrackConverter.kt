@@ -82,6 +82,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
         val newSegment = Segment(sourceFile, currentSegmentTicks.toList())
         segments += newSegment
         newSegment.tickData.forEach { it.segment = newSegment }
+        return segments
       }
       // Reset tracking variables
       currentLane = currentLeadingRobot.lane
@@ -195,7 +196,10 @@ fun getRobotFromMessageAndLatestInformation(
             posOnLane = latestRobot?.posOnLane,
             lateralOffset = latestRobot?.lateralOffset,
             velocity = message.getVelocity(), // From Message
-            acceleration = 0.0, // TODO
+            acceleration =
+                (message.getVelocity() - (latestRobot?.velocity ?: 0.0)) /
+                    (tickData.currentTick -
+                        (latestRobot?.tickData?.currentTick ?: 0.0)), // Calculated
             position = latestRobot?.position,
             rotation = latestRobot?.rotation,
             posOnLaneCAM = latestRobot?.posOnLaneCAM,

@@ -42,21 +42,24 @@ class RobotVelocityStatisticsMetric(
     val averageRobotVelocity =
         robotIdToRobotStateMap.map { it.key to it.value.map { it.velocity ?: 0.0 }.average() }
     averageRobotVelocity.forEach {
-      logFiner("The average velocity of robot with id '$it.first' is ${it.second}.")
+      logFiner(
+          "The average velocity of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
 
     // Minimum velocity for robots
     val minimumRobotVelocity =
         robotIdToRobotStateMap.map { it.key to it.value.minOf { it.velocity ?: 0.0 } }
     minimumRobotVelocity.forEach {
-      logFiner("The minimum velocity of robot with id '$it.first' is ${it.second}.")
+      logFiner(
+          "The minimum velocity of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
 
     // Maximum velocity for robots
     val maximumRobotVelocity =
         robotIdToRobotStateMap.map { it.key to it.value.maxOf { it.velocity ?: 0.0 } }
     maximumRobotVelocity.forEach {
-      logFiner("The maximum velocity of robot with id '$it.first' is ${it.second}.")
+      logFiner(
+          "The maximum velocity of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
   }
 

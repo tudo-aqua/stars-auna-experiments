@@ -23,6 +23,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
 import kotlin.io.path.name
+import tools.aqua.stars.auna.metrics.RobotAccelerationStatisticsMetric
+import tools.aqua.stars.auna.metrics.RobotLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.RobotVelocityStatisticsMetric
 import tools.aqua.stars.core.evaluation.TSCEvaluation
 import tools.aqua.stars.core.metric.metrics.evaluation.*
 import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
@@ -61,6 +64,10 @@ fun main() {
       MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric))
   tscEvaluation.registerMetricProvider(FailedMonitorsMetric(validTSCInstancesPerProjectionMetric))
 
+  tscEvaluation.registerMetricProvider(RobotVelocityStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotLateralOffsetStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotAccelerationStatisticsMetric())
+
   println("Run Evaluation")
   tscEvaluation.runEvaluation()
 }
@@ -74,6 +81,7 @@ fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
   val ticks = getTicksFromMessages(messages, waypoints = waypoints)
   println("Slice Ticks into Segments")
   val segments = segmentTicksIntoSegments(path.name, ticks)
+  println("Checksum Ticks: ${segments.sumOf{it.tickData.size}}")
   return segments.asSequence()
 }
 

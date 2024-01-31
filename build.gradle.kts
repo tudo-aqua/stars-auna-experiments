@@ -41,6 +41,7 @@ dependencies {
   implementation("tools.aqua:stars-importer-carla:$starsVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
   implementation("de.sciss:kdtree:0.1.1")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.4.3")
 }
 
 spotless {
@@ -63,4 +64,4 @@ tasks.test { useJUnitPlatform() }
 
 kotlin { jvmToolchain(17) }
 
-application { mainClass.set("tools.aqua.stars.exporter.auna.RunExperimentsKt") }
+application { mainClass.set("tools.aqua.stars.auna.experiments.RunExperimentsKt") }

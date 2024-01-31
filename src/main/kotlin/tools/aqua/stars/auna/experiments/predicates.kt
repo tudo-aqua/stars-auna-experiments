@@ -33,6 +33,7 @@ val maxLateralOffset =
       globally(v) { v -> (v.lateralOffset ?: 0.0) <= MAX_LATERAL_OFFSET }
     }
 
+
 // The distance to the robot in front should not exceed MAX_DISTANCE_TO_FRONT_ROBOT
 val maxDistanceToPreviousVehicle =
     predicate(Robot::class to Robot::class) { _, r1, r2 ->

@@ -186,7 +186,7 @@ fun getRobotFromMessageAndLatestInformation(
           velocityCAM = message.v, // From Message
           accelerationCAM = message.vDot, // From Message
           dataSource = DataSource.CAM, // From Message
-          lane = posOnLaneAndLateralOffset.first.lane)
+          lane = posOnLaneAndLateralOffset.first.lane) // From Message
     }
     is Odometry ->
         return Robot(
@@ -214,14 +214,14 @@ fun getRobotFromMessageAndLatestInformation(
           lateralOffset = posOnLaneAndLateralOffset.second, // From Message
           velocity = latestRobot?.velocity,
           acceleration = latestRobot?.acceleration,
-          position = message.transform.translation,
-          rotation = message.transform.rotation,
+          position = message.transform.translation, // From Message
+          rotation = message.transform.rotation, // From Message
           posOnLaneCAM = latestRobot?.posOnLaneCAM,
           lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
           velocityCAM = latestRobot?.velocityCAM,
           accelerationCAM = latestRobot?.accelerationCAM,
-          dataSource = DataSource.CAM,
-          lane = posOnLaneAndLateralOffset.first.lane)
+          dataSource = DataSource.VICON_POSE,
+          lane = posOnLaneAndLateralOffset.first.lane) // From Message
     }
   }
 }

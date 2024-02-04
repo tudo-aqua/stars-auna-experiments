@@ -24,12 +24,13 @@ import kotlinx.serialization.json.Json
 import tools.aqua.stars.auna.experiments.downloadAndUnzipExperimentsData
 import tools.aqua.stars.auna.experiments.downloadWaypointsData
 import tools.aqua.stars.auna.experiments.loadSegments
+import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.convertTrackToLanes
 import tools.aqua.stars.importer.auna.Quaternion
 import tools.aqua.stars.importer.auna.Vector
 import tools.aqua.stars.importer.auna.importTrackData
 
-const val OUTPUT_DIR = "./export/"
+const val OUTPUT_DIR = "./stars-auna-export/"
 const val OUTPUT_FILE_NAME = "auna"
 
 const val DEFAULT_ACTOR_TYPE_ID = "robot"
@@ -56,6 +57,25 @@ fun main() {
   val track = importTrackData()
   println("Convert Track Data")
   val lanes = convertTrackToLanes(track)
+
+  println("Create Export Directory")
+  File(OUTPUT_DIR).mkdirs()
+
+  println("Export Static Data")
+  exportStaticData(lanes)
+
+  println("Export Dynamic Data")
+  exportDynamicData(lanes)
+
+  println("Export finished successfully")
+}
+
+/**
+ * Exports static data to directory specified in [OUTPUT_DIR]
+ *
+ * @param lanes experiment data as [List] of [Lane]s.
+ */
+private fun exportStaticData(lanes: List<Lane>) {
   println("Static Data: Parse Lanes")
   val staticData =
       StaticData(
@@ -71,9 +91,16 @@ fun main() {
   println("Static Data: Export Lines")
   val staticDataJson = Json.encodeToString(staticData)
   val staticDataFilePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_static.json"
-  File(OUTPUT_DIR).mkdirs()
   File(staticDataFilePath).writeText(staticDataJson)
   println("Static Data: Export to file $staticDataFilePath finished successfully!")
+}
+
+/**
+ * Exports dynamic data to directory specified in [OUTPUT_DIR].
+ *
+ * @param lanes experiment data as [List] of [Lane]s.
+ */
+private fun exportDynamicData(lanes: List<Lane>) {
   println("Dynamic Data: Load Segments")
   val segments = loadSegments(lanes)
   println("Dynamic Data: Parse Segments")

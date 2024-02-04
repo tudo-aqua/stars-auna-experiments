@@ -29,8 +29,8 @@ import tools.aqua.stars.importer.auna.Quaternion
 import tools.aqua.stars.importer.auna.Vector
 import tools.aqua.stars.importer.auna.importTrackData
 
-const val OUTPUT_DIR = "./"
-const val OUTPUT_FILE_NAME = "auna_visualizer"
+const val OUTPUT_DIR = "./export/"
+const val OUTPUT_FILE_NAME = "auna"
 
 const val DEFAULT_ACTOR_TYPE_ID = "robot"
 const val DEFAULT_LANE_ELEVATION = 0.0
@@ -71,6 +71,7 @@ fun main() {
   println("Static Data: Export Lines")
   val staticDataJson = Json.encodeToString(staticData)
   val staticDataFilePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_static.json"
+  File(OUTPUT_DIR).mkdirs()
   File(staticDataFilePath).writeText(staticDataJson)
   println("Static Data: Export to file $staticDataFilePath finished successfully!")
   println("Dynamic Data: Load Segments")
@@ -103,9 +104,12 @@ fun main() {
                   .toList(),
           ACTOR_TYPES)
 
+  // Used as identifier for json file
+  val segmentSources = segments.map { it.segmentSource }.toSet().joinToString("-")
+
   println("Dynamic Data: Export Segments")
   val dynamicDataJson = Json.encodeToString(dynamicData)
-  val filePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_dynamic.json"
+  val filePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_${segmentSources}_dynamic.json"
   File(filePath).writeText(dynamicDataJson)
   println("Dynamic Data: Export to file $filePath finished successfully!")
 }

@@ -21,8 +21,10 @@ import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
+import tools.aqua.stars.core.metric.utils.getCSVString
 import tools.aqua.stars.core.metric.utils.getPlot
 import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
+import tools.aqua.stars.core.metric.utils.saveAsCSVFile
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
@@ -68,7 +70,7 @@ class RobotAccelerationStatisticsMetric(
       val robotIdToRobotStates = segmentToRobotIdToRobotStateMap.second
       val segment = segmentToRobotIdToRobotStateMap.first
 
-      val combinedValuesMap = mutableMapOf<String, List<Number>>()
+      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
       val folderName = "robot-acceleration-statistics"
       val subFolderName = segment.getSegmentIdentifier()
 
@@ -76,12 +78,19 @@ class RobotAccelerationStatisticsMetric(
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
         val yValues = robotStates.map { it.acceleration ?: 0.0 }
+        val xValues = robotStates.map { it.tickData.currentTick }
 
-        combinedValuesMap[legendEntry] = yValues
+        combinedValuesMap[legendEntry] = xValues to yValues
 
         plotDataAsLineChart(
             plot =
-                getPlot(legendEntry, yValues, "tick", "acceleration (m/s^2)", "Acceleration for"),
+                getPlot(
+                    legendEntry = legendEntry,
+                    xValues = xValues,
+                    yValues = yValues,
+                    "tick",
+                    "acceleration (m/s^2)",
+                    "Acceleration for"),
             folder = folderName,
             subFolder = subFolderName,
             fileName = fileName)
@@ -89,6 +98,39 @@ class RobotAccelerationStatisticsMetric(
 
       plotDataAsLineChart(
           plot = getPlot(combinedValuesMap, "time", "acceleration", "Acceleration for"),
+          folder = folderName,
+          subFolder = subFolderName,
+          fileName = "${subFolderName}_combined")
+    }
+  }
+
+  override fun writePlotData() {
+    segmentToRobotIdToRobotStateMap.forEach { segmentToRobotIdToRobotStateMap ->
+      val robotIdToRobotStates = segmentToRobotIdToRobotStateMap.second
+      val segment = segmentToRobotIdToRobotStateMap.first
+
+      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
+      val folderName = "robot-acceleration-statistics"
+      val subFolderName = segment.getSegmentIdentifier()
+
+      robotIdToRobotStates.forEach { (robotId, robotStates) ->
+        val legendEntry = "Robot $robotId"
+        val fileName = "${subFolderName}_robot_$robotId"
+        val yValues = robotStates.map { it.acceleration ?: 0.0 }
+        val xValues = robotStates.map { it.tickData.currentTick }
+
+        combinedValuesMap[legendEntry] = xValues to yValues
+
+        saveAsCSVFile(
+            csvString =
+                getCSVString(columnEntry = legendEntry, xValues = xValues, yValues = yValues),
+            folder = folderName,
+            subFolder = subFolderName,
+            fileName = fileName)
+      }
+
+      saveAsCSVFile(
+          csvString = getCSVString(combinedValuesMap),
           folder = folderName,
           subFolder = subFolderName,
           fileName = "${subFolderName}_combined")

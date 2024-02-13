@@ -18,6 +18,10 @@
 package tools.aqua.stars.auna.experiments
 
 import tools.aqua.stars.core.tsc.*
+import tools.aqua.stars.core.tsc.builder.all
+import tools.aqua.stars.core.tsc.builder.leaf
+import tools.aqua.stars.core.tsc.builder.root
+import tools.aqua.stars.core.tsc.projection.projRec
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
@@ -39,7 +43,7 @@ fun tsc() =
                   ctx.entityIds.any { robotId2 ->
                     robotId1 != robotId2 &&
                         maxDistanceToPreviousVehicle.holds(
-                            ctx, actor1Id = robotId1, actor2Id = robotId2)
+                            ctx, actor1 = robotId1, actor2 = robotId2)
                   }
                 }
               }
@@ -48,7 +52,7 @@ fun tsc() =
                   ctx.entityIds.any { robotId2 ->
                     robotId1 != robotId2 &&
                         maxDistanceToPreviousVehicle.holds(
-                            ctx, actor1Id = robotId1, actor2Id = robotId2)
+                            ctx, actor1 = robotId1, actor2 = robotId2)
                   }
                 }
               }

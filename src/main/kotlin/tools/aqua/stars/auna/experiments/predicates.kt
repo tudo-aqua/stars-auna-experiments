@@ -20,7 +20,8 @@
 package tools.aqua.stars.auna.experiments
 
 import kotlin.math.abs
-import tools.aqua.stars.core.evaluation.predicate
+import tools.aqua.stars.core.evaluation.BinaryPredicate.Companion.predicate
+import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.logic.kcmftbl.globally
 

@@ -80,7 +80,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
       if (currentSegmentTicks.size > 0) {
         // The leading robot switched lanes. Add previous ticks as segment to list.
         val newSegment =
-            Segment(sourceFile, currentSegmentTicks.toList()).also { segment ->
+            Segment(segments.size, sourceFile, currentSegmentTicks.toList()).also { segment ->
               segment.tickData.forEach { it.segment = segment }
             }
         segments += newSegment
@@ -93,7 +93,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   }
   // Add remaining ticks to segments.
   val newSegment =
-      Segment(sourceFile, currentSegmentTicks.toList()).also { segment ->
+      Segment(segments.size, sourceFile, currentSegmentTicks.toList()).also { segment ->
         segment.tickData.forEach { it.segment = segment }
       }
   segments += newSegment

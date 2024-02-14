@@ -21,8 +21,10 @@ import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
+import tools.aqua.stars.core.metric.utils.getCSVString
 import tools.aqua.stars.core.metric.utils.getPlot
 import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
+import tools.aqua.stars.core.metric.utils.saveAsCSVFile
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
@@ -31,7 +33,7 @@ import tools.aqua.stars.data.av.track.TickData
 class RobotLateralOffsetStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-lateral-offset-statistics")
 ) : SegmentMetricProvider<Robot, TickData, Segment>, Loggable, Plottable {
-  var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
+  private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
 
   override fun evaluate(segment: SegmentType<Robot, TickData, Segment>) {
@@ -70,7 +72,7 @@ class RobotLateralOffsetStatisticsMetric(
       val robotIdToRobotStates = segmentToRobotIdToRobotStateMap.second
       val segment = segmentToRobotIdToRobotStateMap.first
 
-      val combinedValuesMap = mutableMapOf<String, List<Number>>()
+      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
       val folderName = "lateral-offset-statistics"
       val subFolderName = segment.getSegmentIdentifier()
 
@@ -78,11 +80,19 @@ class RobotLateralOffsetStatisticsMetric(
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
         val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
+        val xValues = robotStates.map { it.tickData.currentTick }
 
-        combinedValuesMap[legendEntry] = yValues
+        combinedValuesMap[legendEntry] = xValues to yValues
 
         plotDataAsLineChart(
-            plot = getPlot(legendEntry, yValues, "tick", "lateral offset", "lateral offset for"),
+            plot =
+                getPlot(
+                    legendEntry = legendEntry,
+                    xValues = xValues,
+                    yValues = yValues,
+                    "tick",
+                    "lateral offset",
+                    "lateral offset for"),
             folder = folderName,
             subFolder = subFolderName,
             fileName = fileName)
@@ -90,6 +100,39 @@ class RobotLateralOffsetStatisticsMetric(
 
       plotDataAsLineChart(
           plot = getPlot(combinedValuesMap, "time", "lateral offset", "lateral offset for"),
+          folder = folderName,
+          subFolder = subFolderName,
+          fileName = "${subFolderName}_combined")
+    }
+  }
+
+  override fun writePlotData() {
+    segmentToRobotIdToRobotStateMap.forEach { segmentToRobotIdToRobotStateMap ->
+      val robotIdToRobotStates = segmentToRobotIdToRobotStateMap.second
+      val segment = segmentToRobotIdToRobotStateMap.first
+
+      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
+      val folderName = "lateral-offset-statistics"
+      val subFolderName = segment.getSegmentIdentifier()
+
+      robotIdToRobotStates.forEach { (robotId, robotStates) ->
+        val legendEntry = "Robot $robotId"
+        val fileName = "${subFolderName}_robot_$robotId"
+        val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
+        val xValues = robotStates.map { it.tickData.currentTick }
+
+        combinedValuesMap[legendEntry] = xValues to yValues
+
+        saveAsCSVFile(
+            csvString =
+                getCSVString(columnEntry = legendEntry, xValues = xValues, yValues = yValues),
+            folder = folderName,
+            subFolder = subFolderName,
+            fileName = fileName)
+      }
+
+      saveAsCSVFile(
+          csvString = getCSVString(combinedValuesMap),
           folder = folderName,
           subFolder = subFolderName,
           fileName = "${subFolderName}_combined")

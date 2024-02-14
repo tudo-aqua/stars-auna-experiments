@@ -25,8 +25,11 @@ import tools.aqua.stars.core.types.SegmentType
  * @param segmentSource Specifies the file from which the data of this [Segment] comes from
  * @param tickData The [List] of [TickData]s relevant for the [Segment]
  */
-data class Segment(override val segmentSource: String, override val tickData: List<TickData>) :
-    SegmentType<Robot, TickData, Segment> {
+data class Segment(
+    val segmentId: Int,
+    override val segmentSource: String,
+    override val tickData: List<TickData>
+) : SegmentType<Robot, TickData, Segment> {
   /** Holds a [Map] which maps a timestamp to all relevant [TickData]s (based on [tickData]) */
   override val ticks: Map<Double, TickData> = tickData.associateBy { it.currentTick }
   /** Holds a [List] of all available timestamps in this [Segment] (based on [tickData]) */
@@ -45,4 +48,8 @@ data class Segment(override val segmentSource: String, override val tickData: Li
       val firstEgo = tickData.first().entities.first()
       return firstEgo.id
     }
+
+  override fun getSegmentIdentifier(): String {
+    return "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] with primary entity id ${primaryEntityId})"
+  }
 }

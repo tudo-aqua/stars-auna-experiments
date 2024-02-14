@@ -3,7 +3,7 @@
 /stars-auna-json-files
 /stars-auna-json-files.zip
 flw_waypoints.json
-auna_visualizer_*.json
+/stars-auna-export
 
 # Exclude astah .lock files
 *.lock

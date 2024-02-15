@@ -16,10 +16,10 @@
  */
 
 plugins {
-  kotlin("jvm") version "1.9.0"
+  kotlin("jvm") version "1.9.22"
   application
-  id("com.diffplug.spotless") version "6.21.0"
-  kotlin("plugin.serialization") version "1.7.10"
+  id("com.diffplug.spotless") version "6.25.0"
+  kotlin("plugin.serialization") version "1.9.21"
 }
 
 group = "tools.aqua"
@@ -39,9 +39,9 @@ dependencies {
   implementation("tools.aqua:stars-logic-kcmftbl:$starsVersion")
   implementation("tools.aqua:stars-data-av:$starsVersion")
   implementation("tools.aqua:stars-importer-carla:$starsVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
   implementation("de.sciss:kdtree:0.1.1")
-  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.4.3")
+  implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.5.0")
 }
 
 spotless {

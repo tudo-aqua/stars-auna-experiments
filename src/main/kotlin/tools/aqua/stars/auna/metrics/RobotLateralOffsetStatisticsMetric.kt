@@ -43,27 +43,34 @@ class RobotLateralOffsetStatisticsMetric(
     // Average lateralOffset for robots
     val averageRobotLateralOffset =
         robotIdToRobotStateMap.map {
-          it.key to (it.value.mapNotNull { it.lateralOffset }).average()
+          it.key to (it.value.mapNotNull { t -> t.lateralOffset }).average()
         }
     averageRobotLateralOffset.forEach {
       logFiner(
-          "The average lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The average lateral offset of robot with id '${it.first}' " +
+              "in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
 
     // Minimum lateralOffset for robots
     val minimumRobotLateralOffset =
-        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).min() }
+        robotIdToRobotStateMap.map {
+          it.key to (it.value.mapNotNull { t -> t.lateralOffset }).min()
+        }
     minimumRobotLateralOffset.forEach {
       logFiner(
-          "The minimum lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The minimum lateral offset of robot with id '${it.first}' " +
+              "in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
 
     // Average lateralOffset for robots
     val maximumRobotLateralOffset =
-        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).max() }
+        robotIdToRobotStateMap.map {
+          it.key to (it.value.mapNotNull { t -> t.lateralOffset }).max()
+        }
     maximumRobotLateralOffset.forEach {
       logFiner(
-          "The maximum lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The maximum lateral offset of robot with id '${it.first}' " +
+              "in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
   }
 

@@ -54,7 +54,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   // robots are tracked. For the analysis we only want the ticks in which all three robots are
   // tracked.
   val cleanedTicks =
-      ticks.filter { it.entities.count() == 3 && it.entities.all { it.lane != null } }
+      ticks.filter { it.entities.count() == 3 && it.entities.all { t -> t.lane != null } }
   check(cleanedTicks.any()) { "There is no TickData provided!" }
   check(cleanedTicks[0].entities.size == 3) {
     "The first Tick does not contain exactly 3 entities!"
@@ -143,7 +143,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
     // Update entities of tickData to the caching list of robots
     tickData.entities = robots
     ticks += tickData
-    println("Calculated ${ticks.count()}/${messages.count()} ticks")
+    print("\rCalculated ${ticks.count()}/${messages.count()} ticks")
   }
   return ticks
 }
@@ -166,66 +166,135 @@ fun getRobotFromMessageAndLatestInformation(
     robotId: Int,
     tickData: TickData,
     waypoints: List<Waypoint>
+): Robot =
+    when (message) {
+      is CAM ->
+          getRobotFromMessageAndLatestInformationFromCAM(
+              message = message,
+              latestRobot = latestRobot,
+              robotId = robotId,
+              tickData = tickData,
+              waypoints = waypoints)
+      is Odometry ->
+          getRobotFromMessageAndLatestInformationFromOdometry(
+              message = message, latestRobot = latestRobot, robotId = robotId, tickData = tickData)
+      is ViconPose ->
+          getRobotFromMessageAndLatestInformationFromViconPose(
+              message = message,
+              latestRobot = latestRobot,
+              robotId = robotId,
+              tickData = tickData,
+              waypoints = waypoints)
+    }
+
+/**
+ * Returns the [Robot] based on the given [CAM] [Message]. It takes the previous [Robot] state
+ * (namely [latestRobot]) and the message type into consideration.
+ *
+ * @param message The [Message] from which the [Robot] state should be calculated from.
+ * @param latestRobot The previous [Robot] state. Might be null.
+ * @param robotId The id of the [Robot] which sent the [Message].
+ * @param tickData The [TickData] to which the returned [Robot] belongs to.
+ * @param waypoints A [List] of [Waypoint]s. It is used to calculate the related [Lane] and nearest
+ *   [Waypoint].
+ * @return The [Robot] object based on the given [CAM] [Message].
+ */
+private fun getRobotFromMessageAndLatestInformationFromCAM(
+    message: CAM,
+    latestRobot: Robot?,
+    robotId: Int,
+    tickData: TickData,
+    waypoints: List<Waypoint>
 ): Robot {
-  when (message) {
-    is CAM -> {
-      val posOnLaneAndLateralOffset =
-          calculatePosOnLaneAndLateralOffset(Vector(message.x, message.y, message.z), waypoints)
-      return Robot(
-          id = robotId,
-          tickData = tickData,
-          posOnLane = latestRobot?.posOnLane,
-          lateralOffset = latestRobot?.lateralOffset,
-          velocity = latestRobot?.velocity,
-          acceleration = latestRobot?.acceleration,
-          position = latestRobot?.position,
-          rotation = latestRobot?.rotation,
-          posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
-          lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
-          velocityCAM = message.v, // From Message
-          accelerationCAM = message.vDot, // From Message
-          dataSource = DataSource.CAM, // From Message
-          lane = posOnLaneAndLateralOffset.first.lane) // From Message
-    }
-    is Odometry ->
-        return Robot(
-            id = robotId,
-            tickData = tickData,
-            posOnLane = latestRobot?.posOnLane,
-            lateralOffset = latestRobot?.lateralOffset,
-            velocity = message.getVelocity(), // From Message
-            acceleration =
-                (message.getVelocity() - (latestRobot?.velocity ?: 0.0)) /
-                    (tickData.currentTick -
-                        (latestRobot?.tickData?.currentTick ?: 0.0)), // Calculated
-            position = latestRobot?.position,
-            rotation = latestRobot?.rotation,
-            posOnLaneCAM = latestRobot?.posOnLaneCAM,
-            lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-            velocityCAM = latestRobot?.velocityCAM,
-            accelerationCAM = latestRobot?.accelerationCAM,
-            dataSource = DataSource.ODOMETRY, // From Message
-            lane = latestRobot?.lane)
-    is ViconPose -> {
-      val posOnLaneAndLateralOffset =
-          calculatePosOnLaneAndLateralOffset(message.transform.translation, waypoints)
-      return Robot(
-          id = robotId,
-          tickData = tickData,
-          posOnLane = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
-          lateralOffset = posOnLaneAndLateralOffset.second, // From Message
-          velocity = latestRobot?.velocity,
-          acceleration = latestRobot?.acceleration,
-          position = message.transform.translation, // From Message
-          rotation = message.transform.rotation, // From Message
-          posOnLaneCAM = latestRobot?.posOnLaneCAM,
-          lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-          velocityCAM = latestRobot?.velocityCAM,
-          accelerationCAM = latestRobot?.accelerationCAM,
-          dataSource = DataSource.VICON_POSE,
-          lane = posOnLaneAndLateralOffset.first.lane) // From Message
-    }
-  }
+  val posOnLaneAndLateralOffset =
+      calculatePosOnLaneAndLateralOffset(Vector(message.x, message.y, message.z), waypoints)
+  return Robot(
+      id = robotId,
+      tickData = tickData,
+      posOnLane = latestRobot?.posOnLane,
+      lateralOffset = latestRobot?.lateralOffset,
+      velocity = latestRobot?.velocity,
+      acceleration = latestRobot?.acceleration,
+      position = latestRobot?.position,
+      rotation = latestRobot?.rotation,
+      posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
+      lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
+      velocityCAM = message.v, // From Message
+      accelerationCAM = message.vDot, // From Message
+      dataSource = DataSource.CAM, // From Message
+      lane = posOnLaneAndLateralOffset.first.lane) // From Message
+}
+
+/**
+ * Returns the [Robot] based on the given [Odometry] [Message]. It takes the previous [Robot] state
+ * (namely [latestRobot]) and the message type into consideration.
+ *
+ * @param message The [Message] from which the [Robot] state should be calculated from.
+ * @param latestRobot The previous [Robot] state. Might be null.
+ * @param robotId The id of the [Robot] which sent the [Message].
+ * @param tickData The [TickData] to which the returned [Robot] belongs to.
+ * @return The [Robot] object based on the given [Odometry] [Message].
+ */
+private fun getRobotFromMessageAndLatestInformationFromOdometry(
+    message: Odometry,
+    latestRobot: Robot?,
+    robotId: Int,
+    tickData: TickData
+): Robot =
+    Robot(
+        id = robotId,
+        tickData = tickData,
+        posOnLane = latestRobot?.posOnLane,
+        lateralOffset = latestRobot?.lateralOffset,
+        velocity = message.getVelocity(), // From Message
+        acceleration =
+            (message.getVelocity() - (latestRobot?.velocity ?: 0.0)) /
+                (tickData.currentTick - (latestRobot?.tickData?.currentTick ?: 0.0)), // Calculated
+        position = latestRobot?.position,
+        rotation = latestRobot?.rotation,
+        posOnLaneCAM = latestRobot?.posOnLaneCAM,
+        lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
+        velocityCAM = latestRobot?.velocityCAM,
+        accelerationCAM = latestRobot?.accelerationCAM,
+        dataSource = DataSource.ODOMETRY, // From Message
+        lane = latestRobot?.lane)
+
+/**
+ * Returns the [Robot] based on the given [ViconPose] [Message]. It takes the previous [Robot] state
+ * (namely [latestRobot]) and the message type into consideration.
+ *
+ * @param message The [Message] from which the [Robot] state should be calculated from.
+ * @param latestRobot The previous [Robot] state. Might be null.
+ * @param robotId The id of the [Robot] which sent the [Message].
+ * @param tickData The [TickData] to which the returned [Robot] belongs to.
+ * @param waypoints A [List] of [Waypoint]s. It is used to calculate the related [Lane] and nearest
+ *   [Waypoint].
+ * @return The [Robot] object based on the given [ViconPose] [Message].
+ */
+private fun getRobotFromMessageAndLatestInformationFromViconPose(
+    message: ViconPose,
+    latestRobot: Robot?,
+    robotId: Int,
+    tickData: TickData,
+    waypoints: List<Waypoint>
+): Robot {
+  val posOnLaneAndLateralOffset =
+      calculatePosOnLaneAndLateralOffset(message.transform.translation, waypoints)
+  return Robot(
+      id = robotId,
+      tickData = tickData,
+      posOnLane = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
+      lateralOffset = posOnLaneAndLateralOffset.second, // From Message
+      velocity = latestRobot?.velocity,
+      acceleration = latestRobot?.acceleration,
+      position = message.transform.translation, // From Message
+      rotation = message.transform.rotation, // From Message
+      posOnLaneCAM = latestRobot?.posOnLaneCAM,
+      lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
+      velocityCAM = latestRobot?.velocityCAM,
+      accelerationCAM = latestRobot?.accelerationCAM,
+      dataSource = DataSource.VICON_POSE,
+      lane = posOnLaneAndLateralOffset.first.lane) // From Message
 }
 
 /**

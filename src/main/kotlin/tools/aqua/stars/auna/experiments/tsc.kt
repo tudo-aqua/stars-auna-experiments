@@ -30,88 +30,107 @@ import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
 fun tsc() =
-  TSC(
-    root<Robot, TickData, Segment> {
-      all("TSCRoot") {
-        projectionIDs = mapOf(projRec(("all")))
-        exclusive("Lateral offset") {
-          projectionIDs = mapOf(projRec(("lateralOffset")))
-          leaf("Normal lateral offset") {
-            condition = { ctx -> ctx.entityIds.all { normalLateralOffset.holds(ctx, actorId = it) } }
-          }
-          leaf("Maximum lateral offset exceeded") {
-            condition = { ctx -> ctx.entityIds.all { maxLateralOffsetExceeded.holds(ctx, actorId = it) } }
-            monitorFunction = { ctx ->
-              ctx.entityIds.all { maxLateralOffsetExceeded.holds(ctx, actorId = it) }
+    TSC(
+        root<Robot, TickData, Segment> {
+          all("TSCRoot") {
+            projectionIDs = mapOf(projRec(("all")))
+            exclusive("Lateral offset") {
+              projectionIDs = mapOf(projRec(("lateralOffset")))
+              leaf("Normal lateral offset") {
+                condition = { ctx ->
+                  ctx.entityIds.all { normalLateralOffset.holds(ctx, actorId = it) }
+                }
+              }
+              leaf("Maximum lateral offset exceeded") {
+                condition = { ctx ->
+                  ctx.entityIds.all { maxLateralOffsetExceeded.holds(ctx, actorId = it) }
+                }
+                monitorFunction = { ctx ->
+                  ctx.entityIds.all { maxLateralOffsetExceeded.holds(ctx, actorId = it) }
+                }
+              }
             }
-          }
-        }
-        exclusive("Distance to front robot") {
-          projectionIDs = mapOf(projRec(("Distance to front robot")))
-          leaf("Normal distance to front robot") {
-            condition = { ctx ->
-              ctx.entityIds.any { robotId1 ->
-                ctx.entityIds.any { robotId2 ->
-                  robotId1 != robotId2 &&
-                      normalDistanceToPreviousVehicle.holds(ctx, actor1 = robotId1, actor2 = robotId2)
+            exclusive("Distance to front robot") {
+              projectionIDs = mapOf(projRec(("Distance to front robot")))
+              leaf("Normal distance to front robot") {
+                condition = { ctx ->
+                  ctx.entityIds.any { robotId1 ->
+                    ctx.entityIds.any { robotId2 ->
+                      robotId1 != robotId2 &&
+                          normalDistanceToPreviousVehicle.holds(
+                              ctx, actor1 = robotId1, actor2 = robotId2)
+                    }
+                  }
+                }
+              }
+              leaf("Maximum distance to front robot exceeded") {
+                condition = { ctx ->
+                  ctx.entityIds.any { robotId1 ->
+                    ctx.entityIds.any { robotId2 ->
+                      robotId1 != robotId2 &&
+                          maxDistanceToPreviousVehicleExceeded.holds(
+                              ctx, actor1 = robotId1, actor2 = robotId2)
+                    }
+                  }
+                }
+                monitorFunction = { ctx ->
+                  ctx.entityIds.any { robotId1 ->
+                    ctx.entityIds.any { robotId2 ->
+                      robotId1 != robotId2 &&
+                          maxDistanceToPreviousVehicleExceeded.holds(
+                              ctx, actor1 = robotId1, actor2 = robotId2)
+                    }
+                  }
+                }
+              }
+              leaf("Minimal distance to front robot exceeded") {
+                condition = { ctx ->
+                  ctx.entityIds.any { robotId1 ->
+                    ctx.entityIds.any { robotId2 ->
+                      robotId1 != robotId2 &&
+                          minDistanceToPreviousVehicleExceeded.holds(
+                              ctx, actor1 = robotId1, actor2 = robotId2)
+                    }
+                  }
+                }
+                monitorFunction = { ctx ->
+                  ctx.entityIds.any { robotId1 ->
+                    ctx.entityIds.any { robotId2 ->
+                      robotId1 != robotId2 &&
+                          minDistanceToPreviousVehicleExceeded.holds(
+                              ctx, actor1 = robotId1, actor2 = robotId2)
+                    }
+                  }
+                }
+              }
+            }
+            exclusive("Acceleration") {
+              projectionIDs = mapOf(projRec(("Acceleration")))
+              leaf("Strong acceleration") {
+                condition = { ctx ->
+                  ctx.entityIds.any { r -> strongAcceleration.holds(ctx, actorId = r) }
+                }
+              }
+              leaf("Weak acceleration") {
+                condition = { ctx ->
+                  ctx.entityIds.any { r -> weakAcceleration.holds(ctx, actorId = r) }
+                }
+              }
+              leaf("No acceleration") {
+                condition = { ctx ->
+                  ctx.entityIds.any { r -> noAcceleration.holds(ctx, actorId = r) }
+                }
+              }
+              leaf("Weak deceleration") {
+                condition = { ctx ->
+                  ctx.entityIds.any { r -> weakDeceleration.holds(ctx, actorId = r) }
+                }
+              }
+              leaf("Strong deceleration") {
+                condition = { ctx ->
+                  ctx.entityIds.any { r -> strongDeceleration.holds(ctx, actorId = r) }
                 }
               }
             }
           }
-          leaf("Maximum distance to front robot exceeded") {
-            condition = { ctx ->
-              ctx.entityIds.any { robotId1 ->
-                ctx.entityIds.any { robotId2 ->
-                  robotId1 != robotId2 &&
-                      maxDistanceToPreviousVehicleExceeded.holds(ctx, actor1 = robotId1, actor2 = robotId2)
-                }
-              }
-            }
-            monitorFunction = { ctx ->
-              ctx.entityIds.any { robotId1 ->
-                ctx.entityIds.any { robotId2 ->
-                  robotId1 != robotId2 &&
-                      maxDistanceToPreviousVehicleExceeded.holds(ctx, actor1 = robotId1, actor2 = robotId2)
-                }
-              }
-            }
-          }
-          leaf("Minimal distance to front robot exceeded") {
-            condition = { ctx ->
-              ctx.entityIds.any { robotId1 ->
-                ctx.entityIds.any { robotId2 ->
-                  robotId1 != robotId2 &&
-                      minDistanceToPreviousVehicleExceeded.holds(ctx, actor1 = robotId1, actor2 = robotId2)
-                }
-              }
-            }
-            monitorFunction = { ctx ->
-              ctx.entityIds.any { robotId1 ->
-                ctx.entityIds.any { robotId2 ->
-                  robotId1 != robotId2 &&
-                      minDistanceToPreviousVehicleExceeded.holds(ctx, actor1 = robotId1, actor2 = robotId2)
-                }
-              }
-            }
-          }
-        }
-        exclusive("Acceleration") {
-          projectionIDs = mapOf(projRec(("Acceleration")))
-          leaf("Strong acceleration") {
-            condition = { ctx -> ctx.entityIds.any { r -> strongAcceleration.holds(ctx, actorId = r) } }
-          }
-          leaf("Weak acceleration") {
-            condition = { ctx -> ctx.entityIds.any { r -> weakAcceleration.holds(ctx, actorId = r) } }
-          }
-          leaf("No acceleration") {
-            condition = { ctx -> ctx.entityIds.any { r -> noAcceleration.holds(ctx, actorId = r) } }
-          }
-          leaf("Weak deceleration") {
-            condition = { ctx -> ctx.entityIds.any { r -> weakDeceleration.holds(ctx, actorId = r) } }
-          }
-          leaf("Strong deceleration") {
-            condition = { ctx -> ctx.entityIds.any { r -> strongDeceleration.holds(ctx, actorId = r) } }
-          }
-        }
-      }
-    })
+        })

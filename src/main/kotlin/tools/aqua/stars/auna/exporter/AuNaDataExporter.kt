@@ -198,4 +198,4 @@ private fun quaternionToEuler(quaternion: Quaternion?): Rotation {
  * @return Parsed [Location].
  */
 private fun vectorToLocation(vector: Vector?) =
-    Location(x = vector?.x ?: 0.0, y = vector?.x ?: 0.0, z = vector?.x ?: 0.0)
+    Location(x = vector?.x ?: 0.0, y = vector?.y ?: 0.0, z = vector?.z ?: 0.0)

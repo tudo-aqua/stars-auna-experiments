@@ -15,10 +15,8 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics
+package tools.aqua.stars.auna.metrics.velocity
 
-import java.util.logging.Logger
-import tools.aqua.stars.core.metric.providers.Loggable
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
 import tools.aqua.stars.core.metric.utils.getCSVString
@@ -30,39 +28,13 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
-class RobotVelocityStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-velocity-statistics")
-) : SegmentMetricProvider<Robot, TickData, Segment>, Loggable, Plottable {
+class RobotVelocityStatisticsMetric : SegmentMetricProvider<Robot, TickData, Segment>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
 
   override fun evaluate(segment: SegmentType<Robot, TickData, Segment>) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
-
-    // Average velocity for robots
-    val averageRobotVelocity =
-        robotIdToRobotStateMap.map { it.key to it.value.map { it.velocity ?: 0.0 }.average() }
-    averageRobotVelocity.forEach {
-      logFiner(
-          "The average velocity of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
-    }
-
-    // Minimum velocity for robots
-    val minimumRobotVelocity =
-        robotIdToRobotStateMap.map { it.key to it.value.minOf { it.velocity ?: 0.0 } }
-    minimumRobotVelocity.forEach {
-      logFiner(
-          "The minimum velocity of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
-    }
-
-    // Maximum velocity for robots
-    val maximumRobotVelocity =
-        robotIdToRobotStateMap.map { it.key to it.value.maxOf { it.velocity ?: 0.0 } }
-    maximumRobotVelocity.forEach {
-      logFiner(
-          "The maximum velocity of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
-    }
   }
 
   override fun plotData() {

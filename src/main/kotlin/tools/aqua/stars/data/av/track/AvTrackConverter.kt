@@ -143,8 +143,10 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
     // Update entities of tickData to the caching list of robots
     tickData.entities = robots
     ticks += tickData
-    println("Calculated ${ticks.count()}/${messages.count()} ticks")
+    print(
+        "\rCalculated ${ticks.count()}/${messages.count()} ticks (${ticks.count() * 100 / messages.count()}%)")
   }
+  println()
   return ticks
 }
 

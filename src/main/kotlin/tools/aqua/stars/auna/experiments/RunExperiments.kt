@@ -23,9 +23,18 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
 import kotlin.io.path.name
-import tools.aqua.stars.auna.metrics.RobotAccelerationStatisticsMetric
-import tools.aqua.stars.auna.metrics.RobotLateralOffsetStatisticsMetric
-import tools.aqua.stars.auna.metrics.RobotVelocityStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration.RobotAverageAccelerationStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration.RobotMaxAccelerationStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration.RobotMinAccelerationStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotAverageLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotMaxLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotMinLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotAverageVelocityStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotMaxVelocityStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotMinVelocityStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotVelocityStatisticsMetric
 import tools.aqua.stars.core.evaluation.TSCEvaluation
 import tools.aqua.stars.core.metric.metrics.evaluation.*
 import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
@@ -64,9 +73,23 @@ fun main() {
       MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric))
   tscEvaluation.registerMetricProvider(FailedMonitorsMetric(validTSCInstancesPerProjectionMetric))
 
+  // Velocity
   tscEvaluation.registerMetricProvider(RobotVelocityStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotAverageVelocityStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotMinVelocityStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotMaxVelocityStatisticsMetric())
+
+  // Lateral Offset
   tscEvaluation.registerMetricProvider(RobotLateralOffsetStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotAverageLateralOffsetStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotMinLateralOffsetStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotMaxLateralOffsetStatisticsMetric())
+
+  // Acceleration
   tscEvaluation.registerMetricProvider(RobotAccelerationStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotAverageAccelerationStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotMinAccelerationStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotMaxAccelerationStatisticsMetric())
 
   println("Run Evaluation")
   tscEvaluation.runEvaluation()

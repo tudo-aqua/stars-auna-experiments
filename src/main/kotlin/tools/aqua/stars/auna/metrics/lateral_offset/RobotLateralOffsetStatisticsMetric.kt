@@ -15,10 +15,8 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics
+package tools.aqua.stars.auna.metrics.lateral_offset
 
-import java.util.logging.Logger
-import tools.aqua.stars.core.metric.providers.Loggable
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
 import tools.aqua.stars.core.metric.utils.getCSVString
@@ -30,39 +28,14 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
-class RobotAccelerationStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-acceleration-statistics")
-) : SegmentMetricProvider<Robot, TickData, Segment>, Loggable, Plottable {
-  var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
+class RobotLateralOffsetStatisticsMetric :
+    SegmentMetricProvider<Robot, TickData, Segment>, Plottable {
+  private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
 
   override fun evaluate(segment: SegmentType<Robot, TickData, Segment>) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
-
-    // Average acceleration for robots
-    val averageRobotAcceleration =
-        robotIdToRobotStateMap.map { it.key to it.value.mapNotNull { it.acceleration }.average() }
-    averageRobotAcceleration.forEach {
-      logFiner(
-          "The average acceleration of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
-    }
-
-    // Minimum acceleration for robots
-    val minimumRobotAcceleration =
-        robotIdToRobotStateMap.map { it.key to it.value.mapNotNull { it.acceleration }.min() }
-    minimumRobotAcceleration.forEach {
-      logFiner(
-          "The minimum acceleration of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
-    }
-
-    // Maximum acceleration for robots
-    val maximumRobotAcceleration =
-        robotIdToRobotStateMap.map { it.key to it.value.mapNotNull { it.acceleration }.max() }
-    maximumRobotAcceleration.forEach {
-      logFiner(
-          "The maximum acceleration of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
-    }
   }
 
   override fun plotData() {
@@ -71,13 +44,13 @@ class RobotAccelerationStatisticsMetric(
       val segment = segmentToRobotIdToRobotStateMap.first
 
       val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-      val folderName = "robot-acceleration-statistics"
+      val folderName = "lateral-offset-statistics"
       val subFolderName = segment.getSegmentIdentifier()
 
       robotIdToRobotStates.forEach { (robotId, robotStates) ->
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
-        val yValues = robotStates.map { it.acceleration ?: 0.0 }
+        val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
         val xValues = robotStates.map { it.tickData.currentTick }
 
         combinedValuesMap[legendEntry] = xValues to yValues
@@ -89,15 +62,15 @@ class RobotAccelerationStatisticsMetric(
                     xValues = xValues,
                     yValues = yValues,
                     "tick",
-                    "acceleration (m/s^2)",
-                    "Acceleration for"),
+                    "lateral offset",
+                    "lateral offset for"),
             folder = folderName,
             subFolder = subFolderName,
             fileName = fileName)
       }
 
       plotDataAsLineChart(
-          plot = getPlot(combinedValuesMap, "time", "acceleration", "Acceleration for"),
+          plot = getPlot(combinedValuesMap, "time", "lateral offset", "lateral offset for"),
           folder = folderName,
           subFolder = subFolderName,
           fileName = "${subFolderName}_combined")
@@ -110,13 +83,13 @@ class RobotAccelerationStatisticsMetric(
       val segment = segmentToRobotIdToRobotStateMap.first
 
       val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-      val folderName = "robot-acceleration-statistics"
+      val folderName = "lateral-offset-statistics"
       val subFolderName = segment.getSegmentIdentifier()
 
       robotIdToRobotStates.forEach { (robotId, robotStates) ->
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
-        val yValues = robotStates.map { it.acceleration ?: 0.0 }
+        val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
         val xValues = robotStates.map { it.tickData.currentTick }
 
         combinedValuesMap[legendEntry] = xValues to yValues

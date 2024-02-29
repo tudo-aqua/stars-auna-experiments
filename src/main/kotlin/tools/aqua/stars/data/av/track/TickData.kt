@@ -32,6 +32,13 @@ data class TickData(override val currentTick: AuNaTimeUnit, override var entitie
   /** Holds a reference to the [Segment] in which this [TickData] is included and analyzed */
   override lateinit var segment: Segment
 
+  fun clone(): TickData {
+    val newTick = TickData(currentTick.clone(), listOf())
+    val entityCopies = entities.map { it.copyToNewTick(newTick) }
+    newTick.entities = entityCopies
+    return newTick
+  }
+
   override fun equals(other: Any?): Boolean {
     if (other is TickData) {
       return this.currentTick == other.currentTick

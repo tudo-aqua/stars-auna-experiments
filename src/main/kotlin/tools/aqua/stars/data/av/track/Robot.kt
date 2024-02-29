@@ -60,7 +60,8 @@ data class Robot(
     val velocityCAM: Double? = 0.0,
     val accelerationCAM: Double? = 0.0,
     val dataSource: DataSource = DataSource.NOT_SET,
-    val lane: Lane?
+    val lane: Lane?,
+    var primaryEntity: Boolean
 ) : EntityType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   fun copyToNewTick(newTickData: TickData): Robot {
     return Robot(
@@ -77,7 +78,8 @@ data class Robot(
         velocityCAM = this.velocityCAM,
         accelerationCAM = this.accelerationCAM,
         dataSource = this.dataSource,
-        lane = this.lane)
+        lane = this.lane,
+        primaryEntity = this.primaryEntity)
   }
 
   override fun toString(): String {

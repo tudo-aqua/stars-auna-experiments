@@ -41,11 +41,24 @@ data class Segment(
       require(tickData.first().entities.any()) {
         "There is no Entity in the first TickData. Cannot get primaryEntityId for this Segment"
       }
-      val firstEgo = tickData.first().entities.first()
+      require(tickData.first().entities.any { it.primaryEntity }) {
+        "There need to be at least one 'primary' entity."
+      }
+      val firstEgo = tickData.first().entities.first { it.primaryEntity }
       return firstEgo.id
     }
 
   override fun getSegmentIdentifier(): String {
     return "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] with primary entity id ${primaryEntityId})"
   }
+
+  fun getPrimaryEntityClones(): List<Segment> =
+      tickData.first().entities.map { e ->
+        Segment(
+            segmentId,
+            segmentSource,
+            tickData.map {
+              it.clone().also { it.entities.first { e.id == it.id }.primaryEntity = true }
+            })
+      }
 }

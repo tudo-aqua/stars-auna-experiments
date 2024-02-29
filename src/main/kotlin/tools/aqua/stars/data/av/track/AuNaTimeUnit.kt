@@ -42,6 +42,12 @@ class AuNaTimeUnit(val seconds: Double, val nanoseconds: Double) :
     return seconds + (nanoseconds / 1e9) // 1e9 represents one billion (nanoseconds in a second)
   }
 
+  override fun toString(): String {
+    return "(${seconds}s, ${nanoseconds}ns)"
+  }
+
+  fun clone(): AuNaTimeUnit = AuNaTimeUnit(this.seconds, this.nanoseconds)
+
   companion object {
     val Zero = AuNaTimeUnit(0.0, 0.0)
   }

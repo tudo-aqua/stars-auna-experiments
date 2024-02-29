@@ -104,6 +104,17 @@ val maxDistanceToPreviousVehicleExceeded =
           rangeMaximumDistanceExceeded(abs((r1.posOnLane ?: 0.0) - (r2.posOnLane ?: 0.0))) &&
           rangeMaximumDistanceExceeded(abs((r1.posOnLaneCAM ?: 0.0) - (r2.posOnLaneCAM ?: 0.0)))
     }
+
+/**
+ * There is no distance to the previous robot, as neither of the "normal", "min" and "max" distance
+ * holds.
+ */
+val noDistanceToPreviousVehicle =
+    predicate(Robot::class to Robot::class) { ctx, r1, r2 ->
+      !(normalDistanceToPreviousVehicle.holds(ctx, r1, r2) ||
+          minDistanceToPreviousVehicleExceeded.holds(ctx, r1, r2) ||
+          maxDistanceToPreviousVehicleExceeded.holds(ctx, r1, r2))
+    }
 // endregion
 
 // region acceleration
@@ -198,9 +209,6 @@ val isOnStraightLane =
     }
 
 /** Robot is mainly driving on a curved lane */
-val isOnCurvedLane =
-    predicate(Robot::class) { _, r ->
-      minPrevalence(r, 0.8, phi = { r -> !(r.lane?.isStraight ?: true) })
-    }
+val isOnCurvedLane = predicate(Robot::class) { ctx, r -> !isOnStraightLane.holds(ctx, r) }
 
 // endregion

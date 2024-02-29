@@ -43,4 +43,8 @@ class AuNaTimeDifference(val secondsDifference: Double, val nanosecondsDifferenc
     return secondsDifference +
         (nanosecondsDifference / 1e9) // 1e9 represents one billion (nanoseconds in a second)
   }
+
+  override fun toString(): String {
+    return "(${secondsDifference}s, ${nanosecondsDifference}ns)"
+  }
 }

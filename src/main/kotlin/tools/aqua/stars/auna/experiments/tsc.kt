@@ -31,36 +31,63 @@ fun tsc() =
           all("TSCRoot") {
             projectionIDs = mapOf(projRec(("all")))
             leaf("Max lateral offset") {
-              condition = { ctx ->
-                ctx.entityIds.all { normalLateralOffset.holds(ctx, entityId = it) }
-              }
+              condition = { _ -> true }
               monitorFunction = { ctx ->
                 ctx.entityIds.all { normalLateralOffset.holds(ctx, entityId = it) }
-              }
-            }
-            leaf("Max distance to front robot") {
-              condition = { ctx ->
-                ctx.entityIds.any { robotId1 ->
-                  ctx.entityIds.any { robotId2 ->
-                    robotId1 != robotId2 &&
-                        normalDistanceToPreviousVehicle.holds(
-                            ctx, entityId1 = robotId1, entityId2 = robotId2)
-                  }
-                }
-              }
-              monitorFunction = { ctx ->
-                ctx.entityIds.any { robotId1 ->
-                  ctx.entityIds.any { robotId2 ->
-                    robotId1 != robotId2 &&
-                        normalDistanceToPreviousVehicle.holds(
-                            ctx, entityId1 = robotId1, entityId2 = robotId2)
-                  }
-                }
               }
             }
             exclusive("Lane Type") {
               leaf("Straight Lane") { condition = { ctx -> isOnStraightLane.holds(ctx) } }
               leaf("Curved Lane") { condition = { ctx -> isOnCurvedLane.holds(ctx) } }
+            }
+            exclusive("Distance to front vehicle") {
+              leaf("None") {
+                condition = { ctx ->
+                  ctx.entityIds.any { robotId2 ->
+                    ctx.primaryEntityId != robotId2 &&
+                        ctx.primaryEntityId + 1 == robotId2 &&
+                        noDistanceToPreviousVehicle.holds(
+                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
+                  }
+                }
+              }
+              leaf("Normal") {
+                condition = { ctx ->
+                  ctx.entityIds.any { robotId2 ->
+                    ctx.primaryEntityId != robotId2 &&
+                        ctx.primaryEntityId + 1 == robotId2 &&
+                        normalDistanceToPreviousVehicle.holds(
+                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
+                  }
+                }
+              }
+              leaf("Min") {
+                condition = { ctx ->
+                  ctx.entityIds.any { robotId2 ->
+                    ctx.primaryEntityId != robotId2 &&
+                        ctx.primaryEntityId + 1 == robotId2 &&
+                        minDistanceToPreviousVehicleExceeded.holds(
+                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
+                  }
+                }
+              }
+              leaf("Max") {
+                condition = { ctx ->
+                  ctx.entityIds.any { robotId2 ->
+                    ctx.primaryEntityId != robotId2 &&
+                        ctx.primaryEntityId + 1 == robotId2 &&
+                        maxDistanceToPreviousVehicleExceeded.holds(
+                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
+                  }
+                }
+              }
+            }
+            exclusive("Acceleration") {
+              leaf("Weak Deceleration") { condition = { ctx -> weakDeceleration.holds(ctx) } }
+              leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
+              leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
+              leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
+              leaf("No Acceleration (Driving)") { condition = { ctx -> noAcceleration.holds(ctx) } }
             }
           }
         })

@@ -23,6 +23,7 @@ import kotlin.math.abs
 import tools.aqua.stars.core.evaluation.BinaryPredicate.Companion.predicate
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.Robot
+import tools.aqua.stars.logic.kcmftbl.minPrevalence
 
 // region lateral offset
 /*
@@ -186,4 +187,20 @@ val strongDeceleration =
       rangeStrongDeceleration(r.acceleration ?: 0.0) &&
           rangeStrongDeceleration(r.accelerationCAM ?: 0.0)
     }
+// endregion
+
+// region lane type
+
+/** Robot is mainly driving on a straight lane */
+val isOnStraightLane =
+    predicate(Robot::class) { _, r ->
+      minPrevalence(r, 0.8, phi = { r -> r.lane?.isStraight ?: false })
+    }
+
+/** Robot is mainly driving on a curved lane */
+val isOnCurvedLane =
+    predicate(Robot::class) { _, r ->
+      minPrevalence(r, 0.8, phi = { r -> !(r.lane?.isStraight ?: true) })
+    }
+
 // endregion

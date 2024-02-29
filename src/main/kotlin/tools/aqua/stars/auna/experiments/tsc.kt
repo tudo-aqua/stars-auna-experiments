@@ -19,6 +19,7 @@ package tools.aqua.stars.auna.experiments
 
 import tools.aqua.stars.core.tsc.*
 import tools.aqua.stars.core.tsc.builder.all
+import tools.aqua.stars.core.tsc.builder.exclusive
 import tools.aqua.stars.core.tsc.builder.leaf
 import tools.aqua.stars.core.tsc.builder.root
 import tools.aqua.stars.core.tsc.projection.projRec
@@ -56,6 +57,10 @@ fun tsc() =
                   }
                 }
               }
+            }
+            exclusive("Lane Type") {
+              leaf("Straight Lane") { condition = { ctx -> isOnStraightLane.holds(ctx) } }
+              leaf("Curved Lane") { condition = { ctx -> isOnCurvedLane.holds(ctx) } }
             }
           }
         })

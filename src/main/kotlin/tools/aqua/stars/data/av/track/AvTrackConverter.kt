@@ -31,10 +31,15 @@ import tools.aqua.stars.importer.auna.*
  */
 fun convertTrackToLanes(track: Track): List<Lane> {
   val lanes = mutableListOf<Lane>()
-  track.lanes.forEach {
-    val newLane = Lane(length = it.length, width = it.width, waypoints = listOf())
+  track.lanes.forEachIndexed { index, lane ->
+    val newLane =
+        Lane(
+            length = lane.length,
+            width = lane.width,
+            waypoints = listOf(),
+            isStraight = index % 2 == 0)
     val waypoints =
-        it.waypoints.map { wp ->
+        lane.waypoints.map { wp ->
           Waypoint(x = wp.x, y = wp.y, lane = newLane, distanceToStart = wp.distanceToStart)
         }
     newLane.waypoints = waypoints

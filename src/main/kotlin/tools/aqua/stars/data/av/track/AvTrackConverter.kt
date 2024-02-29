@@ -104,9 +104,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
       }
   segments += newSegment
 
-  val cleanedSegments = segments.filter { it.tickData.size > 10 }
-  val segmentClonesWithUniquePrimaryEntities = cleanedSegments.map { it.getPrimaryEntityClones() }
-  return segmentClonesWithUniquePrimaryEntities.flatten()
+  return segments.filter { it.tickData.size > 10 }.map { it.getPrimaryEntityClones() }.flatten()
 }
 
 /**
@@ -234,7 +232,7 @@ private fun getRobotFromMessageAndLatestInformationFromCAM(
       accelerationCAM = message.vDot, // From Message
       dataSource = DataSource.CAM, // From Message
       lane = posOnLaneAndLateralOffset.first.lane,
-      primaryEntity = false)
+      isPrimaryEntity = false)
 }
 
 /**
@@ -271,7 +269,7 @@ private fun getRobotFromMessageAndLatestInformationFromOdometry(
         accelerationCAM = latestRobot?.accelerationCAM,
         dataSource = DataSource.ODOMETRY, // From Message
         lane = latestRobot?.lane,
-        primaryEntity = false)
+        isPrimaryEntity = false)
 
 /**
  * Returns the [Robot] based on the given [ViconPose] [Message]. It takes the previous [Robot] state
@@ -309,7 +307,7 @@ private fun getRobotFromMessageAndLatestInformationFromViconPose(
       accelerationCAM = latestRobot?.accelerationCAM,
       dataSource = DataSource.VICON_POSE,
       lane = posOnLaneAndLateralOffset.first.lane, // From Message
-      primaryEntity = false)
+      isPrimaryEntity = false)
 }
 
 /**

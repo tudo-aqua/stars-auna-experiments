@@ -36,6 +36,7 @@ data class TickData(override val currentTick: AuNaTimeUnit, override var entitie
     val newTick = TickData(currentTick.clone(), listOf())
     val entityCopies = entities.map { it.copyToNewTick(newTick) }
     newTick.entities = entityCopies
+
     return newTick
   }
 

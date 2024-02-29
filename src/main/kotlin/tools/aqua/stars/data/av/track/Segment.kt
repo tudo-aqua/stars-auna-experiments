@@ -28,7 +28,7 @@ import tools.aqua.stars.core.types.SegmentType
 data class Segment(
     val segmentId: Int,
     override val segmentSource: String,
-    override val tickData: List<TickData>
+    override val tickData: List<TickData> = listOf()
 ) : SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   /** Holds a [Map] which maps a timestamp to all relevant [TickData]s (based on [tickData]) */
   override val ticks: Map<AuNaTimeUnit, TickData> = tickData.associateBy { it.currentTick }
@@ -41,24 +41,26 @@ data class Segment(
       require(tickData.first().entities.any()) {
         "There is no Entity in the first TickData. Cannot get primaryEntityId for this Segment"
       }
-      require(tickData.first().entities.any { it.primaryEntity }) {
+      require(tickData.first().entities.any { it.isPrimaryEntity }) {
         "There need to be at least one 'primary' entity."
       }
-      val firstEgo = tickData.first().entities.first { it.primaryEntity }
+      val firstEgo = tickData.first().entities.first { it.isPrimaryEntity }
       return firstEgo.id
     }
 
-  override fun getSegmentIdentifier(): String {
-    return "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] with primary entity id ${primaryEntityId})"
-  }
+  override fun getSegmentIdentifier(): String =
+      "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] with primary entity id ${primaryEntityId})"
+
+  override fun toString(): String = getSegmentIdentifier()
 
   fun getPrimaryEntityClones(): List<Segment> =
-      tickData.first().entities.map { e ->
+      tickData.first().entities.mapIndexed { index, e ->
         Segment(
-            segmentId,
-            segmentSource,
-            tickData.map {
-              it.clone().also { it.entities.first { e.id == it.id }.primaryEntity = true }
-            })
+                segmentId + (index + 1) * 1_000_000,
+                segmentSource,
+                tickData.map {
+                  it.clone().also { it.entities.first { e.id == it.id }.isPrimaryEntity = true }
+                })
+            .also { it.tickData.forEach { t -> t.segment = it } }
       }
 }

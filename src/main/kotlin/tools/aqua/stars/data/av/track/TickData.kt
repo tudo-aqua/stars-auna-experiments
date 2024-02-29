@@ -27,8 +27,8 @@ import tools.aqua.stars.core.types.TickDataType
  * @param currentTick The current timestamp in seconds
  * @param entities The [List] of [Robot]s for the [currentTick]
  */
-data class TickData(override val currentTick: Double, override var entities: List<Robot>) :
-    TickDataType<Robot, TickData, Segment> {
+data class TickData(override val currentTick: AuNaTimeUnit, override var entities: List<Robot>) :
+    TickDataType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   /** Holds a reference to the [Segment] in which this [TickData] is included and analyzed */
   override lateinit var segment: Segment
 

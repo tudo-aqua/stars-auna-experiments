@@ -15,120 +15,45 @@
  * limitations under the License.
  */
 
-@file:Suppress("DuplicatedCode")
-
 package tools.aqua.stars.auna.experiments
 
-import tools.aqua.stars.core.tsc.TSC
+import tools.aqua.stars.core.tsc.*
 import tools.aqua.stars.core.tsc.builder.all
-import tools.aqua.stars.core.tsc.builder.exclusive
 import tools.aqua.stars.core.tsc.builder.leaf
 import tools.aqua.stars.core.tsc.builder.root
 import tools.aqua.stars.core.tsc.projection.projRec
-import tools.aqua.stars.data.av.track.Robot
-import tools.aqua.stars.data.av.track.Segment
-import tools.aqua.stars.data.av.track.TickData
+import tools.aqua.stars.data.av.track.*
 
 fun tsc() =
     TSC(
-        root<Robot, TickData, Segment> {
+        root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
           all("TSCRoot") {
             projectionIDs = mapOf(projRec(("all")))
-            exclusive("Lateral offset") {
-              projectionIDs = mapOf(projRec(("lateralOffset")))
-              leaf("Normal lateral offset") {
-                condition = { ctx ->
-                  ctx.entityIds.all { normalLateralOffset.holds(ctx, actorId = it) }
-                }
+            leaf("Max lateral offset") {
+              condition = { ctx ->
+                ctx.entityIds.all { normalLateralOffset.holds(ctx, entityId = it) }
               }
-              leaf("Maximum lateral offset exceeded") {
-                condition = { ctx ->
-                  ctx.entityIds.all { maxLateralOffsetExceeded.holds(ctx, actorId = it) }
-                }
-                monitorFunction = { ctx ->
-                  ctx.entityIds.all { maxLateralOffsetExceeded.holds(ctx, actorId = it) }
-                }
+              monitorFunction = { ctx ->
+                ctx.entityIds.all { normalLateralOffset.holds(ctx, entityId = it) }
               }
             }
-            exclusive("Distance to front robot") {
-              projectionIDs = mapOf(projRec(("Distance to front robot")))
-              leaf("Normal distance to front robot") {
-                condition = { ctx ->
-                  ctx.entityIds.any { robotId1 ->
-                    ctx.entityIds.any { robotId2 ->
-                      robotId1 != robotId2 &&
-                          normalDistanceToPreviousVehicle.holds(
-                              ctx, actor1 = robotId1, actor2 = robotId2)
-                    }
+            leaf("Max distance to front robot") {
+              condition = { ctx ->
+                ctx.entityIds.any { robotId1 ->
+                  ctx.entityIds.any { robotId2 ->
+                    robotId1 != robotId2 &&
+                        normalDistanceToPreviousVehicle.holds(
+                            ctx, entityId1 = robotId1, entityId2 = robotId2)
                   }
                 }
               }
-              leaf("Maximum distance to front robot exceeded") {
-                condition = { ctx ->
-                  ctx.entityIds.any { robotId1 ->
-                    ctx.entityIds.any { robotId2 ->
-                      robotId1 != robotId2 &&
-                          maxDistanceToPreviousVehicleExceeded.holds(
-                              ctx, actor1 = robotId1, actor2 = robotId2)
-                    }
+              monitorFunction = { ctx ->
+                ctx.entityIds.any { robotId1 ->
+                  ctx.entityIds.any { robotId2 ->
+                    robotId1 != robotId2 &&
+                        normalDistanceToPreviousVehicle.holds(
+                            ctx, entityId1 = robotId1, entityId2 = robotId2)
                   }
-                }
-                monitorFunction = { ctx ->
-                  ctx.entityIds.any { robotId1 ->
-                    ctx.entityIds.any { robotId2 ->
-                      robotId1 != robotId2 &&
-                          maxDistanceToPreviousVehicleExceeded.holds(
-                              ctx, actor1 = robotId1, actor2 = robotId2)
-                    }
-                  }
-                }
-              }
-              leaf("Minimal distance to front robot exceeded") {
-                condition = { ctx ->
-                  ctx.entityIds.any { robotId1 ->
-                    ctx.entityIds.any { robotId2 ->
-                      robotId1 != robotId2 &&
-                          minDistanceToPreviousVehicleExceeded.holds(
-                              ctx, actor1 = robotId1, actor2 = robotId2)
-                    }
-                  }
-                }
-                monitorFunction = { ctx ->
-                  ctx.entityIds.any { robotId1 ->
-                    ctx.entityIds.any { robotId2 ->
-                      robotId1 != robotId2 &&
-                          minDistanceToPreviousVehicleExceeded.holds(
-                              ctx, actor1 = robotId1, actor2 = robotId2)
-                    }
-                  }
-                }
-              }
-            }
-            exclusive("Acceleration") {
-              projectionIDs = mapOf(projRec(("Acceleration")))
-              leaf("Strong acceleration") {
-                condition = { ctx ->
-                  ctx.entityIds.any { r -> strongAcceleration.holds(ctx, actorId = r) }
-                }
-              }
-              leaf("Weak acceleration") {
-                condition = { ctx ->
-                  ctx.entityIds.any { r -> weakAcceleration.holds(ctx, actorId = r) }
-                }
-              }
-              leaf("No acceleration") {
-                condition = { ctx ->
-                  ctx.entityIds.any { r -> noAcceleration.holds(ctx, actorId = r) }
-                }
-              }
-              leaf("Weak deceleration") {
-                condition = { ctx ->
-                  ctx.entityIds.any { r -> weakDeceleration.holds(ctx, actorId = r) }
-                }
-              }
-              leaf("Strong deceleration") {
-                condition = { ctx ->
-                  ctx.entityIds.any { r -> strongDeceleration.holds(ctx, actorId = r) }
                 }
               }
             }

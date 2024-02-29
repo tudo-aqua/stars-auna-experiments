@@ -62,10 +62,9 @@ fun main() {
       TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
 
   tscEvaluation.registerMetricProvider(SegmentCountMetric())
-  tscEvaluation.registerMetricProvider(SegmentDurationPerIdentifierMetric())
-  tscEvaluation.registerMetricProvider(TotalSegmentTimeLengthMetric())
   val validTSCInstancesPerProjectionMetric =
-      ValidTSCInstancesPerProjectionMetric<Robot, TickData, Segment>()
+      ValidTSCInstancesPerProjectionMetric<
+          Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
   tscEvaluation.registerMetricProvider(validTSCInstancesPerProjectionMetric)
   tscEvaluation.registerMetricProvider(InvalidTSCInstancesPerProjectionMetric())
   tscEvaluation.registerMetricProvider(MissedTSCInstancesPerProjectionMetric())

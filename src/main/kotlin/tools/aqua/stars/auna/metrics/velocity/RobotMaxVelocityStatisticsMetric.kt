@@ -22,17 +22,20 @@ import tools.aqua.stars.core.metric.providers.Loggable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
 import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
-import tools.aqua.stars.data.av.track.Robot
-import tools.aqua.stars.data.av.track.Segment
-import tools.aqua.stars.data.av.track.TickData
+import tools.aqua.stars.data.av.track.*
 
 class RobotMaxVelocityStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-velocity-maximum-statistics")
-) : SegmentMetricProvider<Robot, TickData, Segment>, Loggable, Stateful {
+) :
+    SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
+    Loggable,
+    Stateful {
 
   private var currentMax: MutableMap<Int, Double> = mutableMapOf()
 
-  override fun evaluate(segment: SegmentType<Robot, TickData, Segment>) {
+  override fun evaluate(
+      segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
+  ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     // Maximum velocity for robots

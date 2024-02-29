@@ -24,15 +24,16 @@ import tools.aqua.stars.core.metric.utils.getPlot
 import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
 import tools.aqua.stars.core.metric.utils.saveAsCSVFile
 import tools.aqua.stars.core.types.SegmentType
-import tools.aqua.stars.data.av.track.Robot
-import tools.aqua.stars.data.av.track.Segment
-import tools.aqua.stars.data.av.track.TickData
+import tools.aqua.stars.data.av.track.*
 
-class RobotVelocityStatisticsMetric : SegmentMetricProvider<Robot, TickData, Segment>, Plottable {
+class RobotVelocityStatisticsMetric :
+    SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
 
-  override fun evaluate(segment: SegmentType<Robot, TickData, Segment>) {
+  override fun evaluate(
+      segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
+  ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
@@ -50,7 +51,7 @@ class RobotVelocityStatisticsMetric : SegmentMetricProvider<Robot, TickData, Seg
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
         val yValues = robotStates.map { it.velocity ?: 0.0 }
-        val xValues = robotStates.map { it.tickData.currentTick }
+        val xValues = robotStates.map { it.tickData.currentTick.toDoubleValue() }
 
         combinedValuesMap[legendEntry] = xValues to yValues
 
@@ -89,7 +90,7 @@ class RobotVelocityStatisticsMetric : SegmentMetricProvider<Robot, TickData, Seg
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
         val yValues = robotStates.map { it.velocity ?: 0.0 }
-        val xValues = robotStates.map { it.tickData.currentTick }
+        val xValues = robotStates.map { it.tickData.currentTick.seconds }
 
         combinedValuesMap[legendEntry] = xValues to yValues
 

@@ -29,13 +29,9 @@ data class Segment(
     val segmentId: Int,
     override val segmentSource: String,
     override val tickData: List<TickData>
-) : SegmentType<Robot, TickData, Segment> {
+) : SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   /** Holds a [Map] which maps a timestamp to all relevant [TickData]s (based on [tickData]) */
-  override val ticks: Map<Double, TickData> = tickData.associateBy { it.currentTick }
-  /** Holds a [List] of all available timestamps in this [Segment] (based on [tickData]) */
-  override val tickIDs: List<Double> = tickData.map { it.currentTick }
-  /** Holds the first timestamp for this [Segment] */
-  override val firstTickId: Double = this.tickIDs.first()
+  override val ticks: Map<AuNaTimeUnit, TickData> = tickData.associateBy { it.currentTick }
   /** Holds the id of the primary entity for this [Segment] */
   override val primaryEntityId: Int
     get() {

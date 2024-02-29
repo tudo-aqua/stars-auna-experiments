@@ -23,6 +23,8 @@ import kotlin.math.abs
 import tools.aqua.stars.core.evaluation.BinaryPredicate.Companion.predicate
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.Robot
+import tools.aqua.stars.logic.kcmftbl.eventually
+import tools.aqua.stars.logic.kcmftbl.globally
 import tools.aqua.stars.logic.kcmftbl.minPrevalence
 
 // region lateral offset
@@ -35,11 +37,15 @@ const val MAX_LATERAL_OFFSET: Double = 0.4
 
 /** Normal lateral offset defined as <= [MAX_LATERAL_OFFSET]. */
 val normalLateralOffset =
-    predicate(Robot::class) { _, r -> (r.lateralOffset ?: 0.0) <= MAX_LATERAL_OFFSET }
+    predicate(Robot::class) { _, r ->
+      globally(r, phi = { r -> (r.lateralOffset ?: 0.0) <= MAX_LATERAL_OFFSET })
+    }
 
 /** Exceeding the maximum lateral offset defined as > [MAX_LATERAL_OFFSET]. */
 val maxLateralOffsetExceeded =
-    predicate(Robot::class) { _, r -> (r.lateralOffset ?: 0.0) > MAX_LATERAL_OFFSET }
+    predicate(Robot::class) { _, r ->
+      eventually(r, phi = { r -> (r.lateralOffset ?: 0.0) > MAX_LATERAL_OFFSET })
+    }
 // endregion
 
 // region distance to previous vehicle
@@ -77,8 +83,12 @@ val minDistanceToPreviousVehicleExceeded =
     predicate(Robot::class to Robot::class) { _, r1, r2 ->
       (abs(r1.id - r2.id) == 1) &&
           r1.lane == r2.lane &&
-          rangeMinimumDistanceExceeded(abs((r1.posOnLane ?: 0.0) - (r2.posOnLane ?: 0.0))) &&
-          rangeMinimumDistanceExceeded(abs((r1.posOnLaneCAM ?: 0.0) - (r2.posOnLaneCAM ?: 0.0)))
+          eventually(
+              r1,
+              r2,
+              phi = { r1, r2 ->
+                rangeMinimumDistanceExceeded(abs((r1.posOnLane ?: 0.0) - (r2.posOnLane ?: 0.0)))
+              })
     }
 
 /**
@@ -89,8 +99,12 @@ val normalDistanceToPreviousVehicle =
     predicate(Robot::class to Robot::class) { _, r1, r2 ->
       (abs(r1.id - r2.id) == 1) &&
           r1.lane == r2.lane &&
-          rangeNormalDistance(abs((r1.posOnLane ?: 0.0) - (r2.posOnLane ?: 0.0))) &&
-          rangeNormalDistance(abs((r1.posOnLaneCAM ?: 0.0) - (r2.posOnLaneCAM ?: 0.0)))
+          globally(
+              r1,
+              r2,
+              phi = { r1, r2 ->
+                rangeNormalDistance(abs((r1.posOnLane ?: 0.0) - (r2.posOnLane ?: 0.0)))
+              })
     }
 
 /**
@@ -101,8 +115,12 @@ val maxDistanceToPreviousVehicleExceeded =
     predicate(Robot::class to Robot::class) { _, r1, r2 ->
       (abs(r1.id - r2.id) == 1) &&
           r1.lane == r2.lane &&
-          rangeMaximumDistanceExceeded(abs((r1.posOnLane ?: 0.0) - (r2.posOnLane ?: 0.0))) &&
-          rangeMaximumDistanceExceeded(abs((r1.posOnLaneCAM ?: 0.0) - (r2.posOnLaneCAM ?: 0.0)))
+          eventually(
+              r1,
+              r2,
+              phi = { r1, r2 ->
+                rangeMaximumDistanceExceeded(abs((r1.posOnLane ?: 0.0) - (r2.posOnLane ?: 0.0)))
+              })
     }
 
 /**
@@ -159,8 +177,7 @@ private val rangeStrongDeceleration: (Double) -> Boolean = { t ->
 /** Strong acceleration is defined as > [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]. */
 val strongAcceleration =
     predicate(Robot::class) { _, r ->
-      rangeStrongAcceleration(r.acceleration ?: 0.0) &&
-          rangeStrongAcceleration(r.accelerationCAM ?: 0.0)
+      eventually(r, phi = { r -> rangeStrongAcceleration(r.acceleration ?: 0.0) })
     }
 
 /**
@@ -169,8 +186,7 @@ val strongAcceleration =
  */
 val weakAcceleration =
     predicate(Robot::class) { _, r ->
-      rangeWeakAcceleration(r.acceleration ?: 0.0) &&
-          rangeWeakAcceleration(r.accelerationCAM ?: 0.0)
+      eventually(r, phi = { r -> rangeWeakAcceleration(r.acceleration ?: 0.0) })
     }
 
 /**
@@ -179,7 +195,7 @@ val weakAcceleration =
  */
 val noAcceleration =
     predicate(Robot::class) { _, r ->
-      rangeDriving(r.acceleration ?: 0.0) && rangeDriving(r.accelerationCAM ?: 0.0)
+      globally(r, phi = { r -> rangeDriving(r.acceleration ?: 0.0) })
     }
 
 /**
@@ -188,15 +204,13 @@ val noAcceleration =
  */
 val weakDeceleration =
     predicate(Robot::class) { _, r ->
-      rangeWeakDeceleration(r.acceleration ?: 0.0) &&
-          rangeWeakDeceleration(r.accelerationCAM ?: 0.0)
+      eventually(r, phi = { r -> rangeWeakDeceleration(r.acceleration ?: 0.0) })
     }
 
 /** Strong deceleration is defined as < [ACCELERATION_DECELERATION_STRONG_THRESHOLD]. */
 val strongDeceleration =
     predicate(Robot::class) { _, r ->
-      rangeStrongDeceleration(r.acceleration ?: 0.0) &&
-          rangeStrongDeceleration(r.accelerationCAM ?: 0.0)
+      eventually(r, phi = { r -> rangeStrongDeceleration(r.acceleration ?: 0.0) })
     }
 // endregion
 

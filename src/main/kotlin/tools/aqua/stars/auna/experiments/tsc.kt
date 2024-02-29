@@ -18,10 +18,7 @@
 package tools.aqua.stars.auna.experiments
 
 import tools.aqua.stars.core.tsc.*
-import tools.aqua.stars.core.tsc.builder.all
-import tools.aqua.stars.core.tsc.builder.exclusive
-import tools.aqua.stars.core.tsc.builder.leaf
-import tools.aqua.stars.core.tsc.builder.root
+import tools.aqua.stars.core.tsc.builder.*
 import tools.aqua.stars.core.tsc.projection.projRec
 import tools.aqua.stars.data.av.track.*
 
@@ -40,49 +37,31 @@ fun tsc() =
               leaf("Straight Lane") { condition = { ctx -> isOnStraightLane.holds(ctx) } }
               leaf("Curved Lane") { condition = { ctx -> isOnCurvedLane.holds(ctx) } }
             }
-            exclusive("Distance to front vehicle") {
-              leaf("None") {
-                condition = { ctx ->
-                  ctx.entityIds.any { robotId2 ->
-                    ctx.primaryEntityId != robotId2 &&
-                        ctx.primaryEntityId + 1 == robotId2 &&
-                        noDistanceToPreviousVehicle.holds(
-                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
-                  }
-                }
-              }
+            optional("Distance to front vehicle") {
+              leaf("None") { condition = { ctx -> ctx.primaryEntityId == 1 } }
               leaf("Normal") {
                 condition = { ctx ->
-                  ctx.entityIds.any { robotId2 ->
-                    ctx.primaryEntityId != robotId2 &&
-                        ctx.primaryEntityId + 1 == robotId2 &&
-                        normalDistanceToPreviousVehicle.holds(
-                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
-                  }
+                  ctx.primaryEntityId > 1 &&
+                      normalDistanceToPreviousVehicle.holds(
+                          ctx, entityId1 = ctx.primaryEntityId, entityId2 = ctx.primaryEntityId - 1)
                 }
               }
               leaf("Min") {
                 condition = { ctx ->
-                  ctx.entityIds.any { robotId2 ->
-                    ctx.primaryEntityId != robotId2 &&
-                        ctx.primaryEntityId + 1 == robotId2 &&
-                        minDistanceToPreviousVehicleExceeded.holds(
-                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
-                  }
+                  ctx.primaryEntityId > 1 &&
+                      minDistanceToPreviousVehicleExceeded.holds(
+                          ctx, entityId1 = ctx.primaryEntityId, entityId2 = ctx.primaryEntityId - 1)
                 }
               }
               leaf("Max") {
                 condition = { ctx ->
-                  ctx.entityIds.any { robotId2 ->
-                    ctx.primaryEntityId != robotId2 &&
-                        ctx.primaryEntityId + 1 == robotId2 &&
-                        maxDistanceToPreviousVehicleExceeded.holds(
-                            ctx, entityId1 = ctx.primaryEntityId, entityId2 = robotId2)
-                  }
+                  ctx.primaryEntityId > 1 &&
+                      maxDistanceToPreviousVehicleExceeded.holds(
+                          ctx, entityId1 = ctx.primaryEntityId, entityId2 = ctx.primaryEntityId - 1)
                 }
               }
             }
-            exclusive("Acceleration") {
+            optional("Acceleration") {
               leaf("Weak Deceleration") { condition = { ctx -> weakDeceleration.holds(ctx) } }
               leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
               leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }

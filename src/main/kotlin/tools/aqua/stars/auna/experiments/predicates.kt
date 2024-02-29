@@ -73,18 +73,18 @@ const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT: Double = 0.5 // in m
 val minDistanceToPreviousVehicleExceeded =
     predicate(Robot::class to Robot::class) { _, r1, r2 ->
       until(
-        r1,
-        r2,
-        phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
-        phi2 = { rb1, rb2 ->
-          globally(
-            rb1,
-            rb2,
-            phi = { rb1, rb2 ->
-              abs((rb1.posOnLane ?: 0.0) - (rb2.posOnLane ?: 0.0)) <
-                  DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT
-            })
-        })
+          r1,
+          r2,
+          phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
+          phi2 = { rb1, rb2 ->
+            globally(
+                rb1,
+                rb2,
+                phi = { rb1, rb2 ->
+                  abs((rb1.posOnLane ?: 0.0) - (rb2.posOnLane ?: 0.0)) <
+                      DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT
+                })
+          })
     }
 
 /**

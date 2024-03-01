@@ -52,6 +52,9 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
     } else if (currentFile.nameWithoutExtension.contains("vicon_pose")) {
       dataSourceToContentMap[DataSource.VICON_POSE]?.addAll(
           getJsonContentOfPath<List<ViconPose>>(currentFile.toPath()))
+    } else if (currentFile.nameWithoutExtension.contains("cmd_vel")) {
+      dataSourceToContentMap[DataSource.CMD_VEL]?.addAll(
+          getJsonContentOfPath<List<Twist>>(currentFile.toPath()))
     } else {
       error("Unknown file contents: $currentFile")
     }

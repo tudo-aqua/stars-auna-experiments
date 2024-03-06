@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.velocity
+package tools.aqua.stars.auna.metrics.steering_angle
 
 import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
@@ -24,37 +24,38 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotMinVelocityStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-velocity-minimum-statistics")
+class RobotSteeringAngleMaxStatisticsMetric(
+    override val logger: Logger = Loggable.getLogger("robot-steering-angle-maximum-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,
     Stateful {
 
-  private var currentMin: MutableMap<Int, Double> = mutableMapOf()
+  private var currentMax: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val minimumRobotVelocity =
-        robotIdToRobotStateMap.map { it.key to it.value.minOf { it.velocity ?: 0.0 } }
-    minimumRobotVelocity.forEach {
-      currentMin[it.first] =
-          minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)
+    // Maximum steering angle for robots
+    val maximumRobotSteeringAngle =
+        robotIdToRobotStateMap.map { it.key to it.value.maxOf { it.steeringAngle ?: 0.0 } }
+    maximumRobotSteeringAngle.forEach {
+      currentMax[it.first] =
+          maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)
       logFiner(
-          "The minimum velocity of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The maximum steering angle of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
   }
 
   override fun getState(): Map<Int, Double> {
-    return currentMin
+    return currentMax
   }
 
   override fun printState() {
-    currentMin.forEach { (actorId, minVelocity) ->
-      logFine("The minimum velocity of robot with ID '$actorId' is '$minVelocity'")
+    currentMax.forEach { (actorId, maxSteeringAngle) ->
+      logFine("The maximum steering angle of robot with ID '$actorId' is '$maxSteeringAngle'")
     }
   }
 }

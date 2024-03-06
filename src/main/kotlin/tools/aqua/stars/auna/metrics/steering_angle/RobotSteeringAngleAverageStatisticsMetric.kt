@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.velocity
+package tools.aqua.stars.auna.metrics.steering_angle
 
 import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
@@ -24,38 +24,38 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotMaxVelocityStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-velocity-maximum-statistics")
+class RobotSteeringAngleAverageStatisticsMetric(
+    override val logger: Logger = Loggable.getLogger("robot-steering-angle-average-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,
     Stateful {
 
-  private var currentMax: MutableMap<Int, Double> = mutableMapOf()
+  private var averagesteeringAngle: MutableMap<Int, Double> = mutableMapOf()
+  private var tickCount: Int = 0
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    // Maximum velocity for robots
-    val maximumRobotVelocity =
-        robotIdToRobotStateMap.map { it.key to it.value.maxOf { it.velocity ?: 0.0 } }
-    maximumRobotVelocity.forEach {
-      currentMax[it.first] =
-          maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)
+    val averageRobotsteeringAngle =
+        robotIdToRobotStateMap.map { it.key to it.value.map { it.steeringAngle ?: 0.0 }.average() }
+    averageRobotsteeringAngle.forEach {
+      averagesteeringAngle[it.first] = averagesteeringAngle.getOrDefault(it.first, 0.0) + it.second
       logFiner(
-          "The maximum velocity of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The average steering angle of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
+    tickCount++
   }
 
   override fun getState(): Map<Int, Double> {
-    return currentMax
+    return averagesteeringAngle.map { it.key to it.value / tickCount }.toMap()
   }
 
   override fun printState() {
-    currentMax.forEach { (actorId, maxVelocity) ->
-      logFine("The maximum velocity of robot with ID '$actorId' is '$maxVelocity'")
+    getState().forEach { (actorId, averagesteeringAngle) ->
+      logFine("The average steering angle of robot with ID '$actorId' is '$averagesteeringAngle'")
     }
   }
 }

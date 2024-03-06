@@ -194,16 +194,16 @@ fun getRobotFromMessageAndLatestInformation(
               robotId = robotId,
               tickData = tickData,
               waypoints = waypoints)
-      is AckermannDriveStamped ->
+      is tools.aqua.stars.auna.importer.AckermannDriveStamped ->
           getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
               message = message, latestRobot = latestRobot, robotId = robotId, tickData = tickData)
     }
 
 fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
-    message: AckermannDriveStamped,
-    latestRobot: Robot?,
-    robotId: Int,
-    tickData: TickData
+  message: tools.aqua.stars.auna.importer.AckermannDriveStamped,
+  latestRobot: Robot?,
+  robotId: Int,
+  tickData: TickData
 ): Robot {
   return Robot(
       id = robotId,
@@ -388,7 +388,7 @@ fun getRobotIdFromMessage(message: Message): Int {
     is ViconPose -> {
       message.childFrameId.replace("110", "").filter { it.isDigit() }.toInt()
     }
-    is AckermannDriveStamped -> {
+    is tools.aqua.stars.auna.importer.AckermannDriveStamped -> {
       message.header.frameId.replace("110", "").filter { it.isDigit() }.toInt()
     }
   }

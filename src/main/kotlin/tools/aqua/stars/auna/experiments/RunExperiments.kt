@@ -39,8 +39,8 @@ import tools.aqua.stars.core.metric.metrics.postEvaluation.MissingPredicateCombi
 import tools.aqua.stars.data.av.track.*
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
-import tools.aqua.stars.importer.auna.importDrivingData
-import tools.aqua.stars.importer.auna.importTrackData
+import tools.aqua.stars.auna.importer.importDrivingData
+import tools.aqua.stars.auna.importer.importTrackData
 
 fun main() {
   downloadAndUnzipExperimentsData()
@@ -49,7 +49,7 @@ fun main() {
 
   val tsc = tsc()
   println("Import Track Data")
-  val track = importTrackData()
+  val track = tools.aqua.stars.auna.importer.importTrackData()
   println("Convert Track Data")
   val lanes = convertTrackToLanes(track)
   println("Load Segments")
@@ -93,7 +93,7 @@ fun main() {
 
 fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
   val path = File(SIMULATION_RUN_FOLDER).toPath()
-  val sourcesToContentMap = importDrivingData(path)
+  val sourcesToContentMap = tools.aqua.stars.auna.importer.importDrivingData(path)
   val messages = sortMessagesBySentTime(sourcesToContentMap)
   val waypoints = lanes.flatMap { it.waypoints }
   println("Calculate ticks")

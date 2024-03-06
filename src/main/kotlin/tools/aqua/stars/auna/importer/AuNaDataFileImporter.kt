@@ -46,24 +46,16 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
   folderContents.forEach { currentFile ->
     if (currentFile.nameWithoutExtension.contains("cam")) {
       dataSourceToContentMap[DataSource.CAM]?.addAll(
-          _root_ide_package_.tools.aqua.stars.auna.importer.getJsonContentOfPath<
-              List<tools.aqua.stars.auna.importer.CAM>>(
-              currentFile.toPath()))
+          getJsonContentOfPath<List<CAM>>(currentFile.toPath()))
     } else if (currentFile.nameWithoutExtension.contains("odom")) {
       dataSourceToContentMap[DataSource.ODOMETRY]?.addAll(
-          _root_ide_package_.tools.aqua.stars.auna.importer.getJsonContentOfPath<
-              List<_root_ide_package_.tools.aqua.stars.auna.importer.Odometry>>(
-              currentFile.toPath()))
+          getJsonContentOfPath<List<Odometry>>(currentFile.toPath()))
     } else if (currentFile.nameWithoutExtension.contains("vicon_pose")) {
       dataSourceToContentMap[DataSource.VICON_POSE]?.addAll(
-          _root_ide_package_.tools.aqua.stars.auna.importer.getJsonContentOfPath<
-              List<_root_ide_package_.tools.aqua.stars.auna.importer.ViconPose>>(
-              currentFile.toPath()))
+          getJsonContentOfPath<List<ViconPose>>(currentFile.toPath()))
     } else if (currentFile.nameWithoutExtension.contains("ackermann_cmd")) {
       dataSourceToContentMap[DataSource.ACKERMANN_CMD]?.addAll(
-          _root_ide_package_.tools.aqua.stars.auna.importer.getJsonContentOfPath<
-              List<_root_ide_package_.tools.aqua.stars.auna.importer.AckermannDriveStamped>>(
-              currentFile.toPath()))
+          getJsonContentOfPath<List<AckermannDriveStamped>>(currentFile.toPath()))
     } else {
       error("Unknown file contents: $currentFile")
     }
@@ -76,9 +68,8 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
  *
  * @return The parsed [Track] object.
  */
-fun importTrackData(): _root_ide_package_.tools.aqua.stars.auna.importer.Track {
-  return _root_ide_package_.tools.aqua.stars.auna.importer.getJsonContentOfPath(
-      Path(WAYPOINTS_FILE_NAME))
+fun importTrackData(): Track {
+  return getJsonContentOfPath(Path(WAYPOINTS_FILE_NAME))
 }
 
 /**

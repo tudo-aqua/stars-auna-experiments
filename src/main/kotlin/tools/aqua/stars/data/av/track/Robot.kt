@@ -80,7 +80,8 @@ data class Robot(
         accelerationCAM = this.accelerationCAM,
         dataSource = this.dataSource,
         lane = this.lane,
-        isPrimaryEntity = this.isPrimaryEntity)
+        isPrimaryEntity = this.isPrimaryEntity,
+        steeringAngle = this.steeringAngle)
   }
 
   override fun toString(): String {

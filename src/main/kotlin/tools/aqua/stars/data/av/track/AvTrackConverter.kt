@@ -388,7 +388,7 @@ fun getRobotIdFromMessage(message: Message): Int {
     is ViconPose -> {
       message.childFrameId.replace("110", "").filter { it.isDigit() }.toInt()
     }
-    is tools.aqua.stars.auna.importer.AckermannDriveStamped -> {
+    is AckermannDriveStamped -> {
       message.header.frameId.replace("110", "").filter { it.isDigit() }.toInt()
     }
   }

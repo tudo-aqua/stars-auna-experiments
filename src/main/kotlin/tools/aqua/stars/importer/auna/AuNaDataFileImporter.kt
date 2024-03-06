@@ -53,7 +53,7 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
     } else if (currentFile.nameWithoutExtension.contains("vicon_pose")) {
       dataSourceToContentMap[DataSource.VICON_POSE]?.addAll(
           getJsonContentOfPath<List<ViconPose>>(currentFile.toPath()))
-    } else if (currentFile.nameWithoutExtension.contains("cmd_vel")) {
+    } else if (currentFile.nameWithoutExtension.contains("ackermann_cmd")) {
       dataSourceToContentMap[DataSource.ACKERMANN_CMD]?.addAll(
           getJsonContentOfPath<List<AckermannDriveStamped>>(currentFile.toPath()))
     } else {

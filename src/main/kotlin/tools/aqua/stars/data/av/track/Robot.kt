@@ -61,7 +61,8 @@ data class Robot(
     val accelerationCAM: Double? = 0.0,
     val dataSource: DataSource = DataSource.NOT_SET,
     val lane: Lane?,
-    var isPrimaryEntity: Boolean
+    var isPrimaryEntity: Boolean,
+    val steeringAngle: Double? = 0.0,
 ) : EntityType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   fun copyToNewTick(newTickData: TickData): Robot {
     return Robot(

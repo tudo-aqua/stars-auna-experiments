@@ -33,6 +33,7 @@ import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMinStatist
 import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMinStatisticsMetric
@@ -87,8 +88,8 @@ fun main() {
   tscEvaluation.registerMetricProvider(RobotAccelerationMinStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotAccelerationMaxStatisticsMetric())
 
-  // Acceleration
-  // tscEvaluation.registerMetricProvider(RobotSteeringAngleStatisticsMetric())
+  // Steering angle
+  tscEvaluation.registerMetricProvider(RobotSteeringAngleStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotSteeringAngleAverageStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotSteeringAngleMinStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotSteeringAngleMaxStatisticsMetric())

@@ -20,8 +20,8 @@ package tools.aqua.stars.data.av.track
 import de.sciss.kdtree.KdPoint
 import de.sciss.kdtree.KdTree
 import de.sciss.kdtree.NNSolver
+import tools.aqua.stars.auna.importer.*
 import tools.aqua.stars.data.av.track.AuNaTimeUnit.Companion.Zero
-import tools.aqua.stars.importer.auna.*
 
 /**
  * Converts the given serialized [Track] into a [List] of [Lane]s.
@@ -194,13 +194,13 @@ fun getRobotFromMessageAndLatestInformation(
               robotId = robotId,
               tickData = tickData,
               waypoints = waypoints)
-      is tools.aqua.stars.auna.importer.AckermannDriveStamped ->
+      is AckermannDriveStamped ->
           getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
               message = message, latestRobot = latestRobot, robotId = robotId, tickData = tickData)
     }
 
 fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
-    message: tools.aqua.stars.auna.importer.AckermannDriveStamped,
+    message: AckermannDriveStamped,
     latestRobot: Robot?,
     robotId: Int,
     tickData: TickData

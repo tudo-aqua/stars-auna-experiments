@@ -17,9 +17,9 @@
 
 package tools.aqua.stars.data.av.track
 
+import tools.aqua.stars.auna.importer.Quaternion
+import tools.aqua.stars.auna.importer.Vector
 import tools.aqua.stars.core.types.EntityType
-import tools.aqua.stars.importer.auna.Quaternion
-import tools.aqua.stars.importer.auna.Vector
 
 /**
  * This class implements the [EntityType] and represents the main entity of the AVTrackDataClasses.

@@ -21,7 +21,7 @@ package tools.aqua.stars.auna.experiments
 // Manual download via: DRIVING_DATA_DOWNLOAD_URL and TRACK_DATA_DOWNLOAD_URL
 val DOWNLOAD_EXPERIMENTS_DATA = true
 
-val DRIVING_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/5hYCZVwr4cYZreb/download"
+val DRIVING_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/iYG2SXDAmzLt5Lb/download"
 val TRACK_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/OKFiTtZ4Bby0Y5p/download"
 
 val DOWNLOAD_FOLDER_NAME = "stars-auna-json-files"

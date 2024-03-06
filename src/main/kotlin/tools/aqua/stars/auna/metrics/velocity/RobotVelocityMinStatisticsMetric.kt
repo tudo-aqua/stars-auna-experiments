@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.acceleration
+package tools.aqua.stars.auna.metrics.velocity
 
 import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
@@ -24,8 +24,8 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotMinAccelerationStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-acceleration-minimum-statistics")
+class RobotVelocityMinStatisticsMetric(
+    override val logger: Logger = Loggable.getLogger("robot-velocity-minimum-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,
@@ -38,13 +38,13 @@ class RobotMinAccelerationStatisticsMetric(
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val minimumRobotAcceleration =
-        robotIdToRobotStateMap.map { it.key to it.value.mapNotNull { it.acceleration }.min() }
-    minimumRobotAcceleration.forEach {
+    val minimumRobotVelocity =
+        robotIdToRobotStateMap.map { it.key to it.value.minOf { it.velocity ?: 0.0 } }
+    minimumRobotVelocity.forEach {
       currentMin[it.first] =
           minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)
       logFiner(
-          "The minimum acceleration of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The minimum velocity of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
   }
 
@@ -53,8 +53,8 @@ class RobotMinAccelerationStatisticsMetric(
   }
 
   override fun printState() {
-    currentMin.forEach { (actorId, minAcceleration) ->
-      logFine("The minimum acceleration of robot with ID '$actorId' is '$minAcceleration'")
+    currentMin.forEach { (actorId, minVelocity) ->
+      logFine("The minimum velocity of robot with ID '$actorId' is '$minVelocity'")
     }
   }
 }

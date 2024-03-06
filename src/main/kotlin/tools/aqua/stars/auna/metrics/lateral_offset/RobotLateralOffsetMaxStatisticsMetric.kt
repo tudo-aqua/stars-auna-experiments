@@ -24,41 +24,37 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotAverageLateralOffsetStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-lateral-offset-average-statistics")
+class RobotLateralOffsetMaxStatisticsMetric(
+    override val logger: Logger = Loggable.getLogger("robot-lateral-offset-maximum-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,
     Stateful {
 
-  private var averageVelocity: MutableMap<Int, Double> = mutableMapOf()
-  private var tickCount: Int = 0
+  private var currentMax: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val averageRobotLateralOffset =
-        robotIdToRobotStateMap.map {
-          it.key to (it.value.mapNotNull { it.lateralOffset }).average()
-        }
-    averageRobotLateralOffset.forEach {
-      averageVelocity[it.first] = averageVelocity.getOrDefault(it.first, 0.0) + it.second
-
+    val maximumRobotLateralOffset =
+        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).max() }
+    maximumRobotLateralOffset.forEach {
+      currentMax[it.first] =
+          maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)
       logFiner(
-          "The average lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The maximum lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
-    tickCount++
   }
 
   override fun getState(): Map<Int, Double> {
-    return averageVelocity.map { it.key to it.value / tickCount }.toMap()
+    return currentMax
   }
 
   override fun printState() {
-    getState().forEach { (actorId, averageVelocity) ->
-      logFine("The average lateral offset of robot with ID '$actorId' is '$averageVelocity'")
+    currentMax.forEach { (actorId, maxVelocity) ->
+      logFine("The maximum lateral offset of robot with ID '$actorId' is '$maxVelocity'")
     }
   }
 }

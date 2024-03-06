@@ -24,7 +24,7 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotMaxAccelerationStatisticsMetric(
+class RobotAccelerationMaxStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-acceleration-maximum-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,

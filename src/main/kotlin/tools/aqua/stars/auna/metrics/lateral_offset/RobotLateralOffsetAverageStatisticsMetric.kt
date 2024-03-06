@@ -24,38 +24,41 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotMinLateralOffsetStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-lateral-offset-minimum-statistics")
+class RobotLateralOffsetAverageStatisticsMetric(
+    override val logger: Logger = Loggable.getLogger("robot-lateral-offset-average-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,
     Stateful {
 
-  private var currentMin: MutableMap<Int, Double> = mutableMapOf()
+  private var averageVelocity: MutableMap<Int, Double> = mutableMapOf()
+  private var tickCount: Int = 0
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val minimumRobotLateralOffset =
-        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).min() }
-    minimumRobotLateralOffset.forEach {
-      currentMin[it.first] =
-          minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)
+    val averageRobotLateralOffset =
+        robotIdToRobotStateMap.map {
+          it.key to (it.value.mapNotNull { it.lateralOffset }).average()
+        }
+    averageRobotLateralOffset.forEach {
+      averageVelocity[it.first] = averageVelocity.getOrDefault(it.first, 0.0) + it.second
 
       logFiner(
-          "The minimum lateral offset of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The average lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
+    tickCount++
   }
 
   override fun getState(): Map<Int, Double> {
-    return currentMin
+    return averageVelocity.map { it.key to it.value / tickCount }.toMap()
   }
 
   override fun printState() {
-    currentMin.forEach { (actorId, minAcceleration) ->
-      logFine("The minimum lateral offset of robot with ID '$actorId' is '$minAcceleration'")
+    getState().forEach { (actorId, averageVelocity) ->
+      logFine("The average lateral offset of robot with ID '$actorId' is '$averageVelocity'")
     }
   }
 }

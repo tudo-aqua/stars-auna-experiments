@@ -24,37 +24,38 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotMaxLateralOffsetStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-lateral-offset-maximum-statistics")
+class RobotLateralOffsetMinStatisticsMetric(
+    override val logger: Logger = Loggable.getLogger("robot-lateral-offset-minimum-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,
     Stateful {
 
-  private var currentMax: MutableMap<Int, Double> = mutableMapOf()
+  private var currentMin: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val maximumRobotLateralOffset =
-        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).max() }
-    maximumRobotLateralOffset.forEach {
-      currentMax[it.first] =
-          maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)
+    val minimumRobotLateralOffset =
+        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).min() }
+    minimumRobotLateralOffset.forEach {
+      currentMin[it.first] =
+          minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)
+
       logFiner(
-          "The maximum lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The minimum lateral offset of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
   }
 
   override fun getState(): Map<Int, Double> {
-    return currentMax
+    return currentMin
   }
 
   override fun printState() {
-    currentMax.forEach { (actorId, maxVelocity) ->
-      logFine("The maximum lateral offset of robot with ID '$actorId' is '$maxVelocity'")
+    currentMin.forEach { (actorId, minAcceleration) ->
+      logFine("The minimum lateral offset of robot with ID '$actorId' is '$minAcceleration'")
     }
   }
 }

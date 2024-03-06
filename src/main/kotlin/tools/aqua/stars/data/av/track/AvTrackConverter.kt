@@ -200,10 +200,10 @@ fun getRobotFromMessageAndLatestInformation(
     }
 
 fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
-  message: tools.aqua.stars.auna.importer.AckermannDriveStamped,
-  latestRobot: Robot?,
-  robotId: Int,
-  tickData: TickData
+    message: tools.aqua.stars.auna.importer.AckermannDriveStamped,
+    latestRobot: Robot?,
+    robotId: Int,
+    tickData: TickData
 ): Robot {
   return Robot(
       id = robotId,

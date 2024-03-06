@@ -24,11 +24,11 @@ import kotlinx.serialization.json.Json
 import tools.aqua.stars.auna.experiments.downloadAndUnzipExperimentsData
 import tools.aqua.stars.auna.experiments.downloadWaypointsData
 import tools.aqua.stars.auna.experiments.loadSegments
+import tools.aqua.stars.auna.importer.importTrackData
 import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.convertTrackToLanes
 import tools.aqua.stars.importer.auna.Quaternion
 import tools.aqua.stars.importer.auna.Vector
-import tools.aqua.stars.auna.importer.importTrackData
 
 const val OUTPUT_DIR = "./stars-auna-export/"
 const val OUTPUT_FILE_NAME = "auna"
@@ -44,8 +44,7 @@ val ACTOR_TYPES =
             width = 0.2f,
             length = 0.4f,
             height = 0.1f // TODO: get actual height
-            )
-    )
+            ))
 
 /** Exports calculated [Segment]s to the import format used by the STARS-Visualizer tool. */
 fun main() {

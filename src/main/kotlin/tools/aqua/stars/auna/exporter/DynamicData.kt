@@ -29,6 +29,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class DynamicData(
-  @SerialName("segments") val segments: List<Segment>,
-  @SerialName("actorTypes") val actorTypes: List<ActorType>
+    @SerialName("segments") val segments: List<Segment>,
+    @SerialName("actorTypes") val actorTypes: List<ActorType>
 )

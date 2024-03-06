@@ -31,8 +31,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ActorPosition(
-  @SerialName("actorId") val actorId: Int,
-  @SerialName("actorTypeId") val actorTypeId: String,
-  @SerialName("location") val location: Location,
-  @SerialName("rotation") val rotation: Rotation,
+    @SerialName("actorId") val actorId: Int,
+    @SerialName("actorTypeId") val actorTypeId: String,
+    @SerialName("location") val location: Location,
+    @SerialName("rotation") val rotation: Rotation,
 )

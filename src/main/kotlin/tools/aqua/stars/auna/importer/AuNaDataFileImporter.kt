@@ -68,9 +68,7 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
  *
  * @return The parsed [Track] object.
  */
-fun importTrackData(): Track {
-  return getJsonContentOfPath(Path(WAYPOINTS_FILE_NAME))
-}
+fun importTrackData(): Track = getJsonContentOfPath(Path(WAYPOINTS_FILE_NAME))
 
 /**
  * Returns the parsed Json content for the given [inputFilePath]. Currently supported file

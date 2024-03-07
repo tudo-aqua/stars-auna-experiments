@@ -24,6 +24,7 @@ import java.nio.file.Paths
 import java.util.zip.ZipFile
 import kotlin.io.path.name
 import tools.aqua.stars.auna.importer.Message
+import tools.aqua.stars.auna.importer.Time
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMinStatisticsMetric
@@ -45,6 +46,7 @@ import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
 import tools.aqua.stars.core.metric.metrics.postEvaluation.MissingPredicateCombinationsPerProjectionMetric
 import tools.aqua.stars.data.av.track.*
 
+/** Executes the experiments. */
 fun main() {
   downloadAndUnzipExperimentsData()
   downloadWaypointsData()
@@ -108,6 +110,12 @@ fun main() {
   tscEvaluation.runEvaluation()
 }
 
+/**
+ * Loads all [Segment]s based on the given [List] of [Lane]s.
+ *
+ * @param lanes The [List] of [Lane]s.
+ * @return A [Sequence] of [Segment]s.
+ */
 fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
   val path = File(SIMULATION_RUN_FOLDER).toPath()
   val sourcesToContentMap = tools.aqua.stars.auna.importer.importDrivingData(path)
@@ -132,6 +140,9 @@ fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>
         .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
         .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
 
+/** Holds the name of the downloaded file used for this experiment setup. */
+val DOWNLOAD_FILE_NAME = "$DOWNLOAD_FOLDER_NAME.zip"
+
 /**
  * Checks if the experiments data is available. Otherwise, it is downloaded and extracted to the
  * correct folder.
@@ -139,7 +150,7 @@ fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>
 fun downloadAndUnzipExperimentsData() {
   if (!File(DOWNLOAD_FOLDER_NAME).exists()) {
     println("The experiments data is missing.")
-    if (!File("$DOWNLOAD_FOLDER_NAME.zip").exists()) {
+    if (!File(DOWNLOAD_FILE_NAME).exists()) {
       println("The experiments data zip file is missing.")
       if (DOWNLOAD_EXPERIMENTS_DATA) {
         println("Start with downloading the experiments data. This may take a while.")
@@ -149,14 +160,12 @@ fun downloadAndUnzipExperimentsData() {
         simulationDataMissing()
       }
     }
-    if (!File("$DOWNLOAD_FOLDER_NAME.zip").exists()) {
+    if (!File(DOWNLOAD_FILE_NAME).exists()) {
       simulationDataMissing()
     }
     println("Extract experiments data from zip file.")
     extractZipFile(
-        zipFile = File("$DOWNLOAD_FOLDER_NAME.zip"),
-        extractTo = File("./$DOWNLOAD_FOLDER_NAME"),
-        true)
+        zipFile = File(DOWNLOAD_FILE_NAME), extractTo = File("./$DOWNLOAD_FOLDER_NAME"), true)
   }
   if (!File(DOWNLOAD_FOLDER_NAME).exists()) {
     simulationDataMissing()
@@ -175,9 +184,7 @@ fun simulationDataMissing() {
 
 /** Download the experiments data and saves it in the root directory of the project. */
 fun downloadExperimentsData() {
-  URL(DRIVING_DATA_DOWNLOAD_URL).openStream().use {
-    Files.copy(it, Paths.get("$DOWNLOAD_FOLDER_NAME.zip"))
-  }
+  URL(DRIVING_DATA_DOWNLOAD_URL).openStream().use { Files.copy(it, Paths.get(DOWNLOAD_FILE_NAME)) }
 }
 
 /** Download the waypoint data and saves it in the root directory of the project. */

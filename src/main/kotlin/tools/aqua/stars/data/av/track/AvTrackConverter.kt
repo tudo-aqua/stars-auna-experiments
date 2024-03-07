@@ -199,6 +199,16 @@ fun getRobotFromMessageAndLatestInformation(
               message = message, latestRobot = latestRobot, robotId = robotId, tickData = tickData)
     }
 
+/**
+ * Returns the [Robot] based on the given [Message]. It takes the previous [Robot] state (namely
+ * [latestRobot]) and the message type into consideration.
+ *
+ * @param message The [Message] from which the [Robot] state should be calculated from.
+ * @param latestRobot The previous [Robot] state. Might be null.
+ * @param robotId The id of the [Robot] which sent the [Message].
+ * @param tickData The [TickData] to which the returned [Robot] belongs to.
+ * @return The [Robot] object based on the given [Message].
+ */
 fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
     message: AckermannDriveStamped,
     latestRobot: Robot?,

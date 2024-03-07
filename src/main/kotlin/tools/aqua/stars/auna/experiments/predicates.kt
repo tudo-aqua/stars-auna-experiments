@@ -19,7 +19,6 @@
 
 package tools.aqua.stars.auna.experiments
 
-import kotlin.math.abs
 import tools.aqua.stars.core.evaluation.BinaryPredicate.Companion.predicate
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.Robot
@@ -81,15 +80,14 @@ val minDistanceToPreviousVehicleExceeded =
                 rb1,
                 rb2,
                 phi = { rb1, rb2 ->
-                  abs((rb1.posOnLane ?: 0.0) - (rb2.posOnLane ?: 0.0)) <
-                      DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT
+                  rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT
                 })
           })
     }
 
 /**
  * The distance to the previous vehicle is in the normal range if it is in the interval
- * ([DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT] .. [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG]).
+ * ([DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT] ... [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG]).
  */
 val normalDistanceToPreviousVehicle =
     predicate(Robot::class to Robot::class) { _, r1, r2 ->
@@ -102,7 +100,7 @@ val normalDistanceToPreviousVehicle =
                 rb1,
                 rb2,
                 phi = { rbt1, rbt2 ->
-                  abs((rbt1.posOnLane ?: 0.0) - (rbt2.posOnLane ?: 0.0)) in
+                  rbt1.distanceToOther(rbt2) in
                       DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT..DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG
                 })
           })
@@ -123,8 +121,7 @@ val maxDistanceToPreviousVehicleExceeded =
                 rb1,
                 rb2,
                 phi = { rbt1, rbt2 ->
-                  abs((rbt1.posOnLane ?: 0.0) - (rbt2.posOnLane ?: 0.0)) >
-                      DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG
+                  rbt1.distanceToOther(rbt2) > DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG
                 })
           })
     }
@@ -151,13 +148,13 @@ val maxDistanceToPreviousVehicleExceeded =
 const val ACCELERATION_ACCELERATION_STRONG_THRESHOLD: Double = 0.5
 
 /**
- * Weak acceleration is defined in the interval ([ACCELERATION_ACCELERATION_WEAK_THRESHOLD] ..
+ * Weak acceleration is defined in the interval ([ACCELERATION_ACCELERATION_WEAK_THRESHOLD] ...
  * [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]).
  */
 const val ACCELERATION_ACCELERATION_WEAK_THRESHOLD: Double = 0.1
 
 /**
- * Weak deceleration is defined in the interval ([ACCELERATION_DECELERATION_STRONG_THRESHOLD] ..
+ * Weak deceleration is defined in the interval ([ACCELERATION_DECELERATION_STRONG_THRESHOLD] ...
  * [ACCELERATION_DECELERATION_WEAK_THRESHOLD]).
  */
 const val ACCELERATION_DECELERATION_WEAK_THRESHOLD: Double = -0.1
@@ -173,7 +170,7 @@ val strongAcceleration =
     }
 
 /**
- * Weak acceleration is defined in the interval ([ACCELERATION_ACCELERATION_WEAK_THRESHOLD] ..
+ * Weak acceleration is defined in the interval ([ACCELERATION_ACCELERATION_WEAK_THRESHOLD] ...
  * [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]).
  */
 val weakAcceleration =
@@ -188,7 +185,7 @@ val weakAcceleration =
     }
 
 /**
- * No acceleration is defined in the interval ([ACCELERATION_DECELERATION_WEAK_THRESHOLD] ..
+ * No acceleration is defined in the interval ([ACCELERATION_DECELERATION_WEAK_THRESHOLD] ...
  * [ACCELERATION_ACCELERATION_WEAK_THRESHOLD]).
  */
 val noAcceleration =
@@ -203,7 +200,7 @@ val noAcceleration =
     }
 
 /**
- * Weak deceleration is defined in the interval ([ACCELERATION_DECELERATION_STRONG_THRESHOLD] ..
+ * Weak deceleration is defined in the interval ([ACCELERATION_DECELERATION_STRONG_THRESHOLD] ...
  * [ACCELERATION_DECELERATION_WEAK_THRESHOLD]).
  */
 val weakDeceleration =
@@ -225,13 +222,13 @@ val strongDeceleration =
 // endregion
 
 // region lane type
-/** Robot is mainly driving on a straight lane */
+/** Robot is mainly driving on a straight lane. */
 val isOnStraightLane =
     predicate(Robot::class) { _, r ->
       minPrevalence(r, 0.8, phi = { it.lane?.isStraight ?: false })
     }
 
-/** Robot is mainly driving on a curved lane */
+/** Robot is mainly driving on a curved lane. */
 val isOnCurvedLane = predicate(Robot::class) { ctx, r -> !isOnStraightLane.holds(ctx, r) }
 
 // endregion

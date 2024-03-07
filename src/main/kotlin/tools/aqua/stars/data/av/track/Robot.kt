@@ -17,6 +17,8 @@
 
 package tools.aqua.stars.data.av.track
 
+import kotlin.math.pow
+import kotlin.math.sqrt
 import tools.aqua.stars.auna.importer.Quaternion
 import tools.aqua.stars.auna.importer.Vector
 import tools.aqua.stars.core.types.EntityType
@@ -90,6 +92,32 @@ data class Robot(
           lane = this.lane,
           isPrimaryEntity = this.isPrimaryEntity,
           steeringAngle = this.steeringAngle)
+
+  /**
+   * Calculated the spatial distance to the [other] [Robot].
+   *
+   * @param other The [Robot] to which the distance should be calculated.
+   * @return The distance to the [other] [Robot].
+   */
+  fun distanceToOther(other: Robot): Double = euclideanDistance(this.position, other.position)
+
+  /**
+   * Calculate the Euclidean distance between the given [Vector]s.
+   *
+   * @param position1 The first [Vector].
+   * @param position2 The second [Vector].
+   * @return The Euclidean distance between [position1] and [position2]. When one of them is null,
+   *   [Double.POSITIVE_INFINITY] is returned.
+   */
+  fun euclideanDistance(position1: Vector?, position2: Vector?): Double {
+    if (position1 == null || position2 == null) {
+      return Double.POSITIVE_INFINITY
+    }
+    return sqrt(
+        (position1.x - position2.x).pow(2) +
+            (position1.y - position2.y).pow(2) +
+            (position1.z - position2.z).pow(2))
+  }
 
   override fun toString(): String = "Robot(id=$id)"
 }

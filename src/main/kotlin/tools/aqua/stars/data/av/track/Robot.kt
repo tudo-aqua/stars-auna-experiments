@@ -66,6 +66,12 @@ data class Robot(
     var isPrimaryEntity: Boolean,
     val steeringAngle: Double? = 0.0,
 ) : EntityType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
+
+  /**
+   * Clones the current [Robot] to the given [newTickData].
+   *
+   * @return The cloned [Robot] that is associated with the given [newTickData].
+   */
   fun copyToNewTick(newTickData: TickData): Robot =
       Robot(
           id = this.id,

@@ -24,27 +24,29 @@ import tools.aqua.stars.core.types.EntityType
 /**
  * This class implements the [EntityType] and represents the main entity of the AVTrackDataClasses.
  *
- * @param id The id of the robot
- * @param tickData The related [TickData] for which the values are valid
- * @param posOnLane The position on the [Lane], which is the distance to the beginning of the [Lane]
- *   in meters
- * @param lateralOffset The offset to the optimal line of the [lane]. A positive value means "right
- *   of the middle of the [lane] in driving direction". A negative value stands for "left of the
- *   middle of the [lane] in driving direction".
- * @param velocity The velocity of the Robot for the current [TickData]
- * @param acceleration The acceleration of the Robot for the current [TickData]
- * @param position The latest ViconPose transform position for the current [TickData].
- * @param rotation The latest ViconPose transform rotation for the current [TickData].
- * @param posOnLaneCAM The latest CAM position on the [Lane], which is the distance to the beginning
- *   of the [Lane] in meters
- * @param lateralOffsetCAM The latest CAM offset to the optimal line of the [lane]. A positive value
- *   means "right of the middle of the [lane] in driving direction". A negative value stands for
- *   "left of the middle of the [lane] in driving direction".
- * @param velocityCAM The latest CAM velocity of the Robot for the current [TickData]
- * @param accelerationCAM The latest acceleration of the Robot for the current [TickData]
- * @param dataSource The [DataSource] which triggered the update to the values of the Robot for the
- *   current [TickData]
- * @param lane The [Lane] on which the Robot is currently driving on
+ * @property id The id of the robot.
+ * @property tickData The related [TickData] for which the values are valid.
+ * @property posOnLane The position on the [Lane], which is the distance to the beginning of the
+ *   [Lane] in meters.
+ * @property lateralOffset The offset to the optimal line of the [lane]. A positive value means
+ *   "right of the middle of the [lane] in driving direction". A negative value stands for "left of
+ *   the middle of the [lane] in driving direction".
+ * @property velocity The velocity of the Robot for the current [TickData].
+ * @property acceleration The acceleration of the Robot for the current [TickData].
+ * @property position The latest ViconPose transform position for the current [TickData].
+ * @property rotation The latest ViconPose transform rotation for the current [TickData].
+ * @property posOnLaneCAM The latest CAM position on the [Lane], which is the distance to the
+ *   beginning of the [Lane] in meters.
+ * @property lateralOffsetCAM The latest CAM offset to the optimal line of the [lane]. A positive
+ *   value means "right of the middle of the [lane] in driving direction". A negative value stands
+ *   for "left of the middle of the [lane] in driving direction".
+ * @property velocityCAM The latest CAM velocity of the Robot for the current [TickData],
+ * @property accelerationCAM The latest acceleration of the Robot for the current [TickData],
+ * @property dataSource The [DataSource] which triggered the update to the values of the Robot for
+ *   the current [TickData],
+ * @property lane The [Lane] on which the Robot is currently driving on,
+ * @property isPrimaryEntity Whether the [Robot] should be classified as the 'primary entity'.
+ * @property steeringAngle The current steering angle of the [Robot] in degrees.
  */
 data class Robot(
     override val id: Int,
@@ -64,27 +66,24 @@ data class Robot(
     var isPrimaryEntity: Boolean,
     val steeringAngle: Double? = 0.0,
 ) : EntityType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
-  fun copyToNewTick(newTickData: TickData): Robot {
-    return Robot(
-        id = this.id,
-        tickData = newTickData,
-        posOnLane = this.posOnLane,
-        lateralOffset = this.lateralOffset,
-        velocity = this.velocity,
-        acceleration = this.acceleration,
-        position = this.position,
-        rotation = this.rotation,
-        posOnLaneCAM = this.posOnLaneCAM,
-        lateralOffsetCAM = this.lateralOffsetCAM,
-        velocityCAM = this.velocityCAM,
-        accelerationCAM = this.accelerationCAM,
-        dataSource = this.dataSource,
-        lane = this.lane,
-        isPrimaryEntity = this.isPrimaryEntity,
-        steeringAngle = this.steeringAngle)
-  }
+  fun copyToNewTick(newTickData: TickData): Robot =
+      Robot(
+          id = this.id,
+          tickData = newTickData,
+          posOnLane = this.posOnLane,
+          lateralOffset = this.lateralOffset,
+          velocity = this.velocity,
+          acceleration = this.acceleration,
+          position = this.position,
+          rotation = this.rotation,
+          posOnLaneCAM = this.posOnLaneCAM,
+          lateralOffsetCAM = this.lateralOffsetCAM,
+          velocityCAM = this.velocityCAM,
+          accelerationCAM = this.accelerationCAM,
+          dataSource = this.dataSource,
+          lane = this.lane,
+          isPrimaryEntity = this.isPrimaryEntity,
+          steeringAngle = this.steeringAngle)
 
-  override fun toString(): String {
-    return "Robot(id=$id)"
-  }
+  override fun toString(): String = "Robot(id=$id)"
 }

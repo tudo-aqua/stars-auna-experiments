@@ -27,13 +27,15 @@ import tools.aqua.stars.auna.importer.Message
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration_cam.RobotCAMAccelerationAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration_cam.RobotCAMAccelerationMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration_cam.RobotCAMAccelerationMinStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMinStatisticsMetric
 import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMinStatisticsMetric
-import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMinStatisticsMetric
@@ -66,18 +68,20 @@ fun main() {
   tscEvaluation.registerMetricProvider(validTSCInstancesPerProjectionMetric)
   tscEvaluation.registerMetricProvider(InvalidTSCInstancesPerProjectionMetric())
   tscEvaluation.registerMetricProvider(MissedTSCInstancesPerProjectionMetric())
+  tscEvaluation.registerMetricProvider(TotalSegmentTickDifferenceMetric())
+  tscEvaluation.registerMetricProvider(TotalSegmentTickDifferencePerIdentifierMetric())
   tscEvaluation.registerMetricProvider(
       MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric))
   tscEvaluation.registerMetricProvider(FailedMonitorsMetric(validTSCInstancesPerProjectionMetric))
 
   // Velocity
-  //  tscEvaluation.registerMetricProvider(RobotSteeringAngleStatisticsMetric())
+  // tscEvaluation.registerMetricProvider(RobotSteeringAngleStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotVelocityAverageStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotVelocityMinStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotVelocityMaxStatisticsMetric())
 
   // Lateral Offset
-  //  tscEvaluation.registerMetricProvider(RobotLateralOffsetStatisticsMetric())
+  // tscEvaluation.registerMetricProvider(RobotLateralOffsetStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotLateralOffsetAverageStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotLateralOffsetMinStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotLateralOffsetMaxStatisticsMetric())
@@ -89,10 +93,16 @@ fun main() {
   tscEvaluation.registerMetricProvider(RobotAccelerationMaxStatisticsMetric())
 
   // Steering angle
-  tscEvaluation.registerMetricProvider(RobotSteeringAngleStatisticsMetric())
+  // tscEvaluation.registerMetricProvider(RobotSteeringAngleStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotSteeringAngleAverageStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotSteeringAngleMinStatisticsMetric())
   tscEvaluation.registerMetricProvider(RobotSteeringAngleMaxStatisticsMetric())
+
+  // Acceleration CAM
+  //  tscEvaluation.registerMetricProvider(RobotCAMAccelerationStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotCAMAccelerationAverageStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotCAMAccelerationMinStatisticsMetric())
+  tscEvaluation.registerMetricProvider(RobotCAMAccelerationMaxStatisticsMetric())
 
   println("Run Evaluation")
   tscEvaluation.runEvaluation()
@@ -117,11 +127,10 @@ fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
  * @param messageSourceToContentMap A [Map] which maps a [DataSource] to all its [Message]s.
  * @return A sorted [List] of [Message]s.
  */
-fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>): List<Message> {
-  return messageSourceToContentMap
-      .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
-      .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
-}
+fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>): List<Message> =
+    messageSourceToContentMap
+        .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
+        .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
 
 /**
  * Checks if the experiments data is available. Otherwise, it is downloaded and extracted to the
@@ -192,9 +201,9 @@ fun downloadWaypointsData() {
 }
 
 /**
- * Extract a zip file into any directory
+ * Extract a zip file into any directory.
  *
- * @param zipFile src zip file
+ * @param zipFile src zip file.
  * @param extractTo directory to extract into. There will be new folder with the zip's name inside
  *   [extractTo] directory.
  * @param extractHere no extra folder will be created and will be extracted directly inside
@@ -206,33 +215,32 @@ private fun extractZipFile(
     zipFile: File,
     extractTo: File,
     extractHere: Boolean = false,
-): File? {
-  return try {
-    val outputDir =
-        if (extractHere) {
-          extractTo
-        } else {
-          File(extractTo, zipFile.nameWithoutExtension)
-        }
-
-    ZipFile(zipFile).use { zip ->
-      zip.entries().asSequence().forEach { entry ->
-        zip.getInputStream(entry).use { input ->
-          if (entry.isDirectory) {
-            val d = File(outputDir, entry.name)
-            if (!d.exists()) d.mkdirs()
+): File? =
+    try {
+      val outputDir =
+          if (extractHere) {
+            extractTo
           } else {
-            val f = File(outputDir, entry.name)
-            if (f.parentFile?.exists() != true) f.parentFile?.mkdirs()
+            File(extractTo, zipFile.nameWithoutExtension)
+          }
 
-            f.outputStream().use { output -> input.copyTo(output) }
+      ZipFile(zipFile).use { zip ->
+        zip.entries().asSequence().forEach { entry ->
+          zip.getInputStream(entry).use { input ->
+            if (entry.isDirectory) {
+              val d = File(outputDir, entry.name)
+              if (!d.exists()) d.mkdirs()
+            } else {
+              val f = File(outputDir, entry.name)
+              if (f.parentFile?.exists() != true) f.parentFile?.mkdirs()
+
+              f.outputStream().use { output -> input.copyTo(output) }
+            }
           }
         }
       }
+      extractTo
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
     }
-    extractTo
-  } catch (e: Exception) {
-    e.printStackTrace()
-    null
-  }
-}

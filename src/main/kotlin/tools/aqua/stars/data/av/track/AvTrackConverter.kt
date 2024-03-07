@@ -204,26 +204,26 @@ fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
     latestRobot: Robot?,
     robotId: Int,
     tickData: TickData
-): Robot {
-  return Robot(
-      id = robotId,
-      tickData = tickData,
-      posOnLane = latestRobot?.posOnLane,
-      lateralOffset = latestRobot?.lateralOffset,
-      velocity = latestRobot?.velocity,
-      acceleration = latestRobot?.acceleration,
-      position = latestRobot?.position,
-      rotation = latestRobot?.rotation,
-      posOnLaneCAM = latestRobot?.posOnLaneCAM,
-      lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-      velocityCAM = latestRobot?.velocityCAM,
-      accelerationCAM = latestRobot?.accelerationCAM, // From Message? //TODO Check values
-      dataSource = DataSource.ACKERMANN_CMD, // From Message
-      lane = latestRobot?.lane,
-      steeringAngle = (message.ackermannDrive.steeringAngle * 360) / (2 * Math.PI), // From Message
-      isPrimaryEntity = false,
-  )
-}
+): Robot =
+    Robot(
+        id = robotId,
+        tickData = tickData,
+        posOnLane = latestRobot?.posOnLane,
+        lateralOffset = latestRobot?.lateralOffset,
+        velocity = latestRobot?.velocity,
+        acceleration = latestRobot?.acceleration,
+        position = latestRobot?.position,
+        rotation = latestRobot?.rotation,
+        posOnLaneCAM = latestRobot?.posOnLaneCAM,
+        lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
+        velocityCAM = latestRobot?.velocityCAM,
+        accelerationCAM = latestRobot?.accelerationCAM, // From Message? //TODO Check values
+        dataSource = DataSource.ACKERMANN_CMD, // From Message
+        lane = latestRobot?.lane,
+        steeringAngle =
+            (message.ackermannDrive.steeringAngle * 360) / (2 * Math.PI), // From Message
+        isPrimaryEntity = false,
+    )
 
 /**
  * Returns the [Robot] based on the given [CAM] [Message]. It takes the previous [Robot] state
@@ -377,19 +377,18 @@ fun calculatePosOnLaneAndLateralOffset(
  * @param message The [Message] for which the [Robot] id should be returned.
  * @return The id of the [Robot] which sent the given [message].
  */
-fun getRobotIdFromMessage(message: Message): Int {
-  return when (message) {
-    is CAM -> {
-      message.robotName.replace("110", "").filter { it.isDigit() }.toInt()
+fun getRobotIdFromMessage(message: Message): Int =
+    when (message) {
+      is CAM -> {
+        message.robotName.replace("110", "").filter { it.isDigit() }.toInt()
+      }
+      is Odometry -> {
+        message.header.frameId.replace("110", "").filter { it.isDigit() }.toInt()
+      }
+      is ViconPose -> {
+        message.childFrameId.replace("110", "").filter { it.isDigit() }.toInt()
+      }
+      is AckermannDriveStamped -> {
+        message.header.frameId.replace("110", "").filter { it.isDigit() }.toInt()
+      }
     }
-    is Odometry -> {
-      message.header.frameId.replace("110", "").filter { it.isDigit() }.toInt()
-    }
-    is ViconPose -> {
-      message.childFrameId.replace("110", "").filter { it.isDigit() }.toInt()
-    }
-    is AckermannDriveStamped -> {
-      message.header.frameId.replace("110", "").filter { it.isDigit() }.toInt()
-    }
-  }
-}

@@ -38,8 +38,12 @@ class AuNaTimeUnit(val seconds: Double, val nanoseconds: Double) :
   override fun plus(other: AuNaTimeDifference): AuNaTimeUnit =
       AuNaTimeUnit(seconds + other.secondsDifference, nanoseconds + other.nanosecondsDifference)
 
-  fun toDoubleValue(): Double {
+  fun toSeconds(): Double {
     return seconds + (nanoseconds / 1e9) // 1e9 represents one billion (nanoseconds in a second)
+  }
+
+  fun toMillis(): Double {
+    return seconds * 1000 + (nanoseconds / 1e6)
   }
 
   override fun toString(): String {

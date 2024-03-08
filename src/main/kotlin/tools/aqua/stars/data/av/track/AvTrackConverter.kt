@@ -20,8 +20,10 @@ package tools.aqua.stars.data.av.track
 import de.sciss.kdtree.KdPoint
 import de.sciss.kdtree.KdTree
 import de.sciss.kdtree.NNSolver
-import tools.aqua.stars.data.av.track.AuNaTimeUnit.Companion.Zero
 import tools.aqua.stars.importer.auna.*
+
+/** The size of the window for the moving average acceleration in ms. */
+const val WINDOW_SIZE = 100
 
 /**
  * Converts the given serialized [Track] into a [List] of [Lane]s.
@@ -118,42 +120,86 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
   val ticks = mutableListOf<TickData>()
   val robotIds = mutableSetOf<Int>()
   val latestRobotInformationMap: MutableMap<Int, Robot?> = mutableMapOf()
-  messages.forEach { message ->
-    // Create caching list for newly created Robot objects
-    val robots = mutableListOf<Robot>()
-    // Create empty TickData object for later reference
-    val tickData =
-        TickData(
-            currentTick = message.header.timeStamp.toAuNaTimeUnit(), entities = mutableListOf())
-    // Get the robot id for the current message
-    val robotId = getRobotIdFromMessage(message)
-    // Save robot id
-    robotIds.add(robotId)
-    // Get the latest information for all other robots to be copied later on
-    val latestOtherRobotInformation = robotIds.minus(robotId).map { latestRobotInformationMap[it] }
-    // Copy the latest information of all other robots with the current tickData
-    val otherRobotInformationCopy =
-        latestOtherRobotInformation.mapNotNull { it?.copyToNewTick(tickData) }
-    // Save copy in caching list
-    robots.addAll(otherRobotInformationCopy)
 
-    // Get the latest information for the robot that sent the current message
-    val latestRobotInformation = latestRobotInformationMap[robotId]
-    // Get Robot information form current message
-    val currentRobot =
-        getRobotFromMessageAndLatestInformation(
-            message, latestRobotInformation, robotId, tickData, waypoints)
-    latestRobotInformationMap[robotId] = currentRobot
-    // Add current Robot information to robot cache list
-    robots.add(currentRobot)
+  messages
+      .forEach { message ->
+        // Create caching list for newly created Robot objects
+        val robots = mutableListOf<Robot>()
+        // Create empty TickData object for later reference
+        val tickData =
+            TickData(
+                currentTick = message.header.timeStamp.toAuNaTimeUnit(), entities = mutableListOf())
+        // Get the robot id for the current message
+        val robotId = getRobotIdFromMessage(message)
+        // Save robot id
+        robotIds.add(robotId)
+        // Get the latest information for all other robots to be copied later on
+        val latestOtherRobotInformation =
+            robotIds.minus(robotId).map { latestRobotInformationMap[it] }
+        // Copy the latest information of all other robots with the current tickData
+        val otherRobotInformationCopy =
+            latestOtherRobotInformation.mapNotNull { it?.copyToNewTick(tickData) }
+        // Save copy in caching list
+        robots.addAll(otherRobotInformationCopy)
 
-    // Update entities of tickData to the caching list of robots
-    tickData.entities = robots
-    ticks += tickData
-    print(
-        "\rCalculated ${ticks.count()}/${messages.count()} ticks (${(ticks.count() * 100) / messages.count()}%)")
-  }
-  println()
+        // Get the latest information for the robot that sent the current message
+        val latestRobotInformation = latestRobotInformationMap[robotId]
+        // Get Robot information form current message
+        val currentRobot =
+            getRobotFromMessageAndLatestInformation(
+                message, latestRobotInformation, robotId, tickData, waypoints)
+        latestRobotInformationMap[robotId] = currentRobot
+        // Add current Robot information to robot cache list
+        robots.add(currentRobot)
+
+        // Update entities of tickData to the caching list of robots
+        tickData.entities = robots
+        ticks += tickData
+        print(
+            "\rCalculated ${ticks.count()}/${messages.count()} ticks (${(ticks.count() * 100) / messages.count()}%)")
+      }
+      .also { println() }
+
+  // Calculate Acceleration
+  val tickArray = ticks.toTypedArray()
+  val windowStep = WINDOW_SIZE / 2
+  val start = tickArray[0].currentTick.toMillis()
+  val end = tickArray.last().currentTick.toMillis()
+
+  tickArray
+      .forEachIndexed { index, tickData ->
+        val currentTick = tickData.currentTick.toMillis()
+
+        if (currentTick - windowStep <= start) return@forEachIndexed
+
+        if (currentTick + windowStep >= end) return@forEachIndexed
+
+        val startValue =
+            tickArray[
+                (index - 1 downTo 0).first { t ->
+                  tickArray[t].currentTick.toMillis() <= currentTick - windowStep
+                }]
+
+        if (startValue.entities.size != 3) return@forEachIndexed
+
+        val endValue =
+            tickArray[
+                (index + 1 ..< tickArray.size).first { t ->
+                  tickArray[t].currentTick.toMillis() >= currentTick + windowStep
+                }]
+
+        tickData.entities.forEach {
+          it.acceleration =
+              1000 *
+                  ((endValue.entities.first { r -> r.id == it.id }.velocity ?: 0.0) -
+                      (startValue.entities.first { r -> r.id == it.id }.velocity ?: 0.0)) /
+                  WINDOW_SIZE
+        }
+        print(
+            "\rCalculated $index/${tickArray.size} average accelerations (${index * 100 / tickArray.size}%)")
+      }
+      .also { println("\rCalculated ${tickArray.size} average accelerations (100%)") }
+
   return ticks
 }
 
@@ -223,13 +269,13 @@ private fun getRobotFromMessageAndLatestInformationFromCAM(
       posOnLane = latestRobot?.posOnLane,
       lateralOffset = latestRobot?.lateralOffset,
       velocity = latestRobot?.velocity,
-      acceleration = latestRobot?.acceleration,
+      acceleration = 0.0, // latestRobot?.acceleration,
       position = latestRobot?.position,
       rotation = latestRobot?.rotation,
       posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
       lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
-      velocityCAM = message.v, // From Message
-      accelerationCAM = message.vDot, // From Message
+      // velocityCAM = message.v, // From Message
+      // accelerationCAM = 0.0message.vDot, // From Message
       dataSource = DataSource.CAM, // From Message
       lane = posOnLaneAndLateralOffset.first.lane,
       isPrimaryEntity = false)
@@ -257,16 +303,16 @@ private fun getRobotFromMessageAndLatestInformationFromOdometry(
         posOnLane = latestRobot?.posOnLane,
         lateralOffset = latestRobot?.lateralOffset,
         velocity = message.getVelocity(), // From Message
-        acceleration =
+        acceleration = 0.0, /*
             (message.getVelocity() - (latestRobot?.velocity ?: 0.0)) /
                 (tickData.currentTick - (latestRobot?.tickData?.currentTick ?: Zero))
-                    .toDoubleValue(), // Calculated
+                    .toDoubleValue(), // Calculated*/
         position = latestRobot?.position,
         rotation = latestRobot?.rotation,
         posOnLaneCAM = latestRobot?.posOnLaneCAM,
         lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-        velocityCAM = latestRobot?.velocityCAM,
-        accelerationCAM = latestRobot?.accelerationCAM,
+        // velocityCAM = latestRobot?.velocityCAM,
+        // accelerationCAM = latestRobot?.accelerationCAM,
         dataSource = DataSource.ODOMETRY, // From Message
         lane = latestRobot?.lane,
         isPrimaryEntity = false)
@@ -298,13 +344,13 @@ private fun getRobotFromMessageAndLatestInformationFromViconPose(
       posOnLane = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
       lateralOffset = posOnLaneAndLateralOffset.second, // From Message
       velocity = latestRobot?.velocity,
-      acceleration = latestRobot?.acceleration,
+      acceleration = 0.0, // latestRobot?.acceleration,
       position = message.transform.translation, // From Message
       rotation = message.transform.rotation, // From Message
       posOnLaneCAM = latestRobot?.posOnLaneCAM,
       lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-      velocityCAM = latestRobot?.velocityCAM,
-      accelerationCAM = latestRobot?.accelerationCAM,
+      // velocityCAM = latestRobot?.velocityCAM,
+      // accelerationCAM = latestRobot?.accelerationCAM,
       dataSource = DataSource.VICON_POSE,
       lane = posOnLaneAndLateralOffset.first.lane, // From Message
       isPrimaryEntity = false)
@@ -347,14 +393,11 @@ fun calculatePosOnLaneAndLateralOffset(
  */
 fun getRobotIdFromMessage(message: Message): Int {
   return when (message) {
-    is CAM -> {
-      message.robotName.replace("110", "").filter { it.isDigit() }.toInt()
-    }
-    is Odometry -> {
-      message.header.frameId.replace("110", "").filter { it.isDigit() }.toInt()
-    }
-    is ViconPose -> {
-      message.childFrameId.replace("110", "").filter { it.isDigit() }.toInt()
-    }
-  }
+        is CAM -> message.robotName
+        is Odometry -> message.header.frameId
+        is ViconPose -> message.childFrameId
+      }
+      .replace("110", "")
+      .filter { it.isDigit() }
+      .toInt()
 }

@@ -51,7 +51,7 @@ class RobotLateralOffsetStatisticsMetric :
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
         val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
-        val xValues = robotStates.map { it.tickData.currentTick.toDoubleValue() }
+        val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
         combinedValuesMap[legendEntry] = xValues to yValues
 
@@ -90,7 +90,7 @@ class RobotLateralOffsetStatisticsMetric :
         val legendEntry = "Robot $robotId"
         val fileName = "${subFolderName}_robot_$robotId"
         val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
-        val xValues = robotStates.map { it.tickData.currentTick.toDoubleValue() }
+        val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
         combinedValuesMap[legendEntry] = xValues to yValues
 

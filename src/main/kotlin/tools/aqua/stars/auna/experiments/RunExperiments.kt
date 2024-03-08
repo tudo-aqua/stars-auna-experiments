@@ -23,19 +23,24 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
 import kotlin.io.path.name
+import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAverageAccelerationStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotMaxAccelerationStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotMinAccelerationStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotAverageLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotMaxLateralOffsetStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotMinLateralOffsetStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotAverageVelocityStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotMaxVelocityStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotMinVelocityStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotVelocityStatisticsMetric
 import tools.aqua.stars.core.evaluation.TSCEvaluation
 import tools.aqua.stars.core.metric.metrics.evaluation.*
 import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
 import tools.aqua.stars.core.metric.metrics.postEvaluation.MissingPredicateCombinationsPerProjectionMetric
+import tools.aqua.stars.core.metric.providers.MetricProvider
+import tools.aqua.stars.core.types.*
 import tools.aqua.stars.data.av.track.*
 import tools.aqua.stars.importer.auna.Message
 import tools.aqua.stars.importer.auna.Time
@@ -48,44 +53,49 @@ fun main() {
   println("Finished downloading files")
 
   val tsc = tsc()
+
   println("Import Track Data")
   val track = importTrackData()
+
   println("Convert Track Data")
   val lanes = convertTrackToLanes(track)
+
   println("Load Segments")
   val segments = loadSegments(lanes)
 
   val tscEvaluation =
       TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
 
-  tscEvaluation.registerMetricProvider(SegmentCountMetric())
   val validTSCInstancesPerProjectionMetric =
       ValidTSCInstancesPerProjectionMetric<
           Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
-  tscEvaluation.registerMetricProvider(validTSCInstancesPerProjectionMetric)
-  tscEvaluation.registerMetricProvider(InvalidTSCInstancesPerProjectionMetric())
-  tscEvaluation.registerMetricProvider(MissedTSCInstancesPerProjectionMetric())
-  tscEvaluation.registerMetricProvider(
-      MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric))
-  tscEvaluation.registerMetricProvider(FailedMonitorsMetric(validTSCInstancesPerProjectionMetric))
 
-  // Velocity
-  //  tscEvaluation.registerMetricProvider(RobotVelocityStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotAverageVelocityStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotMinVelocityStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotMaxVelocityStatisticsMetric())
+  tscEvaluation.registerMetricProviders(
+      // Generic metrics
+      SegmentCountMetric(),
+      validTSCInstancesPerProjectionMetric,
+      InvalidTSCInstancesPerProjectionMetric(),
+      MissedTSCInstancesPerProjectionMetric(),
+      MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric),
+      FailedMonitorsMetric(validTSCInstancesPerProjectionMetric),
 
-  // Lateral Offset
-  //  tscEvaluation.registerMetricProvider(RobotLateralOffsetStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotAverageLateralOffsetStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotMinLateralOffsetStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotMaxLateralOffsetStatisticsMetric())
+      // Velocity
+      RobotVelocityStatisticsMetric(),
+      RobotAverageVelocityStatisticsMetric(),
+      RobotMinVelocityStatisticsMetric(),
+      RobotMaxVelocityStatisticsMetric(),
 
-  // Acceleration
-  //  tscEvaluation.registerMetricProvider(RobotAccelerationStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotAverageAccelerationStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotMinAccelerationStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotMaxAccelerationStatisticsMetric())
+      // Lateral Offset
+      RobotLateralOffsetStatisticsMetric(),
+      RobotAverageLateralOffsetStatisticsMetric(),
+      RobotMinLateralOffsetStatisticsMetric(),
+      RobotMaxLateralOffsetStatisticsMetric(),
+
+      // Acceleration
+      RobotAccelerationStatisticsMetric(),
+      RobotAverageAccelerationStatisticsMetric(),
+      RobotMinAccelerationStatisticsMetric(),
+      RobotMaxAccelerationStatisticsMetric())
 
   println("Run Evaluation")
   tscEvaluation.runEvaluation()
@@ -229,3 +239,12 @@ private fun extractZipFile(
     null
   }
 }
+
+private fun <
+    E : EntityType<E, T, S, U, D>,
+    T : TickDataType<E, T, S, U, D>,
+    S : SegmentType<E, T, S, U, D>,
+    U : TickUnit<U, D>,
+    D : TickDifference<D>> TSCEvaluation<E, T, S, U, D>.registerMetricProviders(
+    vararg metricProviders: MetricProvider<E, T, S, U, D>
+) = metricProviders.forEach { registerMetricProvider(it) }

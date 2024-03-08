@@ -112,12 +112,12 @@ private fun exportDynamicData(lanes: List<Lane>) {
                     val tickData = segment.tickData.sortedBy { it.currentTick }
                     Segment(
                         segmentSource = segment.segmentSource,
-                        startTick = tickData.first().currentTick.toDoubleValue(),
-                        endTick = tickData.last().currentTick.toDoubleValue(),
+                        startTick = tickData.first().currentTick.toSeconds(),
+                        endTick = tickData.last().currentTick.toSeconds(),
                         tickData =
                             tickData.map { tick ->
                               TickData(
-                                  tick = tick.currentTick.toDoubleValue(),
+                                  tick = tick.currentTick.toSeconds(),
                                   actors =
                                       tick.entities.map { entity ->
                                         ActorPosition(

@@ -40,8 +40,6 @@ import tools.aqua.stars.importer.auna.Vector
  * @param lateralOffsetCAM The latest CAM offset to the optimal line of the [lane]. A positive value
  *   means "right of the middle of the [lane] in driving direction". A negative value stands for
  *   "left of the middle of the [lane] in driving direction".
- * @param velocityCAM The latest CAM velocity of the Robot for the current [TickData]
- * @param accelerationCAM The latest acceleration of the Robot for the current [TickData]
  * @param dataSource The [DataSource] which triggered the update to the values of the Robot for the
  *   current [TickData]
  * @param lane The [Lane] on which the Robot is currently driving on
@@ -52,13 +50,13 @@ data class Robot(
     val posOnLane: Double? = 0.0,
     val lateralOffset: Double? = 0.0,
     val velocity: Double? = 0.0,
-    val acceleration: Double? = 0.0,
+    var acceleration: Double? = 0.0,
     val position: Vector? = Vector(0.0, 0.0, 0.0),
     val rotation: Quaternion? = Quaternion(0.0, 0.0, 0.0, 0.0),
     val posOnLaneCAM: Double? = 0.0,
     val lateralOffsetCAM: Double? = 0.0,
-    val velocityCAM: Double? = 0.0,
-    val accelerationCAM: Double? = 0.0,
+    // val velocityCAM: Double? = 0.0,
+    // val accelerationCAM: Double? = 0.0,
     val dataSource: DataSource = DataSource.NOT_SET,
     val lane: Lane?,
     var isPrimaryEntity: Boolean
@@ -75,8 +73,8 @@ data class Robot(
         rotation = this.rotation,
         posOnLaneCAM = this.posOnLaneCAM,
         lateralOffsetCAM = this.lateralOffsetCAM,
-        velocityCAM = this.velocityCAM,
-        accelerationCAM = this.accelerationCAM,
+        // velocityCAM = this.velocityCAM,
+        // accelerationCAM = this.accelerationCAM,
         dataSource = this.dataSource,
         lane = this.lane,
         isPrimaryEntity = this.isPrimaryEntity)

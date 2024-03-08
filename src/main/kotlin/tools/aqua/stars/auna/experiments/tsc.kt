@@ -38,7 +38,7 @@ fun tsc() =
               leaf("Curved Lane") { condition = { ctx -> isOnCurvedLane.holds(ctx) } }
             }
 
-            oneOrMore("Distance to front vehicle") {
+            any("Distance to front vehicle") {
               leaf("None") { condition = { ctx -> ctx.primaryEntityId == 1 } }
               leaf("Normal") {
                 condition = { ctx ->
@@ -63,7 +63,7 @@ fun tsc() =
               }
             }
 
-            oneOrMore("Acceleration") {
+            any("Acceleration") {
               leaf("Weak Deceleration") { condition = { ctx -> weakDeceleration.holds(ctx) } }
               leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
               leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }

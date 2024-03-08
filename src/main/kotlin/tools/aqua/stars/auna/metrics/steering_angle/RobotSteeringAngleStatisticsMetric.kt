@@ -39,9 +39,11 @@ class RobotSteeringAngleStatisticsMetric :
   }
 
   override fun plotData() {
-    segmentToRobotIdToRobotStateMap.forEach { segmentToRobotIdToRobotStateMap ->
-      val robotIdToRobotStates = segmentToRobotIdToRobotStateMap.second
-      val segment = segmentToRobotIdToRobotStateMap.first
+    segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
+      print("\rWriting Plots for Robot steering angle: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
+
+      val robotIdToRobotStates = segmentToRobotIdToRobotState.second
+      val segment = segmentToRobotIdToRobotState.first
 
       val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
       val folderName = "robot-steering-angle-statistics"
@@ -75,12 +77,15 @@ class RobotSteeringAngleStatisticsMetric :
           subFolder = subFolderName,
           fileName = "${subFolderName}_combined")
     }
+    println()
   }
 
   override fun writePlotData() {
-    segmentToRobotIdToRobotStateMap.forEach { segmentToRobotIdToRobotStateMap ->
-      val robotIdToRobotStates = segmentToRobotIdToRobotStateMap.second
-      val segment = segmentToRobotIdToRobotStateMap.first
+    segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
+      print("\rWriting CSV for Robot steering angle: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
+
+      val robotIdToRobotStates = segmentToRobotIdToRobotState.second
+      val segment = segmentToRobotIdToRobotState.first
 
       val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
       val folderName = "robot-steering-angle-statistics"
@@ -108,5 +113,6 @@ class RobotSteeringAngleStatisticsMetric :
           subFolder = subFolderName,
           fileName = "${subFolderName}_combined")
     }
+    println()
   }
 }

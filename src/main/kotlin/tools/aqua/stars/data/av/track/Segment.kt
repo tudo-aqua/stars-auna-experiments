@@ -22,13 +22,18 @@ import tools.aqua.stars.core.types.SegmentType
 /**
  * This class implements the [SegmentType] and holds the sliced analysis data in semantic segments.
  *
- * @param segmentSource Specifies the file from which the data of this [Segment] comes from
- * @param tickData The [List] of [TickData]s relevant for the [Segment]
+ * @param segmentId The id of this [Segment].
+ * @param segmentSource Specifies the file from which the data of this [Segment] comes from.
+ * @param tickData The [List] of [TickData]s relevant for the [Segment].
+ * @param previousSegment The [Segment] before this [Segment].
+ * @param nextSegment The [Segment] after this [Segment].
  */
 data class Segment(
     val segmentId: Int,
     override val segmentSource: String,
-    override val tickData: List<TickData> = listOf()
+    override val tickData: List<TickData> = listOf(),
+    val previousSegment: Segment?,
+    var nextSegment: Segment?
 ) : SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   /** Holds a [Map] which maps a timestamp to all relevant [TickData]s (based on [tickData]). */
   override val ticks: Map<AuNaTimeUnit, TickData> = tickData.associateBy { it.currentTick }
@@ -49,18 +54,21 @@ data class Segment(
     }
 
   override fun getSegmentIdentifier(): String =
-      "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] with primary entity id ${primaryEntityId})"
+      "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] " +
+          "with primary entity id ${primaryEntityId})"
 
   override fun toString(): String = getSegmentIdentifier()
 
-  fun getPrimaryEntityClones(): List<Segment> =
-      tickData.first().entities.mapIndexed { index, e ->
-        Segment(
-                segmentId + (index + 1) * 1_000_000,
-                segmentSource,
-                tickData.map {
-                  it.clone().also { it.entities.first { e.id == it.id }.isPrimaryEntity = true }
-                })
-            .also { it.tickData.forEach { t -> t.segment = it } }
-      }
+//  fun getPrimaryEntityClones(): List<Segment> =
+//      tickData.first().entities.mapIndexed { index, e ->
+//        Segment(
+//                segmentId + (index + 1) * 1_000_000,
+//                segmentSource,
+//                tickData.map {
+//                  it.clone().also { t -> t.entities.first { e.id == it.id }.isPrimaryEntity = true }
+//                },
+//                previousSegment,
+//                nextSegment)
+//            .also { it.tickData.forEach { t -> t.segment = it } }
+//      }
 }

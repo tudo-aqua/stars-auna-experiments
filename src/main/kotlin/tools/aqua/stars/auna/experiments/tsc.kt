@@ -70,5 +70,23 @@ fun tsc() =
               leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
               leaf("No Acceleration (Driving)") { condition = { ctx -> noAcceleration.holds(ctx) } }
             }
+
+            any("Steering Angle") {
+              leaf("No Steering") {
+                condition = { ctx ->
+                  ctx.entityIds.any { entityId -> noSteering.holds(ctx, entityId = entityId) }
+                }
+              }
+              leaf("Low Steering") {
+                condition = { ctx ->
+                  ctx.entityIds.any { entityId -> lowSteering.holds(ctx, entityId = entityId) }
+                }
+              }
+              leaf("Hard Steering") {
+                condition = { ctx ->
+                  ctx.entityIds.any { entityId -> hardSteering.holds(ctx, entityId = entityId) }
+                }
+              }
+            }
           }
         })

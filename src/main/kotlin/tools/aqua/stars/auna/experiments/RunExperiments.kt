@@ -30,6 +30,10 @@ import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationAverageStatis
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMinStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMinStatisticsMetric
@@ -96,8 +100,14 @@ fun main() {
       RobotAccelerationStatisticsMetric(),
       RobotAccelerationAverageStatisticsMetric(),
       RobotAccelerationMinStatisticsMetric(),
-      RobotAccelerationMaxStatisticsMetric())
+      RobotAccelerationMaxStatisticsMetric(),
 
+      // Distance to front
+      RobotDistanceToFrontStatisticsMetric(),
+      RobotDistanceToFrontAverageStatisticsMetric(),
+      RobotDistanceToFrontMinStatisticsMetric(),
+      RobotDistanceToFrontMaxStatisticsMetric(),
+  )
   println("Run Evaluation")
   tscEvaluation.runEvaluation()
 }

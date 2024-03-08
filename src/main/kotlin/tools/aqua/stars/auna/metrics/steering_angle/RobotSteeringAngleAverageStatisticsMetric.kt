@@ -31,31 +31,32 @@ class RobotSteeringAngleAverageStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var averagesteeringAngle: MutableMap<Int, Double> = mutableMapOf()
-  private var tickCount: Int = 0
+  private var averageSteeringAngle: MutableMap<Int, Double> = mutableMapOf()
+  private var tickCount: MutableMap<Int, Int> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val averageRobotsteeringAngle =
-        robotIdToRobotStateMap.map { it.key to it.value.map { it.steeringAngle ?: 0.0 }.average() }
-    averageRobotsteeringAngle.forEach {
-      averagesteeringAngle[it.first] = averagesteeringAngle.getOrDefault(it.first, 0.0) + it.second
+    val robotIdToSumOfSteeringAngle =
+        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.steeringAngle ?: 0.0 } }
+
+    robotIdToSumOfSteeringAngle.forEach {
       logFiner(
-          "The average steering angle of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The average steering angle of robot with ID '${it.first}' in Segment $segment is ${it.second / segment.tickData.size}")
+
+      averageSteeringAngle[it.first] = averageSteeringAngle.getOrDefault(it.first, 0.0) + it.second
+      tickCount[it.first] = tickCount.getOrDefault(it.first, 0) + segment.tickData.size
     }
-    tickCount++
   }
 
-  override fun getState(): Map<Int, Double> {
-    return averagesteeringAngle.map { it.key to it.value / tickCount }.toMap()
-  }
+  override fun getState(): Map<Int, Double> =
+      averageSteeringAngle.map { it.key to it.value / (tickCount[it.key] ?: 0) }.toMap()
 
   override fun printState() {
-    getState().forEach { (actorId, averagesteeringAngle) ->
-      logFine("The average steering angle of robot with ID '$actorId' is '$averagesteeringAngle'")
+    getState().forEach { (actorId, averageVelocity) ->
+      logFine("The average steering angle of robot with ID '$actorId' is '$averageVelocity'")
     }
   }
 }

@@ -31,30 +31,28 @@ class RobotLateralOffsetAverageStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var averageVelocity: MutableMap<Int, Double> = mutableMapOf()
-  private var tickCount: Int = 0
+  private var averageLateralOffset: MutableMap<Int, Double> = mutableMapOf()
+  private var tickCount: MutableMap<Int, Int> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val averageRobotLateralOffset =
-        robotIdToRobotStateMap.map {
-          it.key to (it.value.mapNotNull { it.lateralOffset }).average()
-        }
-    averageRobotLateralOffset.forEach {
-      averageVelocity[it.first] = averageVelocity.getOrDefault(it.first, 0.0) + it.second
+    val robotIdToSumOfLateralOffset =
+        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.lateralOffset ?: 0.0 } }
 
+    robotIdToSumOfLateralOffset.forEach {
       logFiner(
-          "The average lateral offset of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
+          "The average lateral offset of robot with ID '${it.first}' in Segment $segment is ${it.second / segment.tickData.size}")
+
+      averageLateralOffset[it.first] = averageLateralOffset.getOrDefault(it.first, 0.0) + it.second
+      tickCount[it.first] = tickCount.getOrDefault(it.first, 0) + segment.tickData.size
     }
-    tickCount++
   }
 
-  override fun getState(): Map<Int, Double> {
-    return averageVelocity.map { it.key to it.value / tickCount }.toMap()
-  }
+  override fun getState(): Map<Int, Double> =
+      averageLateralOffset.map { it.key to it.value / (tickCount[it.key] ?: 0) }.toMap()
 
   override fun printState() {
     getState().forEach { (actorId, averageVelocity) ->

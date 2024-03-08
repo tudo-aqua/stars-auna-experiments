@@ -57,7 +57,7 @@ val normalLateralOffset =
  * Exceeding the maximum distance to the previous vehicle is defined
  * as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG].
  */
-const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG: Double = 2.0
+const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG: Double = 3.0
 
 /**
  * Exceeding the minimum distance to the previous vehicle is defined as <
@@ -76,7 +76,7 @@ val minDistanceToPreviousVehicleExceeded =
           r2,
           phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
           phi2 = { rb1, rb2 ->
-            globally(
+            eventually(
                 rb1,
                 rb2,
                 phi = { rb1, rb2 ->
@@ -117,7 +117,7 @@ val maxDistanceToPreviousVehicleExceeded =
           r2,
           phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
           phi2 = { rb1, rb2 ->
-            globally(
+            eventually(
                 rb1,
                 rb2,
                 phi = { rbt1, rbt2 ->
@@ -166,7 +166,7 @@ const val ACCELERATION_DECELERATION_STRONG_THRESHOLD: Double = -0.5
 val strongAcceleration =
     predicate(Robot::class) { _, r ->
       eventually(
-          r, phi = { (it.acceleration ?: 0.0) >= ACCELERATION_ACCELERATION_STRONG_THRESHOLD })
+          r, phi = { (it.accelerationCAM ?: 0.0) >= ACCELERATION_ACCELERATION_STRONG_THRESHOLD })
     }
 
 /**
@@ -178,7 +178,7 @@ val weakAcceleration =
       eventually(
           r,
           phi = {
-            (it.acceleration ?: 0.0) in
+            (it.accelerationCAM ?: 0.0) in
                 ACCELERATION_ACCELERATION_WEAK_THRESHOLD ..<
                     ACCELERATION_ACCELERATION_STRONG_THRESHOLD
           })
@@ -193,7 +193,7 @@ val noAcceleration =
       globally(
           r,
           phi = {
-            (it.acceleration ?: 0.0) in
+            (it.accelerationCAM ?: 0.0) in
                 ACCELERATION_DECELERATION_WEAK_THRESHOLD ..<
                     ACCELERATION_ACCELERATION_WEAK_THRESHOLD
           })
@@ -208,7 +208,7 @@ val weakDeceleration =
       eventually(
           r,
           phi = {
-            (it.acceleration ?: 0.0) in
+            (it.accelerationCAM ?: 0.0) in
                 ACCELERATION_DECELERATION_STRONG_THRESHOLD ..<
                     ACCELERATION_DECELERATION_WEAK_THRESHOLD
           })
@@ -217,7 +217,8 @@ val weakDeceleration =
 /** Strong deceleration is defined as < [ACCELERATION_DECELERATION_STRONG_THRESHOLD]. */
 val strongDeceleration =
     predicate(Robot::class) { _, r ->
-      eventually(r, phi = { (it.acceleration ?: 0.0) < ACCELERATION_DECELERATION_STRONG_THRESHOLD })
+      eventually(
+          r, phi = { (it.accelerationCAM ?: 0.0) < ACCELERATION_DECELERATION_STRONG_THRESHOLD })
     }
 // endregion
 
@@ -230,5 +231,37 @@ val isOnStraightLane =
 
 /** Robot is mainly driving on a curved lane. */
 val isOnCurvedLane = predicate(Robot::class) { ctx, r -> !isOnStraightLane.holds(ctx, r) }
+
+// endregion
+
+// region steering angle
+/*
+ * The steering angle of the robot in degrees.
+ */
+
+/** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
+const val STEERING_ANGLE_HARD: Double = 30.0
+
+/** Low steering angle is defined as >= [STEERING_ANGLE_LOW]. */
+const val STEERING_ANGLE_LOW: Double = 7.5
+
+/** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
+val hardSteering =
+    predicate(Robot::class) { _, r ->
+      eventually(r, phi = { (it.steeringAngle ?: 0.0) >= STEERING_ANGLE_HARD })
+    }
+
+/** Low steering is defined in the interval ([STEERING_ANGLE_LOW] ... [STEERING_ANGLE_HARD]). */
+val lowSteering =
+    predicate(Robot::class) { _, r ->
+      eventually(
+          r, phi = { (it.steeringAngle ?: 0.0) in STEERING_ANGLE_LOW ..< STEERING_ANGLE_HARD })
+    }
+
+/** No steering angle is defined as >= [STEERING_ANGLE_LOW]. */
+val noSteering =
+    predicate(Robot::class) { _, r ->
+      eventually(r, phi = { (it.steeringAngle ?: 0.0) < STEERING_ANGLE_LOW })
+    }
 
 // endregion

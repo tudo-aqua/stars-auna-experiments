@@ -15,13 +15,20 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.exporter
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
-}
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/**
+ * This class represents the dynamic data of an experiment. It holds [Segment]s that can be analysed
+ * in the STARS-Visualizer tool.
+ *
+ * @property segments A [List] of [Segment]s for this experiment.
+ * @property actorTypes A [List] of [ActorType]s that are used in this experiment.
+ */
+@Serializable
+data class DynamicData(
+    @SerialName("segments") val segments: List<Segment>,
+    @SerialName("actorTypes") val actorTypes: List<ActorType>
+)

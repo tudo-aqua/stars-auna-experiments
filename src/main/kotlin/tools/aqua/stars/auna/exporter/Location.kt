@@ -15,13 +15,21 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.exporter
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
-}
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/**
+ * Represents a three-dimensional vector.
+ *
+ * @property x The x coordinate.
+ * @property y The y coordinate.
+ * @property z The z coordinate.
+ */
+@Serializable
+data class Location(
+    @SerialName("x") val x: Double,
+    @SerialName("y") val y: Double,
+    @SerialName("z") val z: Double
+)

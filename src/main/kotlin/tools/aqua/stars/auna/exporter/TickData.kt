@@ -15,13 +15,19 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.exporter
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
-}
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/**
+ * This class represents one Tick of a [Segment] holding information about each actor.
+ *
+ * @property tick The current tick described by this [TickData].
+ * @property actors The [List] of [ActorPosition]s containing information about each actor.
+ */
+@Serializable
+data class TickData(
+    @SerialName("tick") val tick: Double,
+    @SerialName("actors") val actors: List<ActorPosition>
+)

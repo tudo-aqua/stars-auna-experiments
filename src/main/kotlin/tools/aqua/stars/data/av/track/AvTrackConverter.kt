@@ -20,7 +20,7 @@ package tools.aqua.stars.data.av.track
 import de.sciss.kdtree.KdPoint
 import de.sciss.kdtree.KdTree
 import de.sciss.kdtree.NNSolver
-import tools.aqua.stars.importer.auna.*
+import tools.aqua.stars.auna.importer.*
 
 /** The size of the window for the moving average acceleration in ms. */
 const val WINDOW_SIZE = 100
@@ -240,7 +240,46 @@ fun getRobotFromMessageAndLatestInformation(
               robotId = robotId,
               tickData = tickData,
               waypoints = waypoints)
+      is AckermannDriveStamped ->
+          getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
+              message = message, latestRobot = latestRobot, robotId = robotId, tickData = tickData)
     }
+
+/**
+ * Returns the [Robot] based on the given [Message]. It takes the previous [Robot] state (namely
+ * [latestRobot]) and the message type into consideration.
+ *
+ * @param message The [Message] from which the [Robot] state should be calculated from.
+ * @param latestRobot The previous [Robot] state. Might be null.
+ * @param robotId The id of the [Robot] which sent the [Message].
+ * @param tickData The [TickData] to which the returned [Robot] belongs to.
+ * @return The [Robot] object based on the given [Message].
+ */
+fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
+    message: AckermannDriveStamped,
+    latestRobot: Robot?,
+    robotId: Int,
+    tickData: TickData
+): Robot =
+    Robot(
+        id = robotId,
+        tickData = tickData,
+        posOnLane = latestRobot?.posOnLane,
+        lateralOffset = latestRobot?.lateralOffset,
+        velocity = latestRobot?.velocity,
+        acceleration = latestRobot?.acceleration,
+        position = latestRobot?.position,
+        rotation = latestRobot?.rotation,
+        posOnLaneCAM = latestRobot?.posOnLaneCAM,
+        lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
+        velocityCAM = latestRobot?.velocityCAM,
+        accelerationCAM = latestRobot?.accelerationCAM, // From Message? //TODO Check values
+        dataSource = DataSource.ACKERMANN_CMD, // From Message
+        lane = latestRobot?.lane,
+        steeringAngle =
+            (message.ackermannDrive.steeringAngle * 360) / (2 * Math.PI), // From Message
+        isPrimaryEntity = false,
+    )
 
 /**
  * Returns the [Robot] based on the given [CAM] [Message]. It takes the previous [Robot] state
@@ -269,15 +308,16 @@ private fun getRobotFromMessageAndLatestInformationFromCAM(
       posOnLane = latestRobot?.posOnLane,
       lateralOffset = latestRobot?.lateralOffset,
       velocity = latestRobot?.velocity,
-      acceleration = 0.0, // latestRobot?.acceleration,
+      acceleration = latestRobot?.acceleration,
       position = latestRobot?.position,
       rotation = latestRobot?.rotation,
       posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
       lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
-      // velocityCAM = message.v, // From Message
-      // accelerationCAM = 0.0message.vDot, // From Message
+      velocityCAM = message.v, // From Message
+      accelerationCAM = message.vDot, // From Message
       dataSource = DataSource.CAM, // From Message
       lane = posOnLaneAndLateralOffset.first.lane,
+      steeringAngle = latestRobot?.steeringAngle,
       isPrimaryEntity = false)
 }
 
@@ -311,10 +351,11 @@ private fun getRobotFromMessageAndLatestInformationFromOdometry(
         rotation = latestRobot?.rotation,
         posOnLaneCAM = latestRobot?.posOnLaneCAM,
         lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-        // velocityCAM = latestRobot?.velocityCAM,
-        // accelerationCAM = latestRobot?.accelerationCAM,
+        velocityCAM = latestRobot?.velocityCAM,
+        accelerationCAM = latestRobot?.accelerationCAM,
         dataSource = DataSource.ODOMETRY, // From Message
         lane = latestRobot?.lane,
+        steeringAngle = latestRobot?.steeringAngle,
         isPrimaryEntity = false)
 
 /**
@@ -349,10 +390,11 @@ private fun getRobotFromMessageAndLatestInformationFromViconPose(
       rotation = message.transform.rotation, // From Message
       posOnLaneCAM = latestRobot?.posOnLaneCAM,
       lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-      // velocityCAM = latestRobot?.velocityCAM,
-      // accelerationCAM = latestRobot?.accelerationCAM,
+      velocityCAM = latestRobot?.velocityCAM,
+      accelerationCAM = latestRobot?.accelerationCAM,
       dataSource = DataSource.VICON_POSE,
       lane = posOnLaneAndLateralOffset.first.lane, // From Message
+      steeringAngle = latestRobot?.steeringAngle,
       isPrimaryEntity = false)
 }
 
@@ -396,6 +438,7 @@ fun getRobotIdFromMessage(message: Message): Int {
         is CAM -> message.robotName
         is Odometry -> message.header.frameId
         is ViconPose -> message.childFrameId
+        is AckermannDriveStamped -> message.header.frameId
       }
       .replace("110", "")
       .filter { it.isDigit() }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The STARS AuNa Experiments Authors
+ * Copyright 2024 The STARS AuNa Experiments Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.importer
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
-}
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class AckermannDriveStamped(
+    @SerialName("msg") override val header: tools.aqua.stars.auna.importer.Header,
+    @SerialName("drive") val ackermannDrive: tools.aqua.stars.auna.importer.AckermannDrive
+) : tools.aqua.stars.auna.importer.Message

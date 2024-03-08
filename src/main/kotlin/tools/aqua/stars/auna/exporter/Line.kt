@@ -15,13 +15,20 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.exporter
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
-}
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/**
+ * This class represents a line (e.g. an outer or inner line of a lane) of the static data to be
+ * rendered in the STARS-visualizer tool.
+ *
+ * @property width The width of this [Line].
+ * @property coordinates The coordinates of the line as a point curve of [Location] in a [List].
+ */
+@Serializable
+data class Line(
+    @SerialName("width") val width: Float,
+    @SerialName("coordinates") val coordinates: List<Location>
+)

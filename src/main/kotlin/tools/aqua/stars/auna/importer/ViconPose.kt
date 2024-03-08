@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.importer
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
-}
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ViconPose(
+    @SerialName("msg") override val header: Header,
+    @SerialName("child_frame_id") val childFrameId: String,
+    @SerialName("transform") val transform: Transform
+) : Message

@@ -15,13 +15,21 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.exporter
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
-}
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/**
+ * This class represents a rotation in space as euler angles.
+ *
+ * @property roll The roll axis.
+ * @property pitch The pitch axis.
+ * @property yaw the yaw axis.
+ */
+@Serializable
+data class Rotation(
+    @SerialName("roll") val roll: Double,
+    @SerialName("pitch") val pitch: Double,
+    @SerialName("yaw") val yaw: Double
+)

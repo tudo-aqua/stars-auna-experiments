@@ -15,13 +15,18 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.data.av.track
+package tools.aqua.stars.auna.importer
 
-/** This enum holds all possible triggers for new value updates of the [Robot]s. */
-enum class DataSource {
-  VICON_POSE,
-  ODOMETRY,
-  CAM,
-  ACKERMANN_CMD,
-  NOT_SET
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import tools.aqua.stars.data.av.track.AuNaTimeUnit
+
+@Serializable
+data class Time(
+    @SerialName("seconds") val seconds: Double,
+    @SerialName("nanoseconds") val nanoseconds: Double
+) {
+  fun toAuNaTimeUnit(): AuNaTimeUnit {
+    return AuNaTimeUnit(seconds, nanoseconds)
+  }
 }

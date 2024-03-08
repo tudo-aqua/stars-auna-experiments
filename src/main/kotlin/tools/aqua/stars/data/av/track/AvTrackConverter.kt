@@ -20,10 +20,10 @@ package tools.aqua.stars.data.av.track
 import de.sciss.kdtree.KdPoint
 import de.sciss.kdtree.KdTree
 import de.sciss.kdtree.NNSolver
+import kotlin.math.ceil
+import tools.aqua.stars.auna.experiments.ACCELERATION_WINDOW_SIZE
+import tools.aqua.stars.auna.experiments.SEGMENTS_PER_LANE
 import tools.aqua.stars.auna.importer.*
-
-/** The size of the window for the moving average acceleration in ms. */
-const val WINDOW_SIZE = 100
 
 /**
  * Converts the given serialized [Track] into a [List] of [Lane]s.
@@ -63,6 +63,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   // tracked.
   val cleanedTicks =
       ticks.filter { it.entities.count() == 3 && it.entities.all { t -> t.lane != null } }
+
   check(cleanedTicks.any()) { "There is no TickData provided!" }
   check(cleanedTicks[0].entities.size == 3) {
     "The first Tick does not contain exactly 3 entities!"
@@ -72,6 +73,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
           cleanedTicks[0].entities[1].lane == cleanedTicks[0].entities[2].lane) {
         "The entities do not start on the same lane!"
       }
+
   // Calculate the leading robot by getting the maximum posOnLane property (meaning, the robot is
   // furthest ahead)
   val leadingRobot = cleanedTicks[0].entities.maxBy { it.posOnLane ?: -1.0 }
@@ -81,17 +83,26 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   val segments = mutableListOf<Segment>()
   cleanedTicks.forEach { tickData ->
     val currentLeadingRobot = tickData.entities.first { it.id == leadingRobot.id }
+
     // The leading robot is still on the same lane.
+
     if (currentLeadingRobot.lane == currentLane) {
       currentSegmentTicks += tickData
     } else {
+
+      // The leading robot switched lanes. Create evenly spaced segments from list.
       if (currentSegmentTicks.size > 0) {
-        // The leading robot switched lanes. Add previous ticks as segment to list.
-        val newSegment =
-            Segment(segments.size, sourceFile, currentSegmentTicks.toList()).also { segment ->
-              segment.tickData.forEach { it.segment = segment }
-            }
-        segments += newSegment
+        // Split the ticks into multiple segments according to [SEGMENTS_PER_LANE]
+        val split =
+            currentSegmentTicks.chunked(
+                ceil(currentSegmentTicks.size / SEGMENTS_PER_LANE.toDouble()).toInt())
+
+        split.forEach {
+          segments +=
+              Segment(segments.size, sourceFile, it).also { segment ->
+                segment.tickData.forEach { t -> t.segment = segment }
+              }
+        }
       }
       // Reset tracking variables
       currentLane = currentLeadingRobot.lane
@@ -162,7 +173,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
 
   // Calculate Acceleration
   val tickArray = ticks.toTypedArray()
-  val windowStep = WINDOW_SIZE / 2
+  val windowStep = ACCELERATION_WINDOW_SIZE / 2
   val start = tickArray[0].currentTick.toMillis()
   val end = tickArray.last().currentTick.toMillis()
 
@@ -193,7 +204,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
               1000 *
                   ((endValue.entities.first { r -> r.id == it.id }.velocity ?: 0.0) -
                       (startValue.entities.first { r -> r.id == it.id }.velocity ?: 0.0)) /
-                  WINDOW_SIZE
+                  ACCELERATION_WINDOW_SIZE
         }
         print(
             "\rCalculated $index/${tickArray.size} average accelerations (${index * 100 / tickArray.size}%)")

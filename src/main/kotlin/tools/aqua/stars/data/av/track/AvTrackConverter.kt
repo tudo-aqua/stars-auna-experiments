@@ -21,6 +21,8 @@ import de.sciss.kdtree.KdPoint
 import de.sciss.kdtree.KdTree
 import de.sciss.kdtree.NNSolver
 import kotlin.math.ceil
+import kotlin.math.pow
+import kotlin.math.sqrt
 import tools.aqua.stars.auna.experiments.ACCELERATION_WINDOW_SIZE
 import tools.aqua.stars.auna.experiments.MIN_TICKS_PER_SEGMENT
 import tools.aqua.stars.auna.experiments.SEGMENTS_PER_LANE
@@ -432,35 +434,6 @@ private fun getRobotFromMessageAndLatestInformationFromViconPose(
 }
 
 /**
- * Calculates the nearest [Waypoint] to the given [robotPosition]. The distance to the found
- * [Waypoint] is also the lateral offset.
- *
- * @param robotPosition The position as a [Vector] for the Robot for which the nearest [Waypoint]
- *   should be calculated.
- * @param waypoints All available [Waypoint]s.
- * @return A [Pair] holding the nearest [Waypoint] and the distance to it as [Double].
- */
-fun calculatePosOnLaneAndLateralOffset(
-    robotPosition: Vector,
-    waypoints: List<Waypoint>
-): Pair<Waypoint, Double> {
-  check(waypoints.count() > 1) { "There have to be at least two waypoints provided." }
-  val dimensions = 2
-
-  val searchPoints = waypoints.map { KdPoint(listOf(it.x, it.y)) }
-  val tree = KdTree(dimensions, searchPoints)
-
-  val solver = NNSolver(tree)
-
-  val nearestPoint = solver.getClosestPoint(KdPoint(listOf(robotPosition.x, robotPosition.y)))
-  val nearestWaypoint =
-      waypoints.first { it.x == nearestPoint.values[0] && it.y == nearestPoint.values[1] }
-
-  return nearestWaypoint to
-      nearestPoint.getDistanceSquared(KdPoint(listOf(robotPosition.x, robotPosition.y)))
-}
-
-/**
  * Returns the id of the [Robot] for the given [Message] as [Int].
  *
  * @param message The [Message] for which the [Robot] id should be returned.
@@ -477,3 +450,154 @@ fun getRobotIdFromMessage(message: Message): Int {
       .filter { it.isDigit() }
       .toInt()
 }
+
+/**
+ * Calculates the nearest [Waypoint] to the given [robotPosition]. The lateral offset is calculated
+ * as the distance between the robot position and the closest point on the line interval between the
+ * nearest [Waypoint] and the second nearest [Waypoint].
+ *
+ * @param robotPosition The position as a [Vector] for the Robot for which the nearest [Waypoint]
+ *   should be calculated.
+ * @param waypoints All available [Waypoint]s.
+ * @return A [Pair] holding the nearest [Waypoint] and the distance to it as [Double].
+ */
+fun calculatePosOnLaneAndLateralOffset(
+    robotPosition: Vector,
+    waypoints: List<Waypoint>
+): Pair<Waypoint, Double> {
+  check(waypoints.count() > 1) { "There have to be at least two waypoints provided." }
+
+  val nearestWaypoint = getNearestWaypoint(robotPosition, waypoints)
+
+  val secondNearestWaypoint = getSecondNearestWaypoint(nearestWaypoint, robotPosition, waypoints)
+
+  val nearestPointOnLineInterval =
+      getNearestPointOnLineInterval(
+          boundA = nearestWaypoint.x to nearestWaypoint.y,
+          boundB = secondNearestWaypoint.x to secondNearestWaypoint.y,
+          point = robotPosition.x to robotPosition.y)
+
+  // Actual lateral offset is the distance between the robot position and the closest point on the
+  // line interval
+  val distance =
+      getVectorDistance(
+          nearestPointOnLineInterval.first to nearestPointOnLineInterval.second,
+          robotPosition.x to robotPosition.y)
+
+  return nearestWaypoint to distance
+}
+
+/**
+ * Returns the nearest [Waypoint] to the given [referencePoint] from the provided [waypoints].
+ *
+ * @param referencePoint The [Vector] for which the nearest [Waypoint] should be calculated.
+ * @param waypoints The [List] of [Waypoint]s from which the nearest [Waypoint] should be
+ *   calculated.
+ * @return The nearest [Waypoint] to the given [referencePoint].
+ */
+fun getNearestWaypoint(referencePoint: Vector, waypoints: List<Waypoint>): Waypoint {
+
+  check(waypoints.isNotEmpty()) { "There have to be at least one waypoint provided." }
+
+  val dimensions = 2
+
+  val searchPoints = waypoints.map { KdPoint(listOf(it.x, it.y)) }
+  val tree = KdTree(dimensions, searchPoints)
+
+  val solver = NNSolver(tree)
+
+  val nearestPoint = solver.getClosestPoint(KdPoint(listOf(referencePoint.x, referencePoint.y)))
+  val nearestWaypoint =
+      waypoints.first { it.x == nearestPoint.values[0] && it.y == nearestPoint.values[1] }
+
+  return nearestWaypoint
+}
+
+/**
+ * Returns the second nearest [Waypoint] to the given [referencePoint] from the provided
+ * [waypoints]. If the nearest [Waypoint] is the first or last [Waypoint] in the list, the second
+ * nearest [Waypoint] is the first or last [Waypoint] respectively.
+ *
+ * @param nearestWaypoint The nearest [Waypoint] to the given [referencePoint]. If not available,
+ *   the nearest [Waypoint] can be calculated using [getNearestWaypoint].
+ * @param referencePoint The [Vector] for which the second nearest [Waypoint] should be calculated.
+ * @param waypoints The [List] of [Waypoint]s from which the second nearest [Waypoint] should be
+ *   calculated.
+ * @return The second nearest [Waypoint] to the given [referencePoint].
+ */
+fun getSecondNearestWaypoint(
+    nearestWaypoint: Waypoint,
+    referencePoint: Vector,
+    waypoints: List<Waypoint>
+): Waypoint {
+  check(waypoints.count() > 1) { "There have to be at least two waypoints provided." }
+  check(waypoints.contains(nearestWaypoint)) {
+    "The nearest waypoint has to be part of the waypoints list."
+  }
+
+  val nearestWaypointIndex = waypoints.indexOf(nearestWaypoint)
+
+  // Get second next waypoint (index + 1 or index - 1)
+  val previousWaypoint =
+      waypoints[
+          (nearestWaypointIndex - 1 + waypoints.count()) %
+              waypoints.count()] // Adding waypoints.count() to achieve wrap around
+  val nextWaypoint = waypoints[(nearestWaypointIndex + 1 + waypoints.count()) % waypoints.count()]
+
+  // Get distance to determine if previous or next waypoint is closer
+  val previousWaypointDistance =
+      getVectorDistance(
+          (referencePoint.x to referencePoint.y), (previousWaypoint.x to previousWaypoint.y))
+  val nextWaypointDistance =
+      getVectorDistance((referencePoint.x to referencePoint.y), (nextWaypoint.x to nextWaypoint.y))
+
+  return if (previousWaypointDistance <= nextWaypointDistance) previousWaypoint else nextWaypoint
+}
+
+/**
+ * Returns the closest point on the line interval between [boundA] and [boundB] to the given
+ * [point]. If the point is not on the line interval, the closest bound is returned.
+ *
+ * @param boundA The first bound of the line interval.
+ * @param boundB The second bound of the line interval.
+ * @param point The point for which the closest point on the line interval should be calculated.
+ * @return The closest point on the line interval to the given [point].
+ */
+fun getNearestPointOnLineInterval(
+    boundA: Pair<Double, Double>,
+    boundB: Pair<Double, Double>,
+    point: Pair<Double, Double>
+): Pair<Double, Double> {
+  val lineAToB = (boundB.first - boundA.first) to (boundB.second - boundA.second)
+
+  val lineAToP = (point.first - boundA.first) to (point.second - boundA.second)
+
+  // calculate scalar from AB to AP
+  val scalarProduct = (lineAToB.first * lineAToP.first) + (lineAToB.second * lineAToP.second)
+
+  // calculate squared length of vector AB
+  val abLengthSquared = (lineAToB.first * lineAToB.first) + (lineAToB.second * lineAToB.second)
+
+  val lineProjection = scalarProduct / abLengthSquared
+
+  return when {
+    lineProjection < 0 ->
+        boundA.first to boundA.second // nearest point of line is not on line -> take bound A
+    lineProjection > 1 ->
+        boundB.first to boundB.second // nearest point of line is not on line -> take bound B
+    else ->
+        boundA.first + lineProjection * lineAToB.first to
+            boundA.second +
+                lineProjection * lineAToB.second // nearest point is on line -> return it
+  }
+}
+
+/**
+ * Returns the Euclidean distance between the given [Vector]s.
+ *
+ * @param pointA The first Point as a [Pair] of [Double] values.
+ * @param pointB The second Point as a [Pair] of [Double] values.
+ * @return The Euclidean distance between [pointA] and [pointB].
+ */
+fun getVectorDistance(pointA: Pair<Double, Double>, pointB: Pair<Double, Double>) =
+    sqrt((pointB.first - pointA.first).pow(2) + (pointB.second - pointA.second).pow(2))

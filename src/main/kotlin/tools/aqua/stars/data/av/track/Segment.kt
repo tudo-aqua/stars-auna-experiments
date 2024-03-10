@@ -59,16 +59,17 @@ data class Segment(
 
   override fun toString(): String = getSegmentIdentifier()
 
-//  fun getPrimaryEntityClones(): List<Segment> =
-//      tickData.first().entities.mapIndexed { index, e ->
-//        Segment(
-//                segmentId + (index + 1) * 1_000_000,
-//                segmentSource,
-//                tickData.map {
-//                  it.clone().also { t -> t.entities.first { e.id == it.id }.isPrimaryEntity = true }
-//                },
-//                previousSegment,
-//                nextSegment)
-//            .also { it.tickData.forEach { t -> t.segment = it } }
-//      }
+  //  fun getPrimaryEntityClones(): List<Segment> =
+  //      tickData.first().entities.mapIndexed { index, e ->
+  //        Segment(
+  //                segmentId + (index + 1) * 1_000_000,
+  //                segmentSource,
+  //                tickData.map {
+  //                  it.clone().also { t -> t.entities.first { e.id == it.id }.isPrimaryEntity =
+  // true }
+  //                },
+  //                previousSegment,
+  //                nextSegment)
+  //            .also { it.tickData.forEach { t -> t.segment = it } }
+  //      }
 }

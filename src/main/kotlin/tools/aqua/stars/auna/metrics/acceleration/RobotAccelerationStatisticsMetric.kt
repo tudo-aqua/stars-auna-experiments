@@ -40,7 +40,8 @@ class RobotAccelerationStatisticsMetric :
 
   override fun plotData() {
     segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
-      print("\rWriting Plots for Robot acceleration: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
+      print(
+          "\rWriting Plots for Robot acceleration: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
 
       val robotIdToRobotStates = segmentToRobotIdToRobotState.second
       val segment = segmentToRobotIdToRobotState.first
@@ -82,7 +83,8 @@ class RobotAccelerationStatisticsMetric :
 
   override fun writePlotData() {
     segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
-      print("\rWriting CSV for Robot acceleration: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
+      print(
+          "\rWriting CSV for Robot acceleration: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
 
       val robotIdToRobotStates = segmentToRobotIdToRobotState.second
       val segment = segmentToRobotIdToRobotState.first

@@ -47,7 +47,7 @@ class AuNaTimeUnit(val seconds: Double, val nanoseconds: Double) :
   }
 
   override fun toString(): String {
-    return "${toSeconds()}s"//"(${seconds}s, ${nanoseconds}ns)"
+    return "${toSeconds()}s" // "(${seconds}s, ${nanoseconds}ns)"
   }
 
   fun clone(): AuNaTimeUnit = AuNaTimeUnit(this.seconds, this.nanoseconds)

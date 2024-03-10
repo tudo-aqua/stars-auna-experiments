@@ -18,9 +18,12 @@
 package tools.aqua.stars.auna.exporter
 
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.*
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToStream
 import tools.aqua.stars.auna.experiments.downloadAndUnzipExperimentsData
 import tools.aqua.stars.auna.experiments.downloadWaypointsData
 import tools.aqua.stars.auna.experiments.loadSegments
@@ -99,6 +102,7 @@ private fun exportStaticData(lanes: List<Lane>) {
  *
  * @param lanes experiment data as [List] of [Lane]s.
  */
+@OptIn(ExperimentalSerializationApi::class)
 private fun exportDynamicData(lanes: List<Lane>) {
   println("Dynamic Data: Load Segments")
   val segments = loadSegments(lanes)
@@ -134,9 +138,10 @@ private fun exportDynamicData(lanes: List<Lane>) {
   val segmentSources = segments.map { it.segmentSource }.toSet().joinToString("-")
 
   println("Dynamic Data: Export Segments")
-  val dynamicDataJson = Json.encodeToString(dynamicData)
   val filePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_${segmentSources}_dynamic.json"
-  File(filePath).writeText(dynamicDataJson)
+  FileOutputStream(filePath).use { fos ->
+    Json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
+  }
   println("Dynamic Data: Export to file $filePath finished successfully!")
 }
 

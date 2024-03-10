@@ -23,6 +23,7 @@ package tools.aqua.stars.data.av.track
  * @param x The x value for this coordinate
  * @param y The y value for this coordinate
  * @param distanceToStart The distance to the start of the [Lane]
+ * @param lane The [Lane] this waypoint belongs to
  */
 data class Waypoint(
     val x: Double,

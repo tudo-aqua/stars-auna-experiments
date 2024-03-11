@@ -107,42 +107,48 @@ private fun exportDynamicData(lanes: List<Lane>) {
   println("Dynamic Data: Load Segments")
   val segments = loadSegments(lanes)
   println("Dynamic Data: Parse Segments")
-  val dynamicData =
-      DynamicData(
-          segments =
-              segments
-                  .map { segment ->
-                    val tickData = segment.tickData.sortedBy { it.currentTick }
-                    Segment(
-                        segmentSource = segment.segmentSource,
-                        startTick = tickData.first().currentTick.toSeconds(),
-                        endTick = tickData.last().currentTick.toSeconds(),
-                        tickData =
-                            tickData.map { tick ->
-                              TickData(
-                                  tick = tick.currentTick.toSeconds(),
-                                  actors =
-                                      tick.entities.map { entity ->
-                                        ActorPosition(
-                                            actorId = entity.id,
-                                            actorTypeId = DEFAULT_ACTOR_TYPE_ID,
-                                            location = vectorToLocation(entity.position),
-                                            rotation = quaternionToEuler(entity.rotation))
-                                      })
-                            })
-                  }
-                  .toList(),
-          ACTOR_TYPES)
+
+  val primaryEntityIds = segments.groupBy { it.primaryEntityId }.map { it.key }.sorted()
 
   // Used as identifier for json file
   val segmentSources = segments.map { it.segmentSource }.toSet().joinToString("-")
 
-  println("Dynamic Data: Export Segments")
-  val filePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_${segmentSources}_dynamic.json"
-  FileOutputStream(filePath).use { fos ->
-    Json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
+  for (primaryEntityId in primaryEntityIds) {
+    val dynamicData =
+        DynamicData(
+            segments =
+                segments
+                    .filter { it.primaryEntityId == primaryEntityId }
+                    .map { segment ->
+                      val tickData = segment.tickData.sortedBy { it.currentTick }
+                      Segment(
+                          segmentSource = segment.segmentSource,
+                          startTick = tickData.first().currentTick.toSeconds(),
+                          endTick = tickData.last().currentTick.toSeconds(),
+                          tickData =
+                              tickData.map { tick ->
+                                TickData(
+                                    tick = tick.currentTick.toSeconds(),
+                                    actors =
+                                        tick.entities.map { entity ->
+                                          ActorPosition(
+                                              actorId = entity.id,
+                                              actorTypeId = DEFAULT_ACTOR_TYPE_ID,
+                                              location = vectorToLocation(entity.position),
+                                              rotation = quaternionToEuler(entity.rotation))
+                                        })
+                              })
+                    }
+                    .toList(),
+            ACTOR_TYPES)
+    val filePath =
+        "$OUTPUT_DIR${OUTPUT_FILE_NAME}_${segmentSources}_ego${primaryEntityId}_dynamic.json"
+    print("\rDynamic Data: Export Segments (Ego ${primaryEntityId}) at $filePath")
+    FileOutputStream(filePath).use { fos ->
+      Json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
+    }
   }
-  println("Dynamic Data: Export to file $filePath finished successfully!")
+  println("Dynamic Data: Exporting dynamic data finished successfully!")
 }
 
 /**

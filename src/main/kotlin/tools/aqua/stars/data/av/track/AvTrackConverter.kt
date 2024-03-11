@@ -439,17 +439,16 @@ private fun getRobotFromMessageAndLatestInformationFromViconPose(
  * @param message The [Message] for which the [Robot] id should be returned.
  * @return The id of the [Robot] which sent the given [message].
  */
-fun getRobotIdFromMessage(message: Message): Int {
-  return when (message) {
-        is CAM -> message.robotName
-        is Odometry -> message.header.frameId
-        is ViconPose -> message.childFrameId
-        is AckermannDriveStamped -> message.header.frameId
-      }
-      .replace("110", "")
-      .filter { it.isDigit() }
-      .toInt()
-}
+fun getRobotIdFromMessage(message: Message): Int =
+    when (message) {
+          is CAM -> message.robotName
+          is Odometry -> message.header.frameId
+          is ViconPose -> message.childFrameId
+          is AckermannDriveStamped -> message.header.frameId
+        }
+        .replace("110", "")
+        .filter { it.isDigit() }
+        .toInt()
 
 /**
  * Calculates the nearest [Waypoint] to the given [robotPosition]. The lateral offset is calculated

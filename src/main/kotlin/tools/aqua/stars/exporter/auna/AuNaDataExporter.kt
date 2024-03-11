@@ -114,6 +114,7 @@ private fun exportDynamicData(lanes: List<Lane>) {
                         segmentSource = segment.segmentSource,
                         startTick = tickData.first().currentTick,
                         endTick = tickData.last().currentTick,
+                        primaryActorId = segment.primaryEntityId,
                         tickData =
                             tickData.map { tick ->
                               TickData(

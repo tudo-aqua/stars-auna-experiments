@@ -33,5 +33,6 @@ data class Segment(
     @SerialName("segmentSource") val segmentSource: String,
     @SerialName("startTick") val startTick: Double,
     @SerialName("endTick") val endTick: Double,
+    @SerialName("primaryActorId") val primaryActorId: Int,
     @SerialName("tickData") val tickData: List<TickData>
 )

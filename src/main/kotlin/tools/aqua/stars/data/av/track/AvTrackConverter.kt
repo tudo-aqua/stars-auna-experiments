@@ -46,7 +46,7 @@ fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> =
                         length = lane.length,
                         width = lane.width,
                         waypoints = listOf(),
-                        isStraight = index % 2 == 0)
+                        isStraight = index % 2 != 0)
                     .also {
                       it.waypoints =
                           wp.map { wp ->
@@ -125,8 +125,6 @@ private fun splitTicksByLineChange(
       currentSegmentTicks += tickData
       continue
     }
-
-    println(newLane!!.laneID)
 
     // Reset tracking variables
     currentLane = newLane

@@ -226,11 +226,14 @@ val strongDeceleration =
 /** Robot is mainly driving on a straight lane. */
 val isOnStraightLane =
     predicate(Robot::class) { _, r ->
-      minPrevalence(r, 0.8, phi = { it.lane?.isStraight ?: false })
+      globally(r, phi = { it.lane!!.isStraight })
     }
 
 /** Robot is mainly driving on a curved lane. */
-val isOnCurvedLane = predicate(Robot::class) { ctx, r -> !isOnStraightLane.holds(ctx, r) }
+val isOnCurvedLane =
+    predicate(Robot::class) { _, r ->
+      globally(r, phi = { !it.lane!!.isStraight })
+    }
 
 // endregion
 

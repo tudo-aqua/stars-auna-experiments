@@ -17,24 +17,28 @@
 
 package tools.aqua.stars.exporter.auna
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 /**
  * This enum class represents color values which can be used in the STARS-Visualizer tool for
  * coloring objects.
  */
+@Serializable
 enum class Color {
-  BLACK,
-  DARK_GRAY,
-  SLATE_GRAY,
-  GRAY,
-  GREEN,
-  BLUE,
-  AQUA,
-  VIOLET,
-  CRIMSON,
-  FIREBRICK,
-  DARK_RED,
-  ORANGE,
-  AMBER,
-  YELLOW,
-  WHITE
+  @SerialName("black") BLACK,
+  @SerialName("dark_gray") DARK_GRAY,
+  @SerialName("slate_gray") SLATE_GRAY,
+  @SerialName("gray") GRAY,
+  @SerialName("green") GREEN,
+  @SerialName("blue") BLUE,
+  @SerialName("aqua") AQUA,
+  @SerialName("violet") VIOLET,
+  @SerialName("crimson") CRIMSON,
+  @SerialName("firebrick") FIREBRICK,
+  @SerialName("dark_red") DARK_RED,
+  @SerialName("orange") ORANGE,
+  @SerialName("amber") AMBER,
+  @SerialName("yellow") YELLOW,
+  @SerialName("white") WHITE
 }

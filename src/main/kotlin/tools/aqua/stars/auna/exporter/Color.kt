@@ -29,8 +29,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class Color {
   @SerialName("black") BLACK,
-  @SerialName("dark_gray") DARK_GRAY,
-  @SerialName("slate_gray") SLATE_GRAY,
+  @SerialName("darkGray") DARK_GRAY,
+  @SerialName("slateGray") SLATE_GRAY,
   @SerialName("gray") GRAY,
   @SerialName("green") GREEN,
   @SerialName("blue") BLUE,
@@ -38,7 +38,7 @@ enum class Color {
   @SerialName("violet") VIOLET,
   @SerialName("crimson") CRIMSON,
   @SerialName("firebrick") FIREBRICK,
-  @SerialName("dark_red") DARK_RED,
+  @SerialName("darkRed") DARK_RED,
   @SerialName("orange") ORANGE,
   @SerialName("amber") AMBER,
   @SerialName("yellow") YELLOW,

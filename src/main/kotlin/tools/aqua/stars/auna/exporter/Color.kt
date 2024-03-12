@@ -17,7 +17,7 @@
 
 @file:Suppress("unused")
 
-package tools.aqua.stars.exporter.auna
+package tools.aqua.stars.auna.exporter
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

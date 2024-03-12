@@ -26,6 +26,7 @@ import kotlinx.serialization.Serializable
  * @property segmentSource Specifies the source file of this [Segment].
  * @property startTick The start tick of this [Segment].
  * @property endTick The last tick of this [Segment].
+ * @property primaryActorId The primary actor id of this [Segment].
  * @property tickData A [List] of [TickData] objects contained in this [Segment].
  */
 @Serializable

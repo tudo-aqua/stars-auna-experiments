@@ -38,7 +38,7 @@ class RobotLateralOffsetStatisticsMetric :
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
 
-  override fun plotData() {
+  override fun writePlots() {
     segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
       print(
           "\rWriting Plots for Robot lateral offset: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
@@ -81,7 +81,7 @@ class RobotLateralOffsetStatisticsMetric :
     println()
   }
 
-  override fun writePlotData() {
+  override fun writePlotDataCSV() {
     segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
       print(
           "\rWriting CSV for Robot lateral offset: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")

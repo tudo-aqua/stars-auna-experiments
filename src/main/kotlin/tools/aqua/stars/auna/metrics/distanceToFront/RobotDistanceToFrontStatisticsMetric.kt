@@ -54,7 +54,7 @@ class RobotDistanceToFrontStatisticsMetric :
             distanceToFrontForPrimaryEntityInSegment
   }
 
-  override fun plotData() {
+  override fun writePlots() {
     robotIdToDistanceAtTickMap.forEach { segmentToRobotIdToRobotStateMap ->
       val robotId = segmentToRobotIdToRobotStateMap.key
       val distanceToTickList = segmentToRobotIdToRobotStateMap.value
@@ -90,7 +90,7 @@ class RobotDistanceToFrontStatisticsMetric :
     }
   }
 
-  override fun writePlotData() {
+  override fun writePlotDataCSV() {
     robotIdToDistanceAtTickMap.forEach { segmentToRobotIdToRobotStateMap ->
       val robotId = segmentToRobotIdToRobotStateMap.key
       val distanceToTickList = segmentToRobotIdToRobotStateMap.value

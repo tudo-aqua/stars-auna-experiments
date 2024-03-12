@@ -21,7 +21,6 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.*
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import tools.aqua.stars.auna.experiments.downloadAndUnzipExperimentsData
@@ -80,6 +79,7 @@ fun main() {
  *
  * @param lanes experiment data as [List] of [Lane]s.
  */
+@OptIn(ExperimentalSerializationApi::class)
 private fun exportStaticData(lanes: List<Lane>) {
   println("Static Data: Parse Lanes")
   val staticData =
@@ -94,9 +94,11 @@ private fun exportStaticData(lanes: List<Lane>) {
                         })
               })
   println("Static Data: Export Lines")
-  val staticDataJson = json.encodeToString(staticData)
   val staticDataFilePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_static.json"
-  File(staticDataFilePath).writeText(staticDataJson)
+  FileOutputStream(staticDataFilePath).use { fos ->
+    Json.encodeToStream(StaticData.serializer(), staticData, fos)
+  }
+
   println("Static Data: Export to file $staticDataFilePath finished successfully!")
 }
 

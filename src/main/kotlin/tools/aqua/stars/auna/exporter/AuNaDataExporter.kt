@@ -96,7 +96,7 @@ private fun exportStaticData(lanes: List<Lane>) {
   println("Static Data: Export Lines")
   val staticDataFilePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_static.json"
   FileOutputStream(staticDataFilePath).use { fos ->
-    Json.encodeToStream(StaticData.serializer(), staticData, fos)
+    json.encodeToStream(StaticData.serializer(), staticData, fos)
   }
 
   println("Static Data: Export to file $staticDataFilePath finished successfully!")
@@ -151,7 +151,7 @@ private fun exportDynamicData(lanes: List<Lane>) {
         "$OUTPUT_DIR${OUTPUT_FILE_NAME}_${segmentSources}_ego${primaryEntityId}_dynamic.json"
     print("\rDynamic Data: Export Segments (Ego ${primaryEntityId}) at $filePath")
     FileOutputStream(filePath).use { fos ->
-      Json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
+      json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
     }
   }
   println("Dynamic Data: Exporting dynamic data finished successfully!")

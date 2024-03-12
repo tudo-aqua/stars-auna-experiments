@@ -26,9 +26,11 @@ import kotlinx.serialization.Serializable
  *
  * @property width The width of this [Line].
  * @property coordinates The coordinates of the line as a point curve of [Location] in a [List].
+ * @property color The color of this [Line].
  */
 @Serializable
 data class Line(
     @SerialName("width") val width: Float,
-    @SerialName("coordinates") val coordinates: List<Location>
+    @SerialName("coordinates") val coordinates: List<Location>,
+    @SerialName("color") val color: Color = Color.GRAY
 )

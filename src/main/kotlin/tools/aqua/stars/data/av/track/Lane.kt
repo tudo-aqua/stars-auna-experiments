@@ -20,17 +20,19 @@ package tools.aqua.stars.data.av.track
 /**
  * This class represents the [Lane] on which the [Robot]s are driving on.
  *
+ * @param laneID The id of this [Lane]
  * @param length The length of the [Lane] in meters
  * @param width The width of the [Lane] in meters
  * @param waypoints The [List] of [Waypoint]s which represent the ideal line for this [Lane]
  */
 data class Lane(
+    val laneID: Int,
     val length: Double,
     val width: Double,
     var waypoints: List<Waypoint>,
     var isStraight: Boolean
 ) {
   override fun toString(): String {
-    return "Lane(length=$length, width=$width, waypoints=${waypoints.count()})"
+    return "Lane(id=$laneID, length=$length, width=$width, waypoints=${waypoints.count()})"
   }
 }

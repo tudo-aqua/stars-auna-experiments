@@ -63,7 +63,7 @@ fun main() {
   val track = importTrackData()
 
   println("Convert Track Data")
-  val lanes = convertTrackToLanes(track)
+  val lanes = convertTrackToLanes(track, segmentsPerLane = 3)
 
   println("Load Segments")
   val segments = loadSegments(lanes)
@@ -123,10 +123,13 @@ fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
   val sourcesToContentMap = tools.aqua.stars.auna.importer.importDrivingData(path)
   val messages = sortMessagesBySentTime(sourcesToContentMap)
   val waypoints = lanes.flatMap { it.waypoints }
+
   println("Calculate ticks")
   val ticks = getTicksFromMessages(messages, waypoints = waypoints)
+
   println("Slice Ticks into Segments")
   val segments = segmentTicksIntoSegments(path.name, ticks)
+
   println("Checksum Ticks: ${segments.sumOf{it.tickData.size}}")
   return segments.asSequence()
 }

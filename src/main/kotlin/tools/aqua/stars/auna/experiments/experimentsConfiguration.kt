@@ -15,24 +15,26 @@
  * limitations under the License.
  */
 
+@file:Suppress("MayBeConstant")
+
 package tools.aqua.stars.auna.experiments
 
 // The download size is approximately 60MB!
 // Manual download via: DRIVING_DATA_DOWNLOAD_URL and TRACK_DATA_DOWNLOAD_URL
-const val DOWNLOAD_EXPERIMENTS_DATA = true
+val DOWNLOAD_EXPERIMENTS_DATA = true
 
-const val DRIVING_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/iYG2SXDAmzLt5Lb/download"
-const val TRACK_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/OKFiTtZ4Bby0Y5p/download"
+val DRIVING_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/iYG2SXDAmzLt5Lb/download"
+val TRACK_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/OKFiTtZ4Bby0Y5p/download"
 
-const val DOWNLOAD_FOLDER_NAME = "stars-auna-json-files"
-const val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\json\\3_0_m_s"
-const val WAYPOINTS_FILE_NAME = "flw_waypoints.json"
+val DOWNLOAD_FOLDER_NAME = "stars-auna-json-files"
+val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\json\\3_0_m_s"
+val WAYPOINTS_FILE_NAME = "flw_waypoints.json"
 
 /** The size of the window for the moving average acceleration in ms. */
-const val ACCELERATION_WINDOW_SIZE = 100
+val ACCELERATION_WINDOW_SIZE = 100
 
 /** The number of segments per lane. */
-const val SEGMENTS_PER_LANE = 3
+val SEGMENTS_PER_LANE = 3
 
 /** The minimum ticks per segment. */
-const val MIN_TICKS_PER_SEGMENT = 10
+val MIN_TICKS_PER_SEGMENT = 10

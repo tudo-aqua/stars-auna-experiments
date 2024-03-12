@@ -58,7 +58,7 @@ fun main() {
   println("Import Track Data")
   val track = tools.aqua.stars.auna.importer.importTrackData()
   println("Convert Track Data")
-  val lanes = convertTrackToLanes(track)
+  val lanes = convertTrackToLanes(track, segmentsPerLane = 3)
 
   println("Create Export Directory")
   File(OUTPUT_DIR).mkdirs()

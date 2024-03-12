@@ -25,33 +25,38 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import tools.aqua.stars.auna.experiments.ACCELERATION_WINDOW_SIZE
 import tools.aqua.stars.auna.experiments.MIN_TICKS_PER_SEGMENT
-import tools.aqua.stars.auna.experiments.SEGMENTS_PER_LANE
 import tools.aqua.stars.auna.importer.*
 
 /**
- * Converts the given serialized [Track] into a [List] of [Lane]s.
+ * Converts the given serialized [Track] into a [List] of [Lane]s. Splits each track segment into
+ * [segmentsPerLane] segments.
  *
  * @param track The [Track] that should be converted.
+ * @param segmentsPerLane The number of segments per track segment.
  * @return The converted [List] of [Lane]s.
  */
-fun convertTrackToLanes(track: Track): List<Lane> {
-  val lanes = mutableListOf<Lane>()
-  track.lanes.forEachIndexed { index, lane ->
-    val newLane =
-        Lane(
-            length = lane.length,
-            width = lane.width,
-            waypoints = listOf(),
-            isStraight = index % 2 == 0)
-    val waypoints =
-        lane.waypoints.map { wp ->
-          Waypoint(x = wp.x, y = wp.y, lane = newLane, distanceToStart = wp.distanceToStart)
+fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> =
+    track.lanes
+        .mapIndexed { index, lane ->
+          lane.waypoints
+              .chunked(ceil(lane.waypoints.size / segmentsPerLane.toDouble()).toInt())
+              .mapIndexed { index2, wp ->
+                Lane(
+                        laneID = index * segmentsPerLane + index2,
+                        length = lane.length,
+                        width = lane.width,
+                        waypoints = listOf(),
+                        isStraight = index % 2 == 0)
+                    .also {
+                      it.waypoints =
+                          wp.map { wp ->
+                            Waypoint(
+                                x = wp.x, y = wp.y, lane = it, distanceToStart = wp.distanceToStart)
+                          }
+                    }
+              }
         }
-    newLane.waypoints = waypoints
-    lanes += newLane
-  }
-  return lanes
-}
+        .flatten()
 
 /**
  * Slices the [List] of [TickData] into [Segment]s based on the [Lane] of the leading [Robot].
@@ -64,6 +69,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
   // robots are tracked. For the analysis we only want the ticks in which all three robots are
   // tracked.
+
   val cleanedTicks =
       ticks.filter { it.entities.count() == 3 && it.entities.all { t -> t.lane != null } }
 
@@ -77,26 +83,33 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
         "The entities do not start on the same lane!"
       }
 
+  // Multiply segment for all robots as ego
   return cleanedTicks[0]
       .entities
       .map { egoRobot ->
-        segmentTicksIntoSegments(
-            sourceFile,
-            cleanedTicks.map { tickData ->
-              tickData.clone().also {
-                it.entities.first { t -> t.id == egoRobot.id }.isPrimaryEntity = true
+        // Copy TickData for every robot as ego and set the isPrimaryEntity flag
+        val copiedTicks =
+            cleanedTicks.map {
+              it.clone().also { t ->
+                t.entities.first { e -> e.id == egoRobot.id }.isPrimaryEntity = true
               }
-            },
-            egoRobot)
+            }
+
+        // Split ticks by lane change
+        val splittedTicks = splitTicksByLineChange(copiedTicks, egoRobot)
+
+        // Create segments from ticks
+        val segments = createSegmentsFromTicks(sourceFile, splittedTicks)
+
+        segments
       }
       .flatten()
 }
 
-private fun segmentTicksIntoSegments(
-    sourceFile: String,
+private fun splitTicksByLineChange(
     cleanedTicks: List<TickData>,
     egoRobot: Robot
-): List<Segment> {
+): List<List<TickData>> {
   var currentLane = egoRobot.lane
   val currentSegmentTicks = mutableListOf<TickData>()
   val segmentTicks = mutableListOf<List<TickData>>()
@@ -113,32 +126,37 @@ private fun segmentTicksIntoSegments(
       continue
     }
 
-    // The leading robot switched lanes. Create evenly spaced segments from list.
-    if (currentSegmentTicks.size > 0) {
-      // Split the ticks into multiple segments according to [SEGMENTS_PER_LANE].
-      currentSegmentTicks
-          .chunked(ceil(currentSegmentTicks.size / SEGMENTS_PER_LANE.toDouble()).toInt())
-          .forEach { currentSegmentTicks += it }
-    }
+    println(newLane!!.laneID)
 
     // Reset tracking variables
     currentLane = newLane
-    segmentTicks += currentSegmentTicks
+    segmentTicks += currentSegmentTicks.toList()
     currentSegmentTicks.clear()
   }
+  segmentTicks += currentSegmentTicks.toList()
 
+  return segmentTicks.filter { it.size >= MIN_TICKS_PER_SEGMENT }
+}
+
+private fun createSegmentsFromTicks(
+    sourceFile: String,
+    chunkedTicks: List<List<TickData>>
+): List<Segment> {
   val segments: MutableList<Segment> = mutableListOf()
-  var lastSegment: Segment? = null
-  for (segmentTickList in segmentTicks) {
+  var previousSegment: Segment? = null
+  for (segmentTickList in chunkedTicks) {
     if (segmentTickList.size < MIN_TICKS_PER_SEGMENT) continue
-
-    val segment =
-        Segment(segments.size, sourceFile, segmentTickList, lastSegment, null).also { segment ->
-          segment.tickData.forEach { it.segment = segment }
-        }
-
-    lastSegment = segment
-    segments += segment
+    segments +=
+        Segment(
+                segmentId = segments.size,
+                segmentSource = sourceFile,
+                ticks = segmentTickList.associateBy { it.currentTick },
+                previousSegment = previousSegment,
+                nextSegment = null)
+            .also { segment ->
+              segment.tickData.forEach { it.segment = segment }
+              previousSegment = segment
+            }
   }
 
   return segments

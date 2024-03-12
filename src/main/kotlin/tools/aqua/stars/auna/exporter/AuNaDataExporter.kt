@@ -28,6 +28,7 @@ import tools.aqua.stars.auna.experiments.downloadWaypointsData
 import tools.aqua.stars.auna.experiments.loadSegments
 import tools.aqua.stars.auna.importer.Quaternion
 import tools.aqua.stars.auna.importer.Vector
+import tools.aqua.stars.auna.importer.importTrackData
 import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.convertTrackToLanes
 
@@ -58,7 +59,7 @@ fun main() {
   print("Finished downloading files")
 
   println("Import Track Data")
-  val track = tools.aqua.stars.auna.importer.importTrackData()
+  val track = importTrackData()
   println("Convert Track Data")
   val lanes = convertTrackToLanes(track, segmentsPerLane = 3)
 
@@ -149,12 +150,13 @@ private fun exportDynamicData(lanes: List<Lane>) {
             ACTOR_TYPES)
     val filePath =
         "$OUTPUT_DIR${OUTPUT_FILE_NAME}_${segmentSources}_ego${primaryEntityId}_dynamic.json"
-    print("\rDynamic Data: Export Segments (Ego ${primaryEntityId}) at $filePath")
+    print(
+        "\rDynamic Data: Exporting ${dynamicData.segments.count()} Segments for ego vehicle $primaryEntityId at $filePath...")
     FileOutputStream(filePath).use { fos ->
       json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
     }
   }
-  println("Dynamic Data: Exporting dynamic data finished successfully!")
+  println("\rDynamic Data: Exported dynamic data of ${primaryEntityIds.count()} ego vehicles!")
 }
 
 /**

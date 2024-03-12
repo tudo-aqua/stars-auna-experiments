@@ -48,6 +48,9 @@ val ACTOR_TYPES =
             height = 0.1f // TODO: get actual height
             ))
 
+/** The [Json] instance used for serialization with domain specific configuration */
+val json = Json { encodeDefaults = true }
+
 /** Exports calculated [Segment]s to the import format used by the STARS-Visualizer tool. */
 fun main() {
   println("Export Experiments Data")
@@ -91,7 +94,7 @@ private fun exportStaticData(lanes: List<Lane>) {
                         })
               })
   println("Static Data: Export Lines")
-  val staticDataJson = Json.encodeToString(staticData)
+  val staticDataJson = json.encodeToString(staticData)
   val staticDataFilePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_static.json"
   File(staticDataFilePath).writeText(staticDataJson)
   println("Static Data: Export to file $staticDataFilePath finished successfully!")

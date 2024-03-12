@@ -24,7 +24,6 @@ import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.logic.kcmftbl.eventually
 import tools.aqua.stars.logic.kcmftbl.globally
-import tools.aqua.stars.logic.kcmftbl.minPrevalence
 import tools.aqua.stars.logic.kcmftbl.until
 
 // region lateral offset
@@ -33,7 +32,7 @@ import tools.aqua.stars.logic.kcmftbl.until
  */
 
 /** Exceeding the maximum lateral offset defined as > [MAX_LATERAL_OFFSET]. */
-const val MAX_LATERAL_OFFSET: Double = 0.4
+const val MAX_LATERAL_OFFSET: Double = 0.5
 
 /** Normal lateral offset defined as <= [MAX_LATERAL_OFFSET]. */
 val normalLateralOffset =
@@ -225,15 +224,11 @@ val strongDeceleration =
 // region lane type
 /** Robot is mainly driving on a straight lane. */
 val isOnStraightLane =
-    predicate(Robot::class) { _, r ->
-      globally(r, phi = { it.lane!!.isStraight })
-    }
+    predicate(Robot::class) { _, r -> globally(r, phi = { it.lane!!.isStraight }) }
 
 /** Robot is mainly driving on a curved lane. */
 val isOnCurvedLane =
-    predicate(Robot::class) { _, r ->
-      globally(r, phi = { !it.lane!!.isStraight })
-    }
+    predicate(Robot::class) { _, r -> globally(r, phi = { !it.lane!!.isStraight }) }
 
 // endregion
 

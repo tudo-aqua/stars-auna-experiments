@@ -109,7 +109,7 @@ fun main() {
       RobotDistanceToFrontMaxStatisticsMetric(),
   )
   println("Run Evaluation")
-  tscEvaluation.runEvaluation()
+  tscEvaluation.runEvaluation(false)
 }
 
 /**

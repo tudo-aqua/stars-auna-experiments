@@ -56,6 +56,8 @@ class RobotDistanceToFrontStatisticsMetric :
   }
 
   override fun writePlots() {
+    val folderName = "robot-distance-to-front-statistics"
+    val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
     val finished = AtomicInteger(0)
 
     runBlocking(Dispatchers.Default) {
@@ -66,14 +68,20 @@ class RobotDistanceToFrontStatisticsMetric :
               val distanceToTickList = it.value
 
               val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-              val folderName = "robot-distance-to-front-statistics"
               val subFolderName = distanceToTickList.first().first.segment.getSegmentIdentifier()
 
               val legendEntry = "Robot $robotId"
               val fileName = "${subFolderName}_robot_$robotId"
               val xValues = distanceToTickList.map { it.first.currentTick.toSeconds() }
               val yValues = distanceToTickList.map { it.second }
+
               combinedValuesMap[legendEntry] = xValues to yValues
+
+              synchronized(allValuesMap) {
+                allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
+                allValuesMap[legendEntry]!!.first += xValues
+                allValuesMap[legendEntry]!!.second += yValues
+              }
 
               plotDataAsLineChart(
                   plot =
@@ -105,6 +113,22 @@ class RobotDistanceToFrontStatisticsMetric :
           }
           .forEach { it.join() }
     }
+
+    allValuesMap.forEach { (legendEntry, values) ->
+      plotDataAsLineChart(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.first,
+                  yValues = values.second,
+                  xAxisName = "tick",
+                  yAxisName = "distance to front",
+                  legendHeader = "Distance for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "distance_to_front_all_${legendEntry}")
+    }
+
     println(
         "\rWriting Plots for Robot distance to front: " +
             "${robotIdToDistanceAtTickMap.size}/${robotIdToDistanceAtTickMap.size} (100%)")

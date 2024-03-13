@@ -41,6 +41,8 @@ class RobotVelocityStatisticsMetric :
   }
 
   override fun writePlots() {
+    val folderName = "velocity-statistics"
+    val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
     val finished = AtomicInteger(0)
 
     runBlocking(Dispatchers.Default) {
@@ -51,7 +53,6 @@ class RobotVelocityStatisticsMetric :
               val robotIdToRobotStates = it.second
 
               val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-              val folderName = "robot-velocity-statistics"
               val subFolderName = segment.getSegmentIdentifier()
 
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
@@ -61,6 +62,12 @@ class RobotVelocityStatisticsMetric :
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
+
+                synchronized(allValuesMap) {
+                  allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
+                  allValuesMap[legendEntry]!!.first += xValues
+                  allValuesMap[legendEntry]!!.second += yValues
+                }
 
                 plotDataAsLineChart(
                     plot =
@@ -77,7 +84,12 @@ class RobotVelocityStatisticsMetric :
               }
 
               plotDataAsLineChart(
-                  plot = getPlot(combinedValuesMap, "time", "velocity", "Velocity for"),
+                  plot =
+                      getPlot(
+                          combinedValuesMap.toSortedMap(),
+                          "tick",
+                          "velocity (m/s)",
+                          "Velocity for"),
                   folder = folderName,
                   subFolder = subFolderName,
                   fileName = "${subFolderName}_combined")
@@ -93,6 +105,28 @@ class RobotVelocityStatisticsMetric :
           }
           .forEach { it.join() }
     }
+
+    allValuesMap.forEach { (legendEntry, values) ->
+      plotDataAsLineChart(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.first,
+                  yValues = values.second,
+                  xAxisName = "tick",
+                  yAxisName = "velocity (m/s)",
+                  legendHeader = "Velocity for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "velocity_all_${legendEntry}")
+    }
+
+    plotDataAsLineChart(
+        plot = getPlot(allValuesMap.toSortedMap(), "tick", "velocity (m/s)", "Velocity for"),
+        folder = folderName,
+        subFolder = "all",
+        fileName = "velocity_all_combined")
+
     println(
         "\rWriting Plots for Robot velocity: " +
             "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")

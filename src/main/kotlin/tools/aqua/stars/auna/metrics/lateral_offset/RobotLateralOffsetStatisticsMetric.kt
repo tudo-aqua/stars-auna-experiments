@@ -43,6 +43,8 @@ class RobotLateralOffsetStatisticsMetric :
   }
 
   override fun writePlots() {
+    val folderName = "lateral-offset-statistics"
+    val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
     val finished = AtomicInteger(0)
 
     runBlocking(Dispatchers.Default) {
@@ -53,7 +55,7 @@ class RobotLateralOffsetStatisticsMetric :
               val robotIdToRobotStates = it.second
 
               val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-              val folderName = "lateral-offset-statistics"
+
               val subFolderName = segment.getSegmentIdentifier()
 
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
@@ -63,6 +65,12 @@ class RobotLateralOffsetStatisticsMetric :
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
+
+                synchronized(allValuesMap) {
+                  allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
+                  allValuesMap[legendEntry]!!.first += xValues
+                  allValuesMap[legendEntry]!!.second += yValues
+                }
 
                 plotDataAsLineChart(
                     plot =
@@ -79,7 +87,12 @@ class RobotLateralOffsetStatisticsMetric :
               }
 
               plotDataAsLineChart(
-                  plot = getPlot(combinedValuesMap, "time", "lateral offset", "lateral offset for"),
+                  plot =
+                      getPlot(
+                          combinedValuesMap.toSortedMap(),
+                          "time",
+                          "lateral offset",
+                          "lateral offset for"),
                   folder = folderName,
                   subFolder = subFolderName,
                   fileName = "${subFolderName}_combined")
@@ -95,6 +108,29 @@ class RobotLateralOffsetStatisticsMetric :
           }
           .forEach { it.join() }
     }
+
+    allValuesMap.forEach { (legendEntry, values) ->
+      plotDataAsLineChart(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.first,
+                  yValues = values.second,
+                  xAxisName = "tick",
+                  yAxisName = "lateral offset",
+                  legendHeader = "Lateral offset for"),
+          folder = folderName,
+          subFolder = "all",
+          yAxisScaleMaxValue = 0.8,
+          fileName = "lateral_offset_all_${legendEntry}")
+    }
+
+    plotDataAsLineChart(
+        plot = getPlot(allValuesMap.toSortedMap(), "tick", "lateral offset", "Lateral offset for"),
+        folder = folderName,
+        subFolder = "all",
+        fileName = "lateral_offset_all_combined")
+
     println(
         "\rWriting Plots for Robot lateral offset: " +
             "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")

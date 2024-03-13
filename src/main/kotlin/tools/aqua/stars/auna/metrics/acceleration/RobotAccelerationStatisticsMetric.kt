@@ -43,6 +43,8 @@ class RobotAccelerationStatisticsMetric :
   }
 
   override fun writePlots() {
+    val folderName = "robot-acceleration-statistics"
+    val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
     val finished = AtomicInteger(0)
 
     runBlocking(Dispatchers.Default) {
@@ -53,7 +55,6 @@ class RobotAccelerationStatisticsMetric :
               val robotIdToRobotStates = it.second
 
               val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-              val folderName = "robot-acceleration-statistics"
               val subFolderName = segment.getSegmentIdentifier()
 
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
@@ -63,6 +64,12 @@ class RobotAccelerationStatisticsMetric :
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
+
+                synchronized(allValuesMap) {
+                  allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
+                  allValuesMap[legendEntry]!!.first += xValues
+                  allValuesMap[legendEntry]!!.second += yValues
+                }
 
                 plotDataAsLineChart(
                     plot =
@@ -95,6 +102,29 @@ class RobotAccelerationStatisticsMetric :
           }
           .forEach { it.join() }
     }
+
+    allValuesMap.forEach { (legendEntry, values) ->
+      plotDataAsLineChart(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.first,
+                  yValues = values.second,
+                  xAxisName = "tick",
+                  yAxisName = "acceleration (m/s^2)",
+                  legendHeader = "Acceleration for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "acceleration_all_${legendEntry}")
+    }
+
+    plotDataAsLineChart(
+        plot =
+            getPlot(allValuesMap.toSortedMap(), "tick", "acceleration (m/s^2)", "Acceleration for"),
+        folder = folderName,
+        subFolder = "all",
+        fileName = "acceleration_all_combined")
+
     println(
         "\rWriting PLots for Robot acceleration: " +
             "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")

@@ -43,6 +43,8 @@ class RobotSteeringAngleStatisticsMetric :
   }
 
   override fun writePlots() {
+    val folderName = "steering_angle_statistics"
+    val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
     val finished = AtomicInteger(0)
 
     runBlocking(Dispatchers.Default) {
@@ -53,7 +55,6 @@ class RobotSteeringAngleStatisticsMetric :
               val robotIdToRobotStates = it.second
 
               val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-              val folderName = "robot-steering-angle-statistics"
               val subFolderName = segment.getSegmentIdentifier()
 
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
@@ -63,6 +64,12 @@ class RobotSteeringAngleStatisticsMetric :
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
+
+                synchronized(allValuesMap) {
+                  allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
+                  allValuesMap[legendEntry]!!.first += xValues
+                  allValuesMap[legendEntry]!!.second += yValues
+                }
 
                 plotDataAsLineChart(
                     plot =
@@ -79,7 +86,12 @@ class RobotSteeringAngleStatisticsMetric :
               }
 
               plotDataAsLineChart(
-                  plot = getPlot(combinedValuesMap, "time", "steering angle", "Steering angle for"),
+                  plot =
+                      getPlot(
+                          combinedValuesMap.toSortedMap(),
+                          "tick",
+                          "steering angle",
+                          "Steering angle for"),
                   folder = folderName,
                   subFolder = subFolderName,
                   fileName = "${subFolderName}_combined")
@@ -95,6 +107,29 @@ class RobotSteeringAngleStatisticsMetric :
           }
           .forEach { it.join() }
     }
+
+    allValuesMap.forEach { (legendEntry, values) ->
+      plotDataAsLineChart(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.first,
+                  yValues = values.second,
+                  xAxisName = "tick",
+                  yAxisName = "steering angle (°)",
+                  legendHeader = "steering angle for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "steering_angle_all_${legendEntry}")
+    }
+
+    plotDataAsLineChart(
+        plot =
+            getPlot(allValuesMap.toSortedMap(), "tick", "steering angle (°)", "Steering angle for"),
+        folder = folderName,
+        subFolder = "all",
+        fileName = "steering_angle_all_combined")
+
     println(
         "\rWriting Plots for Robot steering angle: " +
             "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")

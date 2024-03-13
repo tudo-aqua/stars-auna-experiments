@@ -39,9 +39,10 @@ dependencies {
   implementation("tools.aqua:stars-logic-kcmftbl")
   implementation("tools.aqua:stars-data-av")
   implementation("tools.aqua:stars-importer-carla")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
   implementation("de.sciss:kdtree:0.1.1")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.5.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 }
 
 spotless {

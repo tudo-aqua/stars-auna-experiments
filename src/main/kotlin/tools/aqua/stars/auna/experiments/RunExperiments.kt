@@ -38,6 +38,10 @@ import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetAverageSta
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMinStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMinStatisticsMetric
@@ -90,17 +94,23 @@ fun main() {
       RobotVelocityMinStatisticsMetric(),
       RobotVelocityMaxStatisticsMetric(),
 
-      // Lateral Offset
-      RobotLateralOffsetStatisticsMetric(),
-      RobotLateralOffsetAverageStatisticsMetric(),
-      RobotLateralOffsetMinStatisticsMetric(),
-      RobotLateralOffsetMaxStatisticsMetric(),
-
       // Acceleration
       RobotAccelerationStatisticsMetric(),
       RobotAccelerationAverageStatisticsMetric(),
       RobotAccelerationMinStatisticsMetric(),
       RobotAccelerationMaxStatisticsMetric(),
+
+      // Steering angle
+      RobotSteeringAngleStatisticsMetric(),
+      RobotSteeringAngleAverageStatisticsMetric(),
+      RobotSteeringAngleMinStatisticsMetric(),
+      RobotSteeringAngleMaxStatisticsMetric(),
+
+      // Lateral Offset
+      RobotLateralOffsetStatisticsMetric(),
+      RobotLateralOffsetAverageStatisticsMetric(),
+      RobotLateralOffsetMinStatisticsMetric(),
+      RobotLateralOffsetMaxStatisticsMetric(),
 
       // Distance to front
       RobotDistanceToFrontStatisticsMetric(),

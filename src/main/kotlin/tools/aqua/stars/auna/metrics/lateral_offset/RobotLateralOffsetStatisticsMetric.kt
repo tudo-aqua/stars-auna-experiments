@@ -17,6 +17,10 @@
 
 package tools.aqua.stars.auna.metrics.lateral_offset
 
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
 import tools.aqua.stars.core.metric.utils.getCSVString
@@ -39,82 +43,113 @@ class RobotLateralOffsetStatisticsMetric :
   }
 
   override fun writePlots() {
-    segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
-      print(
-          "\rWriting Plots for Robot lateral offset: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
+    val finished = AtomicInteger(0)
 
-      val robotIdToRobotStates = segmentToRobotIdToRobotState.second
-      val segment = segmentToRobotIdToRobotState.first
+    runBlocking(Dispatchers.Default) {
+      segmentToRobotIdToRobotStateMap
+          .map {
+            launch {
+              val segment = it.first
+              val robotIdToRobotStates = it.second
 
-      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-      val folderName = "lateral-offset-statistics"
-      val subFolderName = segment.getSegmentIdentifier()
+              val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
+              val folderName = "lateral-offset-statistics"
+              val subFolderName = segment.getSegmentIdentifier()
 
-      robotIdToRobotStates.forEach { (robotId, robotStates) ->
-        val legendEntry = "Robot $robotId"
-        val fileName = "${subFolderName}_robot_$robotId"
-        val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
-        val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
+              robotIdToRobotStates.forEach { (robotId, robotStates) ->
+                val legendEntry = "Robot $robotId"
+                val fileName = "${subFolderName}_robot_$robotId"
+                val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
+                val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
-        combinedValuesMap[legendEntry] = xValues to yValues
+                combinedValuesMap[legendEntry] = xValues to yValues
 
-        plotDataAsLineChart(
-            plot =
-                getPlot(
-                    legendEntry = legendEntry,
-                    xValues = xValues,
-                    yValues = yValues,
-                    "tick",
-                    "lateral offset",
-                    "lateral offset for"),
-            folder = folderName,
-            subFolder = subFolderName,
-            fileName = fileName)
-      }
+                plotDataAsLineChart(
+                    plot =
+                        getPlot(
+                            legendEntry = legendEntry,
+                            xValues = xValues,
+                            yValues = yValues,
+                            "tick",
+                            "lateral offset",
+                            "lateral offset for"),
+                    folder = folderName,
+                    subFolder = subFolderName,
+                    fileName = fileName)
+              }
 
-      plotDataAsLineChart(
-          plot = getPlot(combinedValuesMap, "time", "lateral offset", "lateral offset for"),
-          folder = folderName,
-          subFolder = subFolderName,
-          fileName = "${subFolderName}_combined")
+              plotDataAsLineChart(
+                  plot = getPlot(combinedValuesMap, "time", "lateral offset", "lateral offset for"),
+                  folder = folderName,
+                  subFolder = subFolderName,
+                  fileName = "${subFolderName}_combined")
+
+              finished.incrementAndGet().let { i ->
+                print(
+                    "\rWriting Plots for Robot lateral offset: " +
+                        "$i/${segmentToRobotIdToRobotStateMap.size} " +
+                        "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
+                        "on ${Thread.currentThread()}")
+              }
+            }
+          }
+          .forEach { it.join() }
     }
-    println()
+    println(
+        "\rWriting Plots for Robot lateral offset: " +
+            "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")
   }
 
   override fun writePlotDataCSV() {
-    segmentToRobotIdToRobotStateMap.forEachIndexed { index, segmentToRobotIdToRobotState ->
-      print(
-          "\rWriting CSV for Robot lateral offset: ${index+1}/${segmentToRobotIdToRobotStateMap.size} (${(index+1) * 100 / segmentToRobotIdToRobotStateMap.size}%)")
+    val finished = AtomicInteger(0)
 
-      val robotIdToRobotStates = segmentToRobotIdToRobotState.second
-      val segment = segmentToRobotIdToRobotState.first
+    runBlocking(Dispatchers.Default) {
+      segmentToRobotIdToRobotStateMap
+          .map {
+            launch {
+              val segment = it.first
+              val robotIdToRobotStates = it.second
 
-      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-      val folderName = "lateral-offset-statistics"
-      val subFolderName = segment.getSegmentIdentifier()
+              val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
+              val folderName = "lateral-offset-statistics"
+              val subFolderName = segment.getSegmentIdentifier()
 
-      robotIdToRobotStates.forEach { (robotId, robotStates) ->
-        val legendEntry = "Robot $robotId"
-        val fileName = "${subFolderName}_robot_$robotId"
-        val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
-        val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
+              robotIdToRobotStates.forEach { (robotId, robotStates) ->
+                val legendEntry = "Robot $robotId"
+                val fileName = "${subFolderName}_robot_$robotId"
+                val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
+                val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
-        combinedValuesMap[legendEntry] = xValues to yValues
+                combinedValuesMap[legendEntry] = xValues to yValues
 
-        saveAsCSVFile(
-            csvString =
-                getCSVString(columnEntry = legendEntry, xValues = xValues, yValues = yValues),
-            folder = folderName,
-            subFolder = subFolderName,
-            fileName = fileName)
-      }
+                saveAsCSVFile(
+                    csvString =
+                        getCSVString(
+                            columnEntry = legendEntry, xValues = xValues, yValues = yValues),
+                    folder = folderName,
+                    subFolder = subFolderName,
+                    fileName = fileName)
+              }
 
-      saveAsCSVFile(
-          csvString = getCSVString(combinedValuesMap),
-          folder = folderName,
-          subFolder = subFolderName,
-          fileName = "${subFolderName}_combined")
+              saveAsCSVFile(
+                  csvString = getCSVString(combinedValuesMap),
+                  folder = folderName,
+                  subFolder = subFolderName,
+                  fileName = "${subFolderName}_combined")
+
+              finished.incrementAndGet().let { i ->
+                print(
+                    "\rWriting CSV for Robot lateral offset: " +
+                        "$i/${segmentToRobotIdToRobotStateMap.size} " +
+                        "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
+                        "on ${Thread.currentThread()}")
+              }
+            }
+          }
+          .forEach { it.join() }
     }
-    println()
+    println(
+        "\rWriting CSV for Robot lateral offset: " +
+            "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")
   }
 }

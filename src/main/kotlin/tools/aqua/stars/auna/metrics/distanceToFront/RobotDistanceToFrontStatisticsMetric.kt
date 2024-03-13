@@ -17,6 +17,10 @@
 
 package tools.aqua.stars.auna.metrics.distanceToFront
 
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
 import tools.aqua.stars.core.metric.utils.getCSVString
@@ -35,12 +39,9 @@ class RobotDistanceToFrontStatisticsMetric :
   ) {
     val primaryEntityId = segment.primaryEntityId
 
-    if (primaryEntityId == 1) {
-      return
-    }
+    if (primaryEntityId == 1) return
 
     val frontEntityId = primaryEntityId - 1
-
     val distanceToFrontForPrimaryEntityInSegment =
         segment.tickData.map { currentTick ->
           val primaryEntity = checkNotNull(currentTick.getEntityById(primaryEntityId))
@@ -55,67 +56,106 @@ class RobotDistanceToFrontStatisticsMetric :
   }
 
   override fun writePlots() {
-    robotIdToDistanceAtTickMap.forEach { segmentToRobotIdToRobotStateMap ->
-      val robotId = segmentToRobotIdToRobotStateMap.key
-      val distanceToTickList = segmentToRobotIdToRobotStateMap.value
+    val finished = AtomicInteger(0)
 
-      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-      val folderName = "robot-distance-to-front-statistics"
-      val subFolderName = distanceToTickList.first().first.segment.getSegmentIdentifier()
+    runBlocking(Dispatchers.Default) {
+      robotIdToDistanceAtTickMap
+          .map {
+            launch {
+              val robotId = it.key
+              val distanceToTickList = it.value
 
-      val legendEntry = "Robot $robotId"
-      val fileName = "${subFolderName}_robot_$robotId"
-      val xValues = distanceToTickList.map { it.first.currentTick.toSeconds() }
-      val yValues = distanceToTickList.map { it.second }
-      combinedValuesMap[legendEntry] = xValues to yValues
+              val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
+              val folderName = "robot-distance-to-front-statistics"
+              val subFolderName = distanceToTickList.first().first.segment.getSegmentIdentifier()
 
-      plotDataAsLineChart(
-          plot =
-              getPlot(
-                  legendEntry = legendEntry,
-                  xValues = xValues,
-                  yValues = yValues,
-                  "tick",
-                  "distance to front (m))",
-                  "Distance for"),
-          folder = folderName,
-          subFolder = subFolderName,
-          fileName = fileName)
+              val legendEntry = "Robot $robotId"
+              val fileName = "${subFolderName}_robot_$robotId"
+              val xValues = distanceToTickList.map { it.first.currentTick.toSeconds() }
+              val yValues = distanceToTickList.map { it.second }
+              combinedValuesMap[legendEntry] = xValues to yValues
 
-      plotDataAsLineChart(
-          plot = getPlot(combinedValuesMap, "time", "distance to front", "Distance for"),
-          folder = folderName,
-          subFolder = subFolderName,
-          fileName = "${subFolderName}_combined")
+              plotDataAsLineChart(
+                  plot =
+                      getPlot(
+                          legendEntry = legendEntry,
+                          xValues = xValues,
+                          yValues = yValues,
+                          "tick",
+                          "distance to front (m))",
+                          "Distance for"),
+                  folder = folderName,
+                  subFolder = subFolderName,
+                  fileName = fileName)
+
+              plotDataAsLineChart(
+                  plot = getPlot(combinedValuesMap, "time", "distance to front", "Distance for"),
+                  folder = folderName,
+                  subFolder = subFolderName,
+                  fileName = "${subFolderName}_combined")
+
+              finished.incrementAndGet().let { i ->
+                print(
+                    "\rWriting Plots for Robot distance to front: " +
+                        "$i/${robotIdToDistanceAtTickMap.size} " +
+                        "(${i * 100 / robotIdToDistanceAtTickMap.size}%) " +
+                        "on ${Thread.currentThread()}")
+              }
+            }
+          }
+          .forEach { it.join() }
     }
+    println(
+        "\rWriting Plots for Robot distance to front: " +
+            "${robotIdToDistanceAtTickMap.size}/${robotIdToDistanceAtTickMap.size} (100%)")
   }
 
   override fun writePlotDataCSV() {
-    robotIdToDistanceAtTickMap.forEach { segmentToRobotIdToRobotStateMap ->
-      val robotId = segmentToRobotIdToRobotStateMap.key
-      val distanceToTickList = segmentToRobotIdToRobotStateMap.value
+    val finished = AtomicInteger(0)
 
-      val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-      val folderName = "robot-distance-to-front-statistics"
-      val subFolderName = distanceToTickList.first().first.segment.getSegmentIdentifier()
+    runBlocking(Dispatchers.Default) {
+      robotIdToDistanceAtTickMap
+          .map {
+            launch {
+              val robotId = it.key
+              val distanceToTickList = it.value
 
-      val legendEntry = "Robot $robotId"
-      val fileName = "${subFolderName}_robot_$robotId"
-      val xValues = distanceToTickList.map { it.first.currentTick.toSeconds() }
-      val yValues = distanceToTickList.map { it.second }
-      combinedValuesMap[legendEntry] = xValues to yValues
+              val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
+              val folderName = "robot-distance-to-front-statistics"
+              val subFolderName = distanceToTickList.first().first.segment.getSegmentIdentifier()
 
-      saveAsCSVFile(
-          csvString = getCSVString(columnEntry = legendEntry, xValues = xValues, yValues = yValues),
-          folder = folderName,
-          subFolder = subFolderName,
-          fileName = fileName)
+              val legendEntry = "Robot $robotId"
+              val fileName = "${subFolderName}_robot_$robotId"
+              val xValues = distanceToTickList.map { it.first.currentTick.toSeconds() }
+              val yValues = distanceToTickList.map { it.second }
+              combinedValuesMap[legendEntry] = xValues to yValues
+
+              saveAsCSVFile(
+                  csvString =
+                      getCSVString(columnEntry = legendEntry, xValues = xValues, yValues = yValues),
+                  folder = folderName,
+                  subFolder = subFolderName,
+                  fileName = fileName)
+
+              //          saveAsCSVFile(
+              //              csvString = getCSVString(combinedValuesMap),
+              //              folder = folderName,
+              //              subFolder = subFolderName,
+              //              fileName = "${subFolderName}_combined")
+
+              finished.incrementAndGet().let { i ->
+                print(
+                    "\rWriting CSV for Robot distance to front: " +
+                        "$i/${robotIdToDistanceAtTickMap.size} " +
+                        "(${i * 100 / robotIdToDistanceAtTickMap.size}%) " +
+                        "on ${Thread.currentThread()}")
+              }
+            }
+          }
+          .forEach { it.join() }
     }
-
-    //          saveAsCSVFile(
-    //              csvString = getCSVString(combinedValuesMap),
-    //              folder = folderName,
-    //              subFolder = subFolderName,
-    //              fileName = "${subFolderName}_combined")
+    println(
+        "\rWriting CSV for Robot distance to front: " +
+            "${robotIdToDistanceAtTickMap.size}/${robotIdToDistanceAtTickMap.size} (100%)")
   }
 }

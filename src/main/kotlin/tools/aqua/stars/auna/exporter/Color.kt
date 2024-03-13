@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The STARS AuNa Experiments Authors
+ * Copyright 2024 The STARS AuNa Experiments Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +15,32 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package tools.aqua.stars.auna.exporter
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * This class represents a line (e.g. an outer or inner line of a lane) of the static data to be
- * rendered in the STARS-visualizer tool.
- *
- * @property width The width of this [Line].
- * @property coordinates The coordinates of the line as a point curve of [Location] in a [List].
- * @property color The color of this [Line].
+ * This enum class represents color values which can be used in the STARS-Visualizer tool for
+ * coloring objects.
  */
 @Serializable
-data class Line(
-    @SerialName("width") val width: Float,
-    @SerialName("coordinates") val coordinates: List<Location>,
-    @SerialName("color") val color: Color = Color.GRAY
-)
+enum class Color {
+  @SerialName("black") BLACK,
+  @SerialName("darkGray") DARK_GRAY,
+  @SerialName("slateGray") SLATE_GRAY,
+  @SerialName("gray") GRAY,
+  @SerialName("green") GREEN,
+  @SerialName("blue") BLUE,
+  @SerialName("aqua") AQUA,
+  @SerialName("violet") VIOLET,
+  @SerialName("crimson") CRIMSON,
+  @SerialName("firebrick") FIREBRICK,
+  @SerialName("darkRed") DARK_RED,
+  @SerialName("orange") ORANGE,
+  @SerialName("amber") AMBER,
+  @SerialName("yellow") YELLOW,
+  @SerialName("white") WHITE
+}

@@ -21,7 +21,6 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.*
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import tools.aqua.stars.auna.experiments.downloadAndUnzipExperimentsData
@@ -29,6 +28,7 @@ import tools.aqua.stars.auna.experiments.downloadWaypointsData
 import tools.aqua.stars.auna.experiments.loadSegments
 import tools.aqua.stars.auna.importer.Quaternion
 import tools.aqua.stars.auna.importer.Vector
+import tools.aqua.stars.auna.importer.importTrackData
 import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.convertTrackToLanes
 
@@ -48,6 +48,9 @@ val ACTOR_TYPES =
             height = 0.1f // TODO: get actual height
             ))
 
+/** The [Json] instance used for serialization with domain specific configuration */
+val json = Json { encodeDefaults = true }
+
 /** Exports calculated [Segment]s to the import format used by the STARS-Visualizer tool. */
 fun main() {
   println("Export Experiments Data")
@@ -56,7 +59,7 @@ fun main() {
   print("Finished downloading files")
 
   println("Import Track Data")
-  val track = tools.aqua.stars.auna.importer.importTrackData()
+  val track = importTrackData()
   println("Convert Track Data")
   val lanes = convertTrackToLanes(track, segmentsPerLane = 3)
 
@@ -77,6 +80,7 @@ fun main() {
  *
  * @param lanes experiment data as [List] of [Lane]s.
  */
+@OptIn(ExperimentalSerializationApi::class)
 private fun exportStaticData(lanes: List<Lane>) {
   println("Static Data: Parse Lanes")
   val staticData =
@@ -91,9 +95,11 @@ private fun exportStaticData(lanes: List<Lane>) {
                         })
               })
   println("Static Data: Export Lines")
-  val staticDataJson = Json.encodeToString(staticData)
   val staticDataFilePath = "$OUTPUT_DIR${OUTPUT_FILE_NAME}_static.json"
-  File(staticDataFilePath).writeText(staticDataJson)
+  FileOutputStream(staticDataFilePath).use { fos ->
+    json.encodeToStream(StaticData.serializer(), staticData, fos)
+  }
+
   println("Static Data: Export to file $staticDataFilePath finished successfully!")
 }
 
@@ -125,6 +131,7 @@ private fun exportDynamicData(lanes: List<Lane>) {
                           segmentSource = segment.segmentSource,
                           startTick = tickData.first().currentTick.toSeconds(),
                           endTick = tickData.last().currentTick.toSeconds(),
+                          primaryActorId = segment.primaryEntityId,
                           tickData =
                               tickData.map { tick ->
                                 TickData(
@@ -143,12 +150,13 @@ private fun exportDynamicData(lanes: List<Lane>) {
             ACTOR_TYPES)
     val filePath =
         "$OUTPUT_DIR${OUTPUT_FILE_NAME}_${segmentSources}_ego${primaryEntityId}_dynamic.json"
-    print("\rDynamic Data: Export Segments (Ego ${primaryEntityId}) at $filePath")
+    print(
+        "\rDynamic Data: Exporting ${dynamicData.segments.count()} Segments for ego vehicle $primaryEntityId at $filePath...")
     FileOutputStream(filePath).use { fos ->
-      Json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
+      json.encodeToStream(DynamicData.serializer(), dynamicData, fos)
     }
   }
-  println("Dynamic Data: Exporting dynamic data finished successfully!")
+  println("\rDynamic Data: Exported dynamic data of ${primaryEntityIds.count()} ego vehicles!")
 }
 
 /**

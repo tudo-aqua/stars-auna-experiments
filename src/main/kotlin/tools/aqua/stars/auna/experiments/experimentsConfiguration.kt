@@ -27,7 +27,7 @@ val DRIVING_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/iYG2SXDAmzLt5Lb
 val TRACK_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/OKFiTtZ4Bby0Y5p/download"
 
 val DOWNLOAD_FOLDER_NAME = "stars-auna-json-files"
-val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\json\\3_0_m_s"
+val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\3_0_m_s"
 val WAYPOINTS_FILE_NAME = "flw_waypoints.json"
 
 /** The size of the window for the moving average acceleration in ms. */

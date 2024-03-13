@@ -30,8 +30,13 @@ data class Lane(
     val length: Double,
     val width: Double,
     var waypoints: List<Waypoint>,
-    var isStraight: Boolean
+    var isStraight: Boolean,
+    var previousLane: Lane?,
+    var nextLane: Lane?,
 ) {
+  val isCurve
+    get() = !isStraight
+
   override fun toString(): String {
     return "Lane(id=$laneID, length=$length, width=$width, waypoints=${waypoints.count()})"
   }

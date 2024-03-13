@@ -35,28 +35,40 @@ import tools.aqua.stars.auna.importer.*
  * @param segmentsPerLane The number of segments per track segment.
  * @return The converted [List] of [Lane]s.
  */
-fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> =
-    track.lanes
-        .mapIndexed { index, lane ->
-          lane.waypoints
-              .chunked(ceil(lane.waypoints.size / segmentsPerLane.toDouble()).toInt())
-              .mapIndexed { index2, wp ->
-                Lane(
-                        laneID = index * segmentsPerLane + index2,
-                        length = lane.length,
-                        width = lane.width,
-                        waypoints = listOf(),
-                        isStraight = index % 2 != 0)
-                    .also {
-                      it.waypoints =
-                          wp.map { wp ->
-                            Waypoint(
-                                x = wp.x, y = wp.y, lane = it, distanceToStart = wp.distanceToStart)
-                          }
-                    }
-              }
-        }
-        .flatten()
+fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> {
+  var previousLane: Lane? = null
+
+  return track.lanes
+      .mapIndexed { index, lane ->
+        lane.waypoints
+            .chunked(ceil(lane.waypoints.size / segmentsPerLane.toDouble()).toInt())
+            .mapIndexed { index2, wp ->
+              Lane(
+                      laneID = index * segmentsPerLane + index2,
+                      length = lane.length,
+                      width = lane.width,
+                      waypoints = listOf(),
+                      isStraight = index % 2 != 0,
+                      previousLane = previousLane,
+                      nextLane = null)
+                  .also {
+                    it.waypoints =
+                        wp.map { wp ->
+                          Waypoint(
+                              x = wp.x, y = wp.y, lane = it, distanceToStart = wp.distanceToStart)
+                        }
+                    previousLane?.nextLane = it
+                    previousLane = it
+                  }
+            }
+      }
+      .flatten()
+      .also {
+        // Let's close the circle
+        it.first().previousLane = it.last()
+        it.last().nextLane = it.first()
+      }
+}
 
 /**
  * Slices the [List] of [TickData] into [Segment]s based on the [Lane] of the leading [Robot].

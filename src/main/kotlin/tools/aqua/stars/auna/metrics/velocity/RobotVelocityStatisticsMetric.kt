@@ -116,6 +116,7 @@ class RobotVelocityStatisticsMetric :
                   xAxisName = "tick",
                   yAxisName = "velocity (m/s)",
                   legendHeader = "Velocity for"),
+          size = 2500 to 500,
           folder = folderName,
           subFolder = "all",
           fileName = "velocity_all_${legendEntry}")
@@ -123,6 +124,7 @@ class RobotVelocityStatisticsMetric :
 
     plotDataAsLineChart(
         plot = getPlot(allValuesMap.toSortedMap(), "tick", "velocity (m/s)", "Velocity for"),
+        size = 1500 to 300,
         folder = folderName,
         subFolder = "all",
         fileName = "velocity_all_combined")

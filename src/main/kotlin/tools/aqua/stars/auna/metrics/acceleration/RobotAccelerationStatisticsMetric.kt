@@ -113,6 +113,7 @@ class RobotAccelerationStatisticsMetric :
                   xAxisName = "tick",
                   yAxisName = "acceleration (m/s^2)",
                   legendHeader = "Acceleration for"),
+          size = 2500 to 500,
           folder = folderName,
           subFolder = "all",
           fileName = "acceleration_all_${legendEntry}")
@@ -121,6 +122,7 @@ class RobotAccelerationStatisticsMetric :
     plotDataAsLineChart(
         plot =
             getPlot(allValuesMap.toSortedMap(), "tick", "acceleration (m/s^2)", "Acceleration for"),
+        size = 2500 to 500,
         folder = folderName,
         subFolder = "all",
         fileName = "acceleration_all_combined")

@@ -124,6 +124,7 @@ class RobotDistanceToFrontStatisticsMetric :
                   xAxisName = "tick",
                   yAxisName = "distance to front",
                   legendHeader = "Distance for"),
+          size = 2500 to 500,
           folder = folderName,
           subFolder = "all",
           fileName = "distance_to_front_all_${legendEntry}")

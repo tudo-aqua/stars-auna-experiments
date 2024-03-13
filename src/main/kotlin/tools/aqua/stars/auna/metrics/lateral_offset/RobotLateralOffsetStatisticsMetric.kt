@@ -119,6 +119,7 @@ class RobotLateralOffsetStatisticsMetric :
                   xAxisName = "tick",
                   yAxisName = "lateral offset",
                   legendHeader = "Lateral offset for"),
+          size = 2500 to 500,
           folder = folderName,
           subFolder = "all",
           yAxisScaleMaxValue = 0.8,
@@ -127,6 +128,7 @@ class RobotLateralOffsetStatisticsMetric :
 
     plotDataAsLineChart(
         plot = getPlot(allValuesMap.toSortedMap(), "tick", "lateral offset", "Lateral offset for"),
+        size = 2500 to 500,
         folder = folderName,
         subFolder = "all",
         fileName = "lateral_offset_all_combined")

@@ -118,6 +118,7 @@ class RobotSteeringAngleStatisticsMetric :
                   xAxisName = "tick",
                   yAxisName = "steering angle (°)",
                   legendHeader = "steering angle for"),
+          size = 2500 to 500,
           folder = folderName,
           subFolder = "all",
           fileName = "steering_angle_all_${legendEntry}")
@@ -126,6 +127,7 @@ class RobotSteeringAngleStatisticsMetric :
     plotDataAsLineChart(
         plot =
             getPlot(allValuesMap.toSortedMap(), "tick", "steering angle (°)", "Steering angle for"),
+        size = 2500 to 500,
         folder = folderName,
         subFolder = "all",
         fileName = "steering_angle_all_combined")

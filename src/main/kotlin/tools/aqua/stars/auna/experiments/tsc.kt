@@ -27,38 +27,39 @@ fun tsc() =
         root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
           all("TSCRoot") {
             projectionIDs = mapOf(projRec(("all")))
-            leaf("Max lateral offset") {
-              condition = { _ -> true }
-              monitorFunction = { ctx ->
-                ctx.entityIds.all { normalLateralOffset.holds(ctx, entityId = it) }
-              }
-            }
+
+            /*
             exclusive("Lane Type") {
               leaf("Straight Lane") { condition = { ctx -> isOnStraightLane.holds(ctx) } }
               leaf("Curved Lane") { condition = { ctx -> isOnCurvedLane.holds(ctx) } }
+            }
+            */
+
+            exclusive("Lane Change") {
+              leaf("Entering Curve") { condition = { ctx -> enteringCurve.holds(ctx) } }
+              leaf("In Curve") { condition = { ctx -> inCurve.holds(ctx) } }
+              leaf("Exiting Curve") { condition = { ctx -> exitingCurve.holds(ctx) } }
+
+              leaf("Entering Straight") { condition = { ctx -> enteringStraight.holds(ctx) } }
+              leaf("In Straight") { condition = { ctx -> inStraight.holds(ctx) } }
+              leaf("Exiting Straight") { condition = { ctx -> exitingStraight.holds(ctx) } }
             }
 
             any("Distance to front vehicle") {
               leaf("None") { condition = { ctx -> ctx.primaryEntityId == 1 } }
               leaf("Normal") {
                 condition = { ctx ->
-                  ctx.primaryEntityId > 1 &&
-                      normalDistanceToPreviousVehicle.holds(
-                          ctx, entityId1 = ctx.primaryEntityId, entityId2 = ctx.primaryEntityId - 1)
+                  ctx.primaryEntityId > 1 && normalDistanceToFrontVehicle.holds(ctx)
                 }
               }
               leaf("Min") {
                 condition = { ctx ->
-                  ctx.primaryEntityId > 1 &&
-                      minDistanceToPreviousVehicleExceeded.holds(
-                          ctx, entityId1 = ctx.primaryEntityId, entityId2 = ctx.primaryEntityId - 1)
+                  ctx.primaryEntityId > 1 && minDistanceToFrontVehicleExceeded.holds(ctx)
                 }
               }
               leaf("Max") {
                 condition = { ctx ->
-                  ctx.primaryEntityId > 1 &&
-                      maxDistanceToPreviousVehicleExceeded.holds(
-                          ctx, entityId1 = ctx.primaryEntityId, entityId2 = ctx.primaryEntityId - 1)
+                  ctx.primaryEntityId > 1 && maxDistanceToFrontVehicleExceeded.holds(ctx)
                 }
               }
             }
@@ -88,5 +89,20 @@ fun tsc() =
                 }
               }
             }
+
+            // region monitors
+            leaf("Max lateral offset") {
+              condition = { _ -> true }
+              monitorFunction = { ctx -> normalLateralOffset.holds(ctx) }
+            }
+            leaf("Minimum distance to front robot") {
+              condition = { _ -> true }
+              monitorFunction = { ctx -> minDistanceToFrontVehicleExceeded.holds(ctx) }
+            }
+            leaf("Maximum deceleration") {
+              condition = { _ -> true }
+              monitorFunction = { ctx -> strongDeceleration.holds(ctx) }
+            }
+            // endregion
           }
         })

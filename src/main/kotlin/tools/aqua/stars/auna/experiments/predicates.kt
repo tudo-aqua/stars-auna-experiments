@@ -19,7 +19,6 @@
 
 package tools.aqua.stars.auna.experiments
 
-import tools.aqua.stars.core.evaluation.BinaryPredicate.Companion.predicate
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.logic.kcmftbl.eventually
@@ -59,83 +58,80 @@ val normalLateralOffset =
 const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG: Double = 3.0
 
 /**
- * Exceeding the minimum distance to the previous vehicle is defined as <
+ * Exceeding the minimum distance to the front vehicle is defined as <
  * [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT].
  */
 const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT: Double = 0.5 // in m
 
 /**
- * Exceeding the minimum distance to the previous vehicle is defined as <
+ * Exceeding the minimum distance to the front vehicle is defined as <
  * [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT].
  */
-val minDistanceToPreviousVehicleExceeded =
-    predicate(Robot::class to Robot::class) { _, r1, r2 ->
-      until(
-          r1,
-          r2,
-          phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
-          phi2 = { rb1, rb2 ->
-            eventually(
-                rb1,
-                rb2,
-                phi = { rb1, rb2 ->
-                  rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT
-                })
-          })
+val minDistanceToFrontVehicleExceeded =
+    predicate(Robot::class) { _, r ->
+      val frontRobot = r.tickData.getEntityById(r.id - 1)
+      if (frontRobot == null) false
+      else
+          until(
+              r,
+              frontRobot,
+              phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
+              phi2 = { rb1, rb2 ->
+                eventually(
+                    rb1,
+                    rb2,
+                    phi = { rb1, rb2 ->
+                      rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT
+                    })
+              })
     }
 
 /**
- * The distance to the previous vehicle is in the normal range if it is in the interval
+ * The distance to the front vehicle is in the normal range if it is in the interval
  * ([DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT] ... [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG]).
  */
-val normalDistanceToPreviousVehicle =
-    predicate(Robot::class to Robot::class) { _, r1, r2 ->
-      until(
-          r1,
-          r2,
-          phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
-          phi2 = { rb1, rb2 ->
-            globally(
-                rb1,
-                rb2,
-                phi = { rbt1, rbt2 ->
-                  rbt1.distanceToOther(rbt2) in
-                      DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT..DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG
-                })
-          })
+val normalDistanceToFrontVehicle =
+    predicate(Robot::class) { _, r ->
+      val frontRobot = r.tickData.getEntityById(r.id - 1)
+      if (frontRobot == null) false
+      else
+          until(
+              r,
+              frontRobot,
+              phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
+              phi2 = { rb1, rb2 ->
+                globally(
+                    rb1,
+                    rb2,
+                    phi = { rbt1, rbt2 ->
+                      rbt1.distanceToOther(rbt2) in
+                          DISTANCE_TO_FRONT_ROBOT_THRESHOLD_SHORT..DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG
+                    })
+              })
     }
 
 /**
- * Exceeding the maximum distance to the previous vehicle is defined
+ * Exceeding the maximum distance to the front vehicle is defined
  * as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG].
  */
-val maxDistanceToPreviousVehicleExceeded =
-    predicate(Robot::class to Robot::class) { _, r1, r2 ->
-      until(
-          r1,
-          r2,
-          phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
-          phi2 = { rb1, rb2 ->
-            eventually(
-                rb1,
-                rb2,
-                phi = { rbt1, rbt2 ->
-                  rbt1.distanceToOther(rbt2) > DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG
-                })
-          })
+val maxDistanceToFrontVehicleExceeded =
+    predicate(Robot::class) { _, r ->
+      val frontRobot = r.tickData.getEntityById(r.id - 1)
+      if (frontRobot == null) false
+      else
+          until(
+              r,
+              frontRobot,
+              phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
+              phi2 = { rb1, rb2 ->
+                eventually(
+                    rb1,
+                    rb2,
+                    phi = { rbt1, rbt2 ->
+                      rbt1.distanceToOther(rbt2) > DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LONG
+                    })
+              })
     }
-
-/// **
-// * There is no distance to the previous robot, as neither of the "normal", "min" and "max"
-// distance
-// * holds.
-// */
-// val noDistanceToPreviousVehicle =
-//    predicate(Robot::class to Robot::class) { ctx, r1, r2 ->
-//      !(normalDistanceToPreviousVehicle.holds(ctx, r1, r2) ||
-//          minDistanceToPreviousVehicleExceeded.holds(ctx, r1, r2) ||
-//          maxDistanceToPreviousVehicleExceeded.holds(ctx, r1, r2))
-//    }
 // endregion
 
 // region acceleration
@@ -263,3 +259,21 @@ val noSteering =
     }
 
 // endregion
+
+val enteringCurve =
+    predicate(Robot::class) { _, r -> r.lane!!.isCurve && r.lane.previousLane!!.isStraight }
+val inCurve =
+    predicate(Robot::class) { _, r ->
+      r.lane!!.isCurve && r.lane.previousLane!!.isCurve && r.lane.nextLane!!.isCurve
+    }
+val exitingCurve =
+    predicate(Robot::class) { _, r -> r.lane!!.isCurve && r.lane.nextLane!!.isStraight }
+
+val enteringStraight =
+    predicate(Robot::class) { _, r -> r.lane!!.isStraight && r.lane.previousLane!!.isCurve }
+val inStraight =
+    predicate(Robot::class) { _, r ->
+      r.lane!!.isStraight && r.lane.previousLane!!.isStraight && r.lane.nextLane!!.isStraight
+    }
+val exitingStraight =
+    predicate(Robot::class) { _, r -> r.lane!!.isStraight && r.lane.nextLane!!.isCurve }

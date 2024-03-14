@@ -25,7 +25,7 @@ import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
 class RobotDistanceToFrontMinStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-acceleration-minimum-statistics")
+    override val logger: Logger = Loggable.getLogger("robot-distance-to-front-minimum-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,

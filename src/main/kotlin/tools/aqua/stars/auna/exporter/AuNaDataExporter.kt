@@ -142,7 +142,8 @@ private fun exportDynamicData(lanes: List<Lane>) {
                                               actorId = entity.id,
                                               actorTypeId = DEFAULT_ACTOR_TYPE_ID,
                                               location = vectorToLocation(entity.position),
-                                              rotation = quaternionToEuler(entity.rotation))
+                                              rotation = quaternionToEuler(entity.rotation),
+                                              trajectoryColors = listOf("#123456", "#654321"))
                                         })
                               })
                     }

@@ -143,7 +143,31 @@ private fun exportDynamicData(lanes: List<Lane>) {
                                               actorTypeId = DEFAULT_ACTOR_TYPE_ID,
                                               location = vectorToLocation(entity.position),
                                               rotation = quaternionToEuler(entity.rotation),
-                                              trajectoryColors = listOf("#123456", "#654321"))
+                                              trajectoryColors =
+                                                  listOf(
+                                                      gradientColorValue(
+                                                          entity.acceleration ?: 0.0,
+                                                          valueColors =
+                                                              listOf(
+                                                                  -15.329432162982227 to "#0000FF",
+                                                                  -2.0 to "#0000F0",
+                                                                  0.0 to "#333333",
+                                                                  2.0 to "#F00000",
+                                                                  10.747724317295187 to "#FF0000")),
+                                                      gradientColorValue(
+                                                          value = entity.velocity ?: 0.0,
+                                                          valueColors =
+                                                              listOf(
+                                                                  0.0 to "#0000FF",
+                                                                  3.724100563502384 to "#FF0000")),
+                                                      gradientColorValue(
+                                                          value = entity.lateralOffset ?: 0.0,
+                                                          valueColors =
+                                                              listOf(
+                                                                  0.0 to "#00FF00",
+                                                                  0.03 to "#00FF00",
+                                                                  0.1 to "#0000FF",
+                                                                  0.65 to "#FF0000"))))
                                         })
                               })
                     }
@@ -158,6 +182,60 @@ private fun exportDynamicData(lanes: List<Lane>) {
     }
   }
   println("\rDynamic Data: Exported dynamic data of ${primaryEntityIds.count()} ego vehicles!")
+}
+
+/**
+ * Returns a hex color value based on a given value and a list of valueColors.
+ *
+ * @param value The value to calculate the color for.
+ * @param valueColors A list of valueColors. Each valueColor is a pair of a value and a color in hex
+ *   notation. Trajectory colors are interpolated between the valueColors. If the value is smaller
+ *   or greater than the range of valueColors, the first or last valueColor is used.
+ * @return The hex color value for the given value.
+ */
+private fun gradientColorValue(value: Double, valueColors: List<Pair<Double, String>>): String {
+  require(valueColors.count() > 1) { "At least two valueColors are required" }
+
+  val valueColorsSorted = valueColors.sortedBy { it.first }
+  valueColorsSorted.forEachIndexed { index, valueColor ->
+    if (value < valueColor.first) {
+      val lowerBound = if (index == 0) valueColor else valueColorsSorted[index - 1]
+      val ratio = (value - lowerBound.first) / (valueColor.first - lowerBound.first)
+      return interpolateHexColor(lowerBound.second, valueColor.second, ratio)
+    }
+  }
+  return valueColorsSorted.last().second
+}
+
+/**
+ * Interpolates between two hex colors.
+ *
+ * @param color1 The first color in hex notation.
+ * @param color2 The second color in hex notation.
+ * @param ratio The ratio to interpolate between the two colors.
+ * @return The interpolated color in hex notation.
+ */
+private fun interpolateHexColor(color1: String, color2: String, ratio: Double): String {
+  val hex1 = color1.substring(1).toInt(16)
+  val hex2 = color2.substring(1).toInt(16)
+
+  val r1 = hex1 shr 16 and 0xFF
+  val g1 = hex1 shr 8 and 0xFF
+  val b1 = hex1 and 0xFF
+
+  val r2 = hex2 shr 16 and 0xFF
+  val g2 = hex2 shr 8 and 0xFF
+  val b2 = hex2 and 0xFF
+
+  val r = (r1 + (r2 - r1) * ratio).toInt()
+  val g = (g1 + (g2 - g1) * ratio).toInt()
+  val b = (b1 + (b2 - b1) * ratio).toInt()
+
+  val interpolatedColor = (r shl 16) or (g shl 8) or (b)
+
+  // convert to hex
+  val interpolatedColorHex = String.format("#%06X", 0xFFFFFF and interpolatedColor)
+  return interpolatedColorHex
 }
 
 /**

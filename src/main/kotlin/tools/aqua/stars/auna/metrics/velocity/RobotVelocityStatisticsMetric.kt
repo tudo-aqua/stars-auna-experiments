@@ -21,14 +21,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.*
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
-import tools.aqua.stars.core.metric.utils.getCSVString
-import tools.aqua.stars.core.metric.utils.getPlot
-import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
-import tools.aqua.stars.core.metric.utils.saveAsCSVFile
+import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotVelocityStatisticsMetric :
+class RobotVelocityStatisticsMetric(val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
@@ -69,37 +66,39 @@ class RobotVelocityStatisticsMetric :
                   allValuesMap[legendEntry]!!.second += yValues
                 }
 
-                plotDataAsLineChart(
-                    plot =
-                        getPlot(
-                            legendEntry = legendEntry,
-                            xValues = xValues,
-                            yValues = yValues,
-                            "tick",
-                            "velocity (m/s)",
-                            "Velocity for"),
-                    folder = folderName,
-                    subFolder = subFolderName,
-                    fileName = fileName)
-              }
+                if (plotSegments) {
+                  plotDataAsLineChart(
+                      plot =
+                          getPlot(
+                              legendEntry = legendEntry,
+                              xValues = xValues,
+                              yValues = yValues,
+                              "tick",
+                              "velocity (m/s)",
+                              "Velocity for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = fileName)
 
-              plotDataAsLineChart(
-                  plot =
-                      getPlot(
-                          combinedValuesMap.toSortedMap(),
-                          "tick",
-                          "velocity (m/s)",
-                          "Velocity for"),
-                  folder = folderName,
-                  subFolder = subFolderName,
-                  fileName = "${subFolderName}_combined")
+                  plotDataAsLineChart(
+                      plot =
+                          getPlot(
+                              combinedValuesMap.toSortedMap(),
+                              "tick",
+                              "velocity (m/s)",
+                              "Velocity for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = "${subFolderName}_combined")
 
-              finished.incrementAndGet().let { i ->
-                print(
-                    "\rWriting Plots for Robot velocity: " +
-                        "$i/${segmentToRobotIdToRobotStateMap.size} " +
-                        "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
-                        "on ${Thread.currentThread()}")
+                  finished.incrementAndGet().let { i ->
+                    print(
+                        "\rWriting Plots for Robot velocity: " +
+                            "$i/${segmentToRobotIdToRobotStateMap.size} " +
+                            "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
+                            "on ${Thread.currentThread()}")
+                  }
+                }
               }
             }
           }
@@ -120,6 +119,33 @@ class RobotVelocityStatisticsMetric :
           folder = folderName,
           subFolder = "all",
           fileName = "velocity_all_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "velocity (m/s)",
+                  yAxisName = "frequency",
+                  legendHeader = "Velocity for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "velocity_hist_all_lin_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "velocity (m/s)",
+                  yAxisName = "frequency",
+                  legendHeader = "Velocity for"),
+          logScaleY = true,
+          folder = folderName,
+          subFolder = "all",
+          fileName = "velocity_hist_all_log_${legendEntry}")
     }
 
     plotDataAsLineChart(
@@ -129,9 +155,7 @@ class RobotVelocityStatisticsMetric :
         subFolder = "all",
         fileName = "velocity_all_combined")
 
-    println(
-        "\rWriting Plots for Robot velocity: " +
-            "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")
+    println("\rWriting Plots for Robot velocity: finished")
   }
 
   override fun writePlotDataCSV() {

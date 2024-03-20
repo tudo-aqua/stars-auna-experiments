@@ -23,14 +23,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
-import tools.aqua.stars.core.metric.utils.getCSVString
-import tools.aqua.stars.core.metric.utils.getPlot
-import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
-import tools.aqua.stars.core.metric.utils.saveAsCSVFile
+import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotSteeringAngleStatisticsMetric :
+class RobotSteeringAngleStatisticsMetric(val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
@@ -71,37 +68,39 @@ class RobotSteeringAngleStatisticsMetric :
                   allValuesMap[legendEntry]!!.second += yValues
                 }
 
-                plotDataAsLineChart(
-                    plot =
-                        getPlot(
-                            legendEntry = legendEntry,
-                            xValues = xValues,
-                            yValues = yValues,
-                            "tick",
-                            "steering angle (°)",
-                            "Steering angle for"),
-                    folder = folderName,
-                    subFolder = subFolderName,
-                    fileName = fileName)
-              }
+                if (plotSegments) {
+                  plotDataAsLineChart(
+                      plot =
+                          getPlot(
+                              legendEntry = legendEntry,
+                              xValues = xValues,
+                              yValues = yValues,
+                              "tick",
+                              "steering angle (°)",
+                              "Steering angle for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = fileName)
 
-              plotDataAsLineChart(
-                  plot =
-                      getPlot(
-                          combinedValuesMap.toSortedMap(),
-                          "tick",
-                          "steering angle",
-                          "Steering angle for"),
-                  folder = folderName,
-                  subFolder = subFolderName,
-                  fileName = "${subFolderName}_combined")
+                  plotDataAsLineChart(
+                      plot =
+                          getPlot(
+                              combinedValuesMap.toSortedMap(),
+                              "tick",
+                              "steering angle",
+                              "Steering angle for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = "${subFolderName}_combined")
 
-              finished.incrementAndGet().let { i ->
-                print(
-                    "\rWriting Plots for Robot steering angle: " +
-                        "$i/${segmentToRobotIdToRobotStateMap.size} " +
-                        "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
-                        "on ${Thread.currentThread()}")
+                  finished.incrementAndGet().let { i ->
+                    print(
+                        "\rWriting Plots for Robot steering angle: " +
+                            "$i/${segmentToRobotIdToRobotStateMap.size} " +
+                            "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
+                            "on ${Thread.currentThread()}")
+                  }
+                }
               }
             }
           }
@@ -122,6 +121,33 @@ class RobotSteeringAngleStatisticsMetric :
           folder = folderName,
           subFolder = "all",
           fileName = "steering_angle_all_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "steering angle (°)",
+                  yAxisName = "frequency",
+                  legendHeader = "steering angle for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "steering_angle_hist_all_lin_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "steering angle (°)",
+                  yAxisName = "frequency",
+                  legendHeader = "steering angle for"),
+          logScaleY = true,
+          folder = folderName,
+          subFolder = "all",
+          fileName = "steering_angle_hist_all_log_${legendEntry}")
     }
 
     plotDataAsLineChart(
@@ -132,9 +158,7 @@ class RobotSteeringAngleStatisticsMetric :
         subFolder = "all",
         fileName = "steering_angle_all_combined")
 
-    println(
-        "\rWriting Plots for Robot steering angle: " +
-            "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")
+    println("\rWriting Plots for Robot steering angle: finished")
   }
 
   override fun writePlotDataCSV() {

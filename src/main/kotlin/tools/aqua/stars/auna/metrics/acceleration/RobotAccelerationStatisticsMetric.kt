@@ -21,16 +21,14 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.letsPlot.core.spec.back.transform.bistro.util.plot
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
-import tools.aqua.stars.core.metric.utils.getCSVString
-import tools.aqua.stars.core.metric.utils.getPlot
-import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
-import tools.aqua.stars.core.metric.utils.saveAsCSVFile
+import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotAccelerationStatisticsMetric :
+class RobotAccelerationStatisticsMetric(val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
@@ -71,32 +69,34 @@ class RobotAccelerationStatisticsMetric :
                   allValuesMap[legendEntry]!!.second += yValues
                 }
 
-                plotDataAsLineChart(
-                    plot =
-                        getPlot(
-                            legendEntry = legendEntry,
-                            xValues = xValues,
-                            yValues = yValues,
-                            "tick",
-                            "acceleration (m/s^2)",
-                            "Acceleration for"),
-                    folder = folderName,
-                    subFolder = subFolderName,
-                    fileName = fileName)
-              }
+                if (plotSegments) {
+                  plotDataAsLineChart(
+                      plot =
+                          getPlot(
+                              legendEntry = legendEntry,
+                              xValues = xValues,
+                              yValues = yValues,
+                              "tick",
+                              "acceleration (m/s^2)",
+                              "Acceleration for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = fileName)
 
-              plotDataAsLineChart(
-                  plot = getPlot(combinedValuesMap, "time", "acceleration", "Acceleration for"),
-                  folder = folderName,
-                  subFolder = subFolderName,
-                  fileName = "${subFolderName}_combined")
+                  plotDataAsLineChart(
+                      plot = getPlot(combinedValuesMap, "time", "acceleration", "Acceleration for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = "${subFolderName}_combined")
 
-              finished.incrementAndGet().let { i ->
-                print(
-                    "\rWriting Plots for Robot acceleration: " +
-                        "$i/${segmentToRobotIdToRobotStateMap.size} " +
-                        "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
-                        "on ${Thread.currentThread()}")
+                  finished.incrementAndGet().let { i ->
+                    print(
+                        "\rWriting Plots for Robot acceleration: " +
+                            "$i/${segmentToRobotIdToRobotStateMap.size} " +
+                            "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
+                            "on ${Thread.currentThread()}")
+                  }
+                }
               }
             }
           }
@@ -117,6 +117,32 @@ class RobotAccelerationStatisticsMetric :
           folder = folderName,
           subFolder = "all",
           fileName = "acceleration_all_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "acceleration (m/s^2)",
+                  yAxisName = "frequency",
+                  legendHeader = "Acceleration for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "acceleration_hist_all_lin_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "acceleration (m/s^2)",
+                  legendHeader = "Acceleration for"),
+          logScaleY = true,
+          folder = folderName,
+          subFolder = "all",
+          fileName = "acceleration_hist_all_log_${legendEntry}")
     }
 
     plotDataAsLineChart(
@@ -127,9 +153,7 @@ class RobotAccelerationStatisticsMetric :
         subFolder = "all",
         fileName = "acceleration_all_combined")
 
-    println(
-        "\rWriting PLots for Robot acceleration: " +
-            "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")
+    println("\rWriting PLots for Robot acceleration: finished")
   }
 
   override fun writePlotDataCSV() {

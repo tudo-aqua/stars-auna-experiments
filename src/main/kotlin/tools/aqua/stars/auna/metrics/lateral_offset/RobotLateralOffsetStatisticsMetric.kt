@@ -23,14 +23,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
-import tools.aqua.stars.core.metric.utils.getCSVString
-import tools.aqua.stars.core.metric.utils.getPlot
-import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
-import tools.aqua.stars.core.metric.utils.saveAsCSVFile
+import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotLateralOffsetStatisticsMetric :
+class RobotLateralOffsetStatisticsMetric(val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
@@ -72,37 +69,39 @@ class RobotLateralOffsetStatisticsMetric :
                   allValuesMap[legendEntry]!!.second += yValues
                 }
 
-                plotDataAsLineChart(
-                    plot =
-                        getPlot(
-                            legendEntry = legendEntry,
-                            xValues = xValues,
-                            yValues = yValues,
-                            "tick",
-                            "lateral offset",
-                            "lateral offset for"),
-                    folder = folderName,
-                    subFolder = subFolderName,
-                    fileName = fileName)
-              }
+                if (plotSegments) {
+                  plotDataAsLineChart(
+                      plot =
+                          getPlot(
+                              legendEntry = legendEntry,
+                              xValues = xValues,
+                              yValues = yValues,
+                              "tick",
+                              "lateral offset",
+                              "lateral offset for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = fileName)
 
-              plotDataAsLineChart(
-                  plot =
-                      getPlot(
-                          combinedValuesMap.toSortedMap(),
-                          "time",
-                          "lateral offset",
-                          "lateral offset for"),
-                  folder = folderName,
-                  subFolder = subFolderName,
-                  fileName = "${subFolderName}_combined")
+                  plotDataAsLineChart(
+                      plot =
+                          getPlot(
+                              combinedValuesMap.toSortedMap(),
+                              "time",
+                              "lateral offset",
+                              "lateral offset for"),
+                      folder = folderName,
+                      subFolder = subFolderName,
+                      fileName = "${subFolderName}_combined")
 
-              finished.incrementAndGet().let { i ->
-                print(
-                    "\rWriting Plots for Robot lateral offset: " +
-                        "$i/${segmentToRobotIdToRobotStateMap.size} " +
-                        "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
-                        "on ${Thread.currentThread()}")
+                  finished.incrementAndGet().let { i ->
+                    print(
+                        "\rWriting Plots for Robot lateral offset: " +
+                            "$i/${segmentToRobotIdToRobotStateMap.size} " +
+                            "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
+                            "on ${Thread.currentThread()}")
+                  }
+                }
               }
             }
           }
@@ -124,6 +123,33 @@ class RobotLateralOffsetStatisticsMetric :
           subFolder = "all",
           yAxisScaleMaxValue = 0.8,
           fileName = "lateral_offset_all_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "lateral offset",
+                  yAxisName = "frequency",
+                  legendHeader = "Lateral offset for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "lateral_offset_hist_all_lin_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "lateral offset",
+                  yAxisName = "frequency",
+                  legendHeader = "Lateral offset for"),
+          logScaleY = true,
+          folder = folderName,
+          subFolder = "all",
+          fileName = "lateral_offset_hist_all_log_${legendEntry}")
     }
 
     plotDataAsLineChart(
@@ -133,9 +159,7 @@ class RobotLateralOffsetStatisticsMetric :
         subFolder = "all",
         fileName = "lateral_offset_all_combined")
 
-    println(
-        "\rWriting Plots for Robot lateral offset: " +
-            "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")
+    println("\rWriting Plots for Robot lateral offset: finished")
   }
 
   override fun writePlotDataCSV() {

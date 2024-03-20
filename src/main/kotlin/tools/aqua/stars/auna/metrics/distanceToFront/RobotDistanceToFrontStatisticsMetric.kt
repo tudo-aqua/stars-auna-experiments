@@ -23,14 +23,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
-import tools.aqua.stars.core.metric.utils.getCSVString
-import tools.aqua.stars.core.metric.utils.getPlot
-import tools.aqua.stars.core.metric.utils.plotDataAsLineChart
-import tools.aqua.stars.core.metric.utils.saveAsCSVFile
+import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotDistanceToFrontStatisticsMetric :
+class RobotDistanceToFrontStatisticsMetric(val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   var robotIdToDistanceAtTickMap: MutableMap<Int, List<Pair<TickData, Double>>> = mutableMapOf()
 
@@ -83,31 +80,33 @@ class RobotDistanceToFrontStatisticsMetric :
                 allValuesMap[legendEntry]!!.second += yValues
               }
 
-              plotDataAsLineChart(
-                  plot =
-                      getPlot(
-                          legendEntry = legendEntry,
-                          xValues = xValues,
-                          yValues = yValues,
-                          "tick",
-                          "distance to front (m))",
-                          "Distance for"),
-                  folder = folderName,
-                  subFolder = subFolderName,
-                  fileName = fileName)
+              if (plotSegments) {
+                plotDataAsLineChart(
+                    plot =
+                        getPlot(
+                            legendEntry = legendEntry,
+                            xValues = xValues,
+                            yValues = yValues,
+                            "tick",
+                            "distance to front (m))",
+                            "Distance for"),
+                    folder = folderName,
+                    subFolder = subFolderName,
+                    fileName = fileName)
 
-              plotDataAsLineChart(
-                  plot = getPlot(combinedValuesMap, "time", "distance to front", "Distance for"),
-                  folder = folderName,
-                  subFolder = subFolderName,
-                  fileName = "${subFolderName}_combined")
+                plotDataAsLineChart(
+                    plot = getPlot(combinedValuesMap, "time", "distance to front", "Distance for"),
+                    folder = folderName,
+                    subFolder = subFolderName,
+                    fileName = "${subFolderName}_combined")
 
-              finished.incrementAndGet().let { i ->
-                print(
-                    "\rWriting Plots for Robot distance to front: " +
-                        "$i/${robotIdToDistanceAtTickMap.size} " +
-                        "(${i * 100 / robotIdToDistanceAtTickMap.size}%) " +
-                        "on ${Thread.currentThread()}")
+                finished.incrementAndGet().let { i ->
+                  print(
+                      "\rWriting Plots for Robot distance to front: " +
+                          "$i/${robotIdToDistanceAtTickMap.size} " +
+                          "(${i * 100 / robotIdToDistanceAtTickMap.size}%) " +
+                          "on ${Thread.currentThread()}")
+                }
               }
             }
           }
@@ -128,11 +127,36 @@ class RobotDistanceToFrontStatisticsMetric :
           folder = folderName,
           subFolder = "all",
           fileName = "distance_to_front_all_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "distance to front",
+                  yAxisName = "frequency",
+                  legendHeader = "Distance for"),
+          folder = folderName,
+          subFolder = "all",
+          fileName = "distance_to_front_hist_all_lin_${legendEntry}")
+
+      plotDataAsHistogram(
+          plot =
+              getPlot(
+                  legendEntry = legendEntry,
+                  xValues = values.second,
+                  yValues = values.second,
+                  xAxisName = "distance to front",
+                  yAxisName = "frequency",
+                  legendHeader = "Distance for"),
+          logScaleY = true,
+          folder = folderName,
+          subFolder = "all",
+          fileName = "distance_to_front_hist_all_log_${legendEntry}")
     }
 
-    println(
-        "\rWriting Plots for Robot distance to front: " +
-            "${robotIdToDistanceAtTickMap.size}/${robotIdToDistanceAtTickMap.size} (100%)")
+    println("\rWriting Plots for Robot distance to front: finished")
   }
 
   override fun writePlotDataCSV() {

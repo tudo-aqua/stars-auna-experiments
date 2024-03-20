@@ -79,6 +79,7 @@ fun main() {
       ValidTSCInstancesPerProjectionMetric<
           Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
 
+  val plotSegments = false
   tscEvaluation.registerMetricProviders(
       // Generic metrics
       SegmentCountMetric(),
@@ -89,31 +90,31 @@ fun main() {
       FailedMonitorsMetric(validTSCInstancesPerProjectionMetric),
 
       // Velocity
-      RobotVelocityStatisticsMetric(),
+      RobotVelocityStatisticsMetric(plotSegments),
       RobotVelocityAverageStatisticsMetric(),
       RobotVelocityMinStatisticsMetric(),
       RobotVelocityMaxStatisticsMetric(),
 
       // Acceleration
-      RobotAccelerationStatisticsMetric(),
+      RobotAccelerationStatisticsMetric(plotSegments),
       RobotAccelerationAverageStatisticsMetric(),
       RobotAccelerationMinStatisticsMetric(),
       RobotAccelerationMaxStatisticsMetric(),
 
       // Steering angle
-      RobotSteeringAngleStatisticsMetric(),
+      RobotSteeringAngleStatisticsMetric(plotSegments),
       RobotSteeringAngleAverageStatisticsMetric(),
       RobotSteeringAngleMinStatisticsMetric(),
       RobotSteeringAngleMaxStatisticsMetric(),
 
       // Lateral Offset
-      RobotLateralOffsetStatisticsMetric(),
+      RobotLateralOffsetStatisticsMetric(plotSegments),
       RobotLateralOffsetAverageStatisticsMetric(),
       RobotLateralOffsetMinStatisticsMetric(),
       RobotLateralOffsetMaxStatisticsMetric(),
 
       // Distance to front
-      RobotDistanceToFrontStatisticsMetric(),
+      RobotDistanceToFrontStatisticsMetric(plotSegments),
       RobotDistanceToFrontAverageStatisticsMetric(),
       RobotDistanceToFrontMinStatisticsMetric(),
       RobotDistanceToFrontMaxStatisticsMetric(),

@@ -38,3 +38,6 @@ val SEGMENTS_PER_LANE = 3
 
 /** The minimum ticks per segment. */
 val MIN_TICKS_PER_SEGMENT = 10
+
+/** The hardware limit of the steering angle in radians. */
+val STEERING_ANGLE_LIMIT = 0.4

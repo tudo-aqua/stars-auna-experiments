@@ -20,9 +20,12 @@ package tools.aqua.stars.data.av.track
 import de.sciss.kdtree.KdPoint
 import de.sciss.kdtree.KdTree
 import de.sciss.kdtree.NNSolver
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 import tools.aqua.stars.auna.experiments.ACCELERATION_WINDOW_SIZE
+import tools.aqua.stars.auna.experiments.STEERING_ANGLE_LIMIT
 import tools.aqua.stars.auna.importer.*
 
 /**
@@ -193,7 +196,9 @@ private fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
         dataSource = DataSource.ACKERMANN_CMD, // From Message
         lane = latestRobot?.lane,
         steeringAngle =
-            (message.ackermannDrive.steeringAngle * 360) / (2 * Math.PI), // From Message
+            max(
+                min(message.ackermannDrive.steeringAngle, STEERING_ANGLE_LIMIT),
+                -STEERING_ANGLE_LIMIT) * 360 / (2 * Math.PI), // From Message
         isPrimaryEntity = false,
     )
 

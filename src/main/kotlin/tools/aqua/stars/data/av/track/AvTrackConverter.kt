@@ -113,6 +113,50 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
       .flatten()
 }
 
+/**
+ * Wraps the [List] of [TickData] into [Segment]s.
+ *
+ * @param sourceFile The file from which the [TickData] was loaded.
+ * @param ticks The [List] of [TickData].
+ * @return [List] of [Segment]s based on the given [List] of [TickData].
+ */
+fun segmentTicksToIncludeWholeDrive(sourceFile: String, ticks: List<TickData>): List<Segment> {
+  // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
+  // robots are tracked. For the analysis we only want the ticks in which all three robots are
+  // tracked.
+
+  val cleanedTicks =
+      ticks.filter { it.entities.count() == 3 && it.entities.all { t -> t.lane.laneID >= 0 } }
+
+  check(cleanedTicks.any()) { "There is no TickData provided!" }
+  check(cleanedTicks[0].entities.size == 3) {
+    "The first Tick does not contain exactly 3 entities!"
+  }
+  check(
+      cleanedTicks[0].entities[0].lane == cleanedTicks[0].entities[1].lane &&
+          cleanedTicks[0].entities[1].lane == cleanedTicks[0].entities[2].lane) {
+        "The entities do not start on the same lane!"
+      }
+
+  // Multiply segment for all robots as ego
+  return cleanedTicks[0].entities.map { egoRobot ->
+    // Copy TickData for every robot as ego and set the isPrimaryEntity flag
+    val copiedTicks =
+        cleanedTicks.map {
+          it.clone().also { t ->
+            t.entities.first { e -> e.id == egoRobot.id }.isPrimaryEntity = true
+          }
+        }
+    Segment(
+        segmentId = egoRobot.id,
+        segmentSource = sourceFile,
+        ticks = copiedTicks.associateBy { it.currentTick },
+        previousSegment = null,
+        nextSegment = null,
+    )
+  }
+}
+
 private fun splitTicksByLineChange(
     cleanedTicks: List<TickData>,
     egoRobot: Robot

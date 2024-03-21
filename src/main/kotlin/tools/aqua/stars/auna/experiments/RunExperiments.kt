@@ -139,7 +139,7 @@ fun main() {
  * @param lanes The [List] of [Lane]s.
  * @return A [Sequence] of [Segment]s.
  */
-fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
+fun loadSegments(lanes: List<Lane>, spliceData: Boolean = true): Sequence<Segment> {
   val path = File(SIMULATION_RUN_FOLDER).toPath()
   val sourcesToContentMap = tools.aqua.stars.auna.importer.importDrivingData(path)
   val messages = sortMessagesBySentTime(sourcesToContentMap)
@@ -149,7 +149,12 @@ fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
   val ticks = getTicksFromMessages(messages, waypoints = waypoints)
 
   println("Slice Ticks into Segments")
-  val segments = segmentTicksIntoSegments(path.name, ticks)
+  val segments =
+      if (spliceData) {
+        segmentTicksIntoSegments(path.name, ticks)
+      } else {
+        segmentTicksToIncludeWholeDrive(path.name, ticks)
+      }
 
   println("Checksum Ticks: ${segments.sumOf{it.tickData.size}}")
   return segments.asSequence()

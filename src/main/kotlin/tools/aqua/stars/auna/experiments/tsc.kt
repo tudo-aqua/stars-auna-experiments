@@ -27,7 +27,8 @@ fun tsc() =
     TSC(
         root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
           all("TSCRoot") {
-            projectionIDs = mapOf(projRec("all"), proj("Driving situation"), proj("Driving maneuver"))
+            projectionIDs =
+                mapOf(projRec("all"), proj("Driving situation"), proj("Driving maneuver"))
 
             all("Driving situation") {
               projectionIDs = mapOf(projRec("Driving situation"))
@@ -76,7 +77,9 @@ fun tsc() =
                 leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
                 leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
                 leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
-                leaf("No Acceleration (Driving)") { condition = { ctx -> noAcceleration.holds(ctx) } }
+                leaf("No Acceleration (Driving)") {
+                  condition = { ctx -> noAcceleration.holds(ctx) }
+                }
               }
 
               any("Steering Angle") {
@@ -99,21 +102,24 @@ fun tsc() =
             }
 
             // region monitors
-            leaf("Max lateral offset") {
-              condition = { _ -> true }
-              monitorFunction = { ctx -> normalLateralOffset.holds(ctx) }
-            }
-            leaf("Minimum distance to front robot") {
-              condition = { _ -> true }
-              monitorFunction = { ctx -> minDistanceToFrontVehicleExceeded.holds(ctx) }
-            }
-            leaf("Maximum deceleration") {
-              condition = { _ -> true }
-              monitorFunction = { ctx -> strongDeceleration.holds(ctx) }
-            }
-            leaf("CAM message timeout") {
-              condition = { _ -> true }
-              monitorFunction = { ctx -> camMessageTimeout.holds(ctx) }
+            all("monitors") {
+              projectionIDs = mapOf(projRec("Driving situation"), projRec("Driving maneuver"))
+              leaf("Max lateral offset") {
+                condition = { _ -> true }
+                monitorFunction = { ctx -> normalLateralOffset.holds(ctx) }
+              }
+              leaf("Minimum distance to front robot") {
+                condition = { _ -> true }
+                monitorFunction = { ctx -> minDistanceToFrontVehicleExceeded.holds(ctx) }
+              }
+              leaf("Maximum deceleration") {
+                condition = { _ -> true }
+                monitorFunction = { ctx -> strongDeceleration.holds(ctx) }
+              }
+              leaf("CAM message timeout") {
+                condition = { _ -> true }
+                monitorFunction = { ctx -> camMessageTimeout.holds(ctx) }
+              }
             }
             // endregion
           }

@@ -30,6 +30,7 @@ import tools.aqua.stars.auna.importer.Quaternion
 import tools.aqua.stars.auna.importer.Vector
 import tools.aqua.stars.auna.importer.importTrackData
 import tools.aqua.stars.data.av.track.Lane
+import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.convertTrackToLanes
 
 const val OUTPUT_DIR = "./stars-auna-export/"
@@ -159,15 +160,34 @@ private fun exportDynamicData(lanes: List<Lane>) {
                                                           valueColors =
                                                               listOf(
                                                                   0.0 to "#0000FF",
-                                                                  3.724100563502384 to "#FF0000")),
+                                                                  2.0 to "#F5E43D",
+                                                                  3.0 to "#F52620",
+                                                                  3.724100563502384 to "#523FA1")),
                                                       gradientColorValue(
                                                           value = entity.lateralOffset ?: 0.0,
                                                           valueColors =
                                                               listOf(
                                                                   0.0 to "#00FF00",
-                                                                  0.03 to "#00FF00",
-                                                                  0.1 to "#0000FF",
-                                                                  0.65 to "#FF0000"))))
+                                                                  0.499999999 to "#00FF00",
+                                                                  0.5 to "#FF0000")),
+                                                      gradientColorValue(
+                                                          value = entity.steeringAngle ?: 0.0,
+                                                          valueColors =
+                                                              listOf(
+                                                                  -20.0 to "FF0000",
+                                                                  0.0 to "#000000",
+                                                                  20.0 to "#00FF00")),
+                                                      gradientColorValue(
+                                                          value = distanceToFront(entity, tick),
+                                                          valueColors =
+                                                              listOf(
+                                                                  -1.0 to "#333333",
+                                                                  0.0 to "#333333",
+                                                                  0.000000001 to "#FF0000",
+                                                                  0.5 to "#FF0000",
+                                                                  0.500000001 to "#00FF00",
+                                                                  3.0 to "#00FF00",
+                                                                  3.000000001 to "#F57E3D"))))
                                         })
                               })
                     }
@@ -182,6 +202,18 @@ private fun exportDynamicData(lanes: List<Lane>) {
     }
   }
   println("\rDynamic Data: Exported dynamic data of ${primaryEntityIds.count()} ego vehicles!")
+}
+
+/**
+ * Returns the distance to the front robot.
+ *
+ * @param robot The robot to calculate the distance for.
+ * @param tick The tick data to calculate the distance for.
+ * @return The distance to the front robot. -1.0 if the front robot is not found (Robot is leading).
+ */
+private fun distanceToFront(robot: Robot, tick: tools.aqua.stars.data.av.track.TickData): Double {
+  val frontRobot = tick.getEntityById(robot.id - 1) ?: return -1.0
+  return robot.distanceToOther(frontRobot)
 }
 
 /**

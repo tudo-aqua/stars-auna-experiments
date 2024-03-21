@@ -147,7 +147,7 @@ private fun exportDynamicData(lanes: List<Lane>) {
                                               trajectoryColors =
                                                   listOf(
                                                       gradientColorValue(
-                                                          entity.acceleration ?: 0.0,
+                                                          entity.acceleration,
                                                           valueColors =
                                                               listOf(
                                                                   -15.329432162982227 to "#0000FF",
@@ -156,7 +156,7 @@ private fun exportDynamicData(lanes: List<Lane>) {
                                                                   2.0 to "#F00000",
                                                                   10.747724317295187 to "#FF0000")),
                                                       gradientColorValue(
-                                                          value = entity.velocity ?: 0.0,
+                                                          value = entity.velocity,
                                                           valueColors =
                                                               listOf(
                                                                   0.0 to "#0000FF",
@@ -164,14 +164,14 @@ private fun exportDynamicData(lanes: List<Lane>) {
                                                                   3.0 to "#F52620",
                                                                   3.724100563502384 to "#523FA1")),
                                                       gradientColorValue(
-                                                          value = entity.lateralOffset ?: 0.0,
+                                                          value = entity.lateralOffset,
                                                           valueColors =
                                                               listOf(
                                                                   0.0 to "#00FF00",
                                                                   0.499999999 to "#00FF00",
                                                                   0.5 to "#FF0000")),
                                                       gradientColorValue(
-                                                          value = entity.steeringAngle ?: 0.0,
+                                                          value = entity.steeringAngle,
                                                           valueColors =
                                                               listOf(
                                                                   -20.0 to "FF0000",

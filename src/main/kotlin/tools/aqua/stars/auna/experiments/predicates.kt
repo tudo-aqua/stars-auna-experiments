@@ -134,6 +134,37 @@ val maxDistanceToFrontVehicleExceeded =
     }
 // endregion
 
+// region velocity
+/*
+ * The velocity of the robot in m/s.
+ */
+
+/** Maximum velocity is defined as >= [VELOCITY_MAX]. */
+const val VELOCITY_MAX: Double = 2.5
+
+/** High velocity is defined as >= [VELOCITY_HIGH]. */
+const val VELOCITY_HIGH: Double = 1.5
+
+/** Maximum velocity is defined as >= [STEERING_ANGLE_LOW]. */
+val maxVelocity =
+  predicate(Robot::class) { _, r ->
+    eventually(r, phi = { (it.steeringAngle ?: 0.0) >= VELOCITY_MAX })
+  }
+
+/** High velocity is defined in the interval ([VELOCITY_HIGH] ... [VELOCITY_MAX]). */
+val highVelocity =
+  predicate(Robot::class) { ctx, r ->
+    eventually(
+      r, phi = { (it.velocity ?: 0.0) in VELOCITY_HIGH ..< VELOCITY_MAX }) && !maxVelocity.holds(ctx, r)
+  }
+
+/** Low velocity is defined as < [VELOCITY_HIGH]. */
+val lowVelocity =
+  predicate(Robot::class) { _, r ->
+    globally(r, phi = { (it.velocity ?: 0.0) < VELOCITY_HIGH })
+  }
+// endregion
+
 // region acceleration
 /*
  * The acceleration of the robot in m/s^2.

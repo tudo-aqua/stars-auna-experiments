@@ -28,14 +28,9 @@ fun tsc() =
           all("TSCRoot") {
             projectionIDs = mapOf(projRec(("all")))
 
-            /*
-            exclusive("Lane Type") {
-              leaf("Straight Lane") { condition = { ctx -> isOnStraightLane.holds(ctx) } }
-              leaf("Curved Lane") { condition = { ctx -> isOnCurvedLane.holds(ctx) } }
-            }
-            */
 
             exclusive("Lane Change") {
+              projectionIDs = mapOf(projRec(("Driving situation")))
               leaf("Entering Curve") { condition = { ctx -> enteringCurve.holds(ctx) } }
               leaf("In Curve") { condition = { ctx -> inCurve.holds(ctx) } }
               leaf("Exiting Curve") { condition = { ctx -> exitingCurve.holds(ctx) } }
@@ -46,6 +41,7 @@ fun tsc() =
             }
 
             any("Distance to front vehicle") {
+              projectionIDs = mapOf(projRec(("Driving situation")))
               leaf("None") { condition = { ctx -> ctx.primaryEntityId == 1 } }
               leaf("Normal") {
                 condition = { ctx ->
@@ -64,7 +60,15 @@ fun tsc() =
               }
             }
 
+            exclusive("Velocity") {
+              projectionIDs = mapOf(projRec(("Driving situation")))
+              leaf("Low Velocity") { condition = { ctx -> lowVelocity.holds(ctx) } }
+              leaf("High Velocity") { condition = { ctx -> highVelocity.holds(ctx) } }
+              leaf("Max Velocity") { condition = { ctx -> maxVelocity.holds(ctx) } }
+            }
+
             any("Acceleration") {
+              projectionIDs = mapOf(projRec(("Driving maneuver")))
               leaf("Weak Deceleration") { condition = { ctx -> weakDeceleration.holds(ctx) } }
               leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
               leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
@@ -73,6 +77,7 @@ fun tsc() =
             }
 
             any("Steering Angle") {
+              projectionIDs = mapOf(projRec(("Driving maneuver")))
               leaf("No Steering") {
                 condition = { ctx ->
                   ctx.entityIds.any { entityId -> noSteering.holds(ctx, entityId = entityId) }

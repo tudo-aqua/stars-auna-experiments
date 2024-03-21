@@ -53,21 +53,46 @@ import tools.aqua.stars.core.types.EntityType
 data class Robot(
     override val id: Int,
     override val tickData: TickData,
-    val posOnLane: Double? = 0.0,
-    val lateralOffset: Double? = 0.0,
-    val velocity: Double? = 0.0,
-    var acceleration: Double? = 0.0,
-    val position: Vector? = Vector(0.0, 0.0, 0.0),
-    val rotation: Quaternion? = Quaternion(0.0, 0.0, 0.0, 0.0),
-    val posOnLaneCAM: Double? = 0.0,
-    val lateralOffsetCAM: Double? = 0.0,
-    val velocityCAM: Double? = 0.0,
-    val accelerationCAM: Double? = 0.0,
+    val posOnLane: Double = 0.0,
+    val lateralOffset: Double = 0.0,
+    val velocity: Double = 0.0,
+    var acceleration: Double = 0.0,
+    val position: Vector = Vector(0.0, 0.0, 0.0),
+    val rotation: Quaternion = Quaternion(0.0, 0.0, 0.0, 0.0),
+    val posOnLaneCAM: Double = 0.0,
+    val lateralOffsetCAM: Double = 0.0,
+    val velocityCAM: Double = 0.0,
+    val accelerationCAM: Double = 0.0,
     val dataSource: DataSource = DataSource.NOT_SET,
-    val lane: Lane?,
+    val lane: Lane,
     var isPrimaryEntity: Boolean,
-    val steeringAngle: Double? = 0.0,
+    val steeringAngle: Double = 0.0,
 ) : EntityType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
+
+    /** Dummy constructor */
+    constructor(tickData: TickData) : this(
+        id = -1,
+        tickData = tickData,
+        posOnLane = 0.0,
+        lateralOffset = 0.0,
+        velocity = 0.0,
+        acceleration = 0.0,
+        position = Vector.zero,
+        rotation = Quaternion.zero,
+        posOnLaneCAM = 0.0,
+        lateralOffsetCAM = 0.0,
+        velocityCAM = 0.0,
+        accelerationCAM = 0.0,
+        dataSource = DataSource.NOT_SET,
+        lane = Lane(
+            laneID = -1,
+            length = 0.0,
+            width = 0.0,
+            waypoints = emptyList<Waypoint>(),
+            isStraight = true),
+        isPrimaryEntity = false,
+        steeringAngle = 0.0
+    )
 
   /**
    * Clones the current [Robot] to the given [newTickData].
@@ -109,15 +134,11 @@ data class Robot(
    * @return The Euclidean distance between [position1] and [position2]. When one of them is null,
    *   [Double.POSITIVE_INFINITY] is returned.
    */
-  fun euclideanDistance(position1: Vector?, position2: Vector?): Double {
-    if (position1 == null || position2 == null) {
-      return Double.POSITIVE_INFINITY
-    }
-    return sqrt(
-        (position1.x - position2.x).pow(2) +
-            (position1.y - position2.y).pow(2) +
-            (position1.z - position2.z).pow(2))
-  }
+  private fun euclideanDistance(position1: Vector, position2: Vector): Double =
+      sqrt(
+          (position1.x - position2.x).pow(2) +
+              (position1.y - position2.y).pow(2) +
+              (position1.z - position2.z).pow(2))
 
   override fun toString(): String = "Robot(id=$id)"
 }

@@ -26,4 +26,8 @@ data class Quaternion(
     @SerialName("y") val y: Double,
     @SerialName("z") val z: Double,
     @SerialName("w") val w: Double
-)
+) {
+    companion object {
+        val zero: Quaternion = Quaternion(0.0, 0.0, 0.0, 0.0)
+    }
+}

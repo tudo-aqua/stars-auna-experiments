@@ -27,6 +27,7 @@ import kotlin.math.sqrt
 import tools.aqua.stars.auna.experiments.ACCELERATION_WINDOW_SIZE
 import tools.aqua.stars.auna.experiments.STEERING_ANGLE_LIMIT
 import tools.aqua.stars.auna.importer.*
+import tools.aqua.stars.data.av.track.Lane
 
 /**
  * Returns a [List] of [TickData] based on the given [List] of [Message]s.
@@ -62,7 +63,8 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
         robots.addAll(otherRobotInformationCopy)
 
         // Get the latest information for the robot that sent the current message
-        val latestRobotInformation = latestRobotInformationMap[robotId]
+        val latestRobotInformation = latestRobotInformationMap[robotId] ?: Robot(tickData)
+
         // Get Robot information form current message
         val currentRobot =
             getRobotFromMessageAndLatestInformation(
@@ -136,7 +138,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
  */
 private fun getRobotFromMessageAndLatestInformation(
     message: Message,
-    latestRobot: Robot?,
+    latestRobot: Robot,
     robotId: Int,
     tickData: TickData,
     waypoints: List<Waypoint>
@@ -176,25 +178,25 @@ private fun getRobotFromMessageAndLatestInformation(
  */
 private fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
     message: AckermannDriveStamped,
-    latestRobot: Robot?,
+    latestRobot: Robot,
     robotId: Int,
     tickData: TickData
 ): Robot =
     Robot(
         id = robotId,
         tickData = tickData,
-        posOnLane = latestRobot?.posOnLane,
-        lateralOffset = latestRobot?.lateralOffset,
-        velocity = latestRobot?.velocity,
-        acceleration = latestRobot?.acceleration,
-        position = latestRobot?.position,
-        rotation = latestRobot?.rotation,
-        posOnLaneCAM = latestRobot?.posOnLaneCAM,
-        lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-        velocityCAM = latestRobot?.velocityCAM,
-        accelerationCAM = latestRobot?.accelerationCAM, // From Message? //TODO Check values
+        posOnLane = latestRobot.posOnLane,
+        lateralOffset = latestRobot.lateralOffset,
+        velocity = latestRobot.velocity,
+        acceleration = latestRobot.acceleration,
+        position = latestRobot.position,
+        rotation = latestRobot.rotation,
+        posOnLaneCAM = latestRobot.posOnLaneCAM,
+        lateralOffsetCAM = latestRobot.lateralOffsetCAM,
+        velocityCAM = latestRobot.velocityCAM,
+        accelerationCAM = latestRobot.accelerationCAM, // From Message //TODO Check values
         dataSource = DataSource.ACKERMANN_CMD, // From Message
-        lane = latestRobot?.lane,
+        lane = latestRobot.lane,
         steeringAngle =
             max(
                 min(message.ackermannDrive.steeringAngle, STEERING_ANGLE_LIMIT),
@@ -216,7 +218,7 @@ private fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
  */
 private fun getRobotFromMessageAndLatestInformationFromCAM(
     message: CAM,
-    latestRobot: Robot?,
+    latestRobot: Robot,
     robotId: Int,
     tickData: TickData,
     waypoints: List<Waypoint>
@@ -226,19 +228,19 @@ private fun getRobotFromMessageAndLatestInformationFromCAM(
   return Robot(
       id = robotId,
       tickData = tickData,
-      posOnLane = latestRobot?.posOnLane,
-      lateralOffset = latestRobot?.lateralOffset,
-      velocity = latestRobot?.velocity,
-      acceleration = latestRobot?.acceleration,
-      position = latestRobot?.position,
-      rotation = latestRobot?.rotation,
+      posOnLane = latestRobot.posOnLane,
+      lateralOffset = latestRobot.lateralOffset,
+      velocity = latestRobot.velocity,
+      acceleration = latestRobot.acceleration,
+      position = latestRobot.position,
+      rotation = latestRobot.rotation,
       posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
       lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
       velocityCAM = message.v, // From Message
       accelerationCAM = message.vDot, // From Message
       dataSource = DataSource.CAM, // From Message
       lane = posOnLaneAndLateralOffset.first.lane,
-      steeringAngle = latestRobot?.steeringAngle,
+      steeringAngle = latestRobot.steeringAngle,
       isPrimaryEntity = false)
 }
 
@@ -254,29 +256,29 @@ private fun getRobotFromMessageAndLatestInformationFromCAM(
  */
 private fun getRobotFromMessageAndLatestInformationFromOdometry(
     message: Odometry,
-    latestRobot: Robot?,
+    latestRobot: Robot,
     robotId: Int,
     tickData: TickData
 ): Robot =
     Robot(
         id = robotId,
         tickData = tickData,
-        posOnLane = latestRobot?.posOnLane,
-        lateralOffset = latestRobot?.lateralOffset,
+        posOnLane = latestRobot.posOnLane,
+        lateralOffset = latestRobot.lateralOffset,
         velocity = message.getVelocity(), // From Message
         acceleration = 0.0, /*
-            (message.getVelocity() - (latestRobot?.velocity ?: 0.0)) /
-                (tickData.currentTick - (latestRobot?.tickData?.currentTick ?: Zero))
+            (message.getVelocity() - (latestRobot.velocity : 0.0)) /
+                (tickData.currentTick - (latestRobot.tickData.currentTick))
                     .toDoubleValue(), // Calculated*/
-        position = latestRobot?.position,
-        rotation = latestRobot?.rotation,
-        posOnLaneCAM = latestRobot?.posOnLaneCAM,
-        lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-        velocityCAM = latestRobot?.velocityCAM,
-        accelerationCAM = latestRobot?.accelerationCAM,
+        position = latestRobot.position,
+        rotation = latestRobot.rotation,
+        posOnLaneCAM = latestRobot.posOnLaneCAM,
+        lateralOffsetCAM = latestRobot.lateralOffsetCAM,
+        velocityCAM = latestRobot.velocityCAM,
+        accelerationCAM = latestRobot.accelerationCAM,
         dataSource = DataSource.ODOMETRY, // From Message
-        lane = latestRobot?.lane,
-        steeringAngle = latestRobot?.steeringAngle,
+        lane = latestRobot.lane,
+        steeringAngle = latestRobot.steeringAngle,
         isPrimaryEntity = false)
 
 /**
@@ -293,7 +295,7 @@ private fun getRobotFromMessageAndLatestInformationFromOdometry(
  */
 private fun getRobotFromMessageAndLatestInformationFromViconPose(
     message: ViconPose,
-    latestRobot: Robot?,
+    latestRobot: Robot,
     robotId: Int,
     tickData: TickData,
     waypoints: List<Waypoint>
@@ -305,17 +307,17 @@ private fun getRobotFromMessageAndLatestInformationFromViconPose(
       tickData = tickData,
       posOnLane = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
       lateralOffset = posOnLaneAndLateralOffset.second, // From Message
-      velocity = latestRobot?.velocity,
-      acceleration = 0.0, // latestRobot?.acceleration,
+      velocity = latestRobot.velocity,
+      acceleration = 0.0, // latestRobot.acceleration,
       position = message.transform.translation, // From Message
       rotation = message.transform.rotation, // From Message
-      posOnLaneCAM = latestRobot?.posOnLaneCAM,
-      lateralOffsetCAM = latestRobot?.lateralOffsetCAM,
-      velocityCAM = latestRobot?.velocityCAM,
-      accelerationCAM = latestRobot?.accelerationCAM,
+      posOnLaneCAM = latestRobot.posOnLaneCAM,
+      lateralOffsetCAM = latestRobot.lateralOffsetCAM,
+      velocityCAM = latestRobot.velocityCAM,
+      accelerationCAM = latestRobot.accelerationCAM,
       dataSource = DataSource.VICON_POSE,
       lane = posOnLaneAndLateralOffset.first.lane, // From Message
-      steeringAngle = latestRobot?.steeringAngle,
+      steeringAngle = latestRobot.steeringAngle,
       isPrimaryEntity = false)
 }
 

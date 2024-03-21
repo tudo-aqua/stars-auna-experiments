@@ -25,4 +25,8 @@ data class Vector(
     @SerialName("x") val x: Double,
     @SerialName("y") val y: Double,
     @SerialName("z") val z: Double,
-)
+) {
+    companion object {
+        val zero: Vector = Vector(0.0, 0.0, 0.0)
+    }
+}

@@ -20,10 +20,11 @@ package tools.aqua.stars.data.av.track
 /**
  * This class represents the [Lane] on which the [Robot]s are driving on.
  *
- * @param laneID The id of this [Lane]
- * @param length The length of the [Lane] in meters
- * @param width The width of the [Lane] in meters
- * @param waypoints The [List] of [Waypoint]s which represent the ideal line for this [Lane]
+ * @param laneID The id of this [Lane].
+ * @param length The length of the [Lane] in meters.
+ * @param width The width of the [Lane] in meters.
+ * @param waypoints The [List] of [Waypoint]s which represent the ideal line for this [Lane].
+ * @param isStraight Whether this [Lane] is straight or not.
  */
 data class Lane(
     val laneID: Int,
@@ -31,9 +32,10 @@ data class Lane(
     val width: Double,
     var waypoints: List<Waypoint>,
     var isStraight: Boolean,
-    var previousLane: Lane?,
-    var nextLane: Lane?,
 ) {
+  lateinit var previousLane: Lane
+  lateinit var nextLane: Lane
+
   val isCurve
     get() = !isStraight
 

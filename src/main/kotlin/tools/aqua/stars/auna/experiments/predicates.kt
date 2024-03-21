@@ -38,7 +38,7 @@ const val MAX_LATERAL_OFFSET: Double = 0.5
 /** Normal lateral offset defined as <= [MAX_LATERAL_OFFSET]. */
 val normalLateralOffset =
     predicate(Robot::class) { _, r ->
-      globally(r, phi = { (it.lateralOffset ?: 0.0) <= MAX_LATERAL_OFFSET })
+      globally(r, phi = { it.lateralOffset <= MAX_LATERAL_OFFSET })
     }
 
 /// ** Exceeding the maximum lateral offset defined as > [MAX_LATERAL_OFFSET]. */
@@ -150,19 +150,19 @@ const val VELOCITY_HIGH: Double = 1.5
 /** Maximum velocity is defined as >= [STEERING_ANGLE_LOW]. */
 val maxVelocity =
     predicate(Robot::class) { _, r ->
-      eventually(r, phi = { (it.steeringAngle ?: 0.0) >= VELOCITY_MAX })
+      eventually(r, phi = { it.steeringAngle >= VELOCITY_MAX })
     }
 
 /** High velocity is defined in the interval ([VELOCITY_HIGH] ... [VELOCITY_MAX]). */
 val highVelocity =
     predicate(Robot::class) { ctx, r ->
-      eventually(r, phi = { (it.velocity ?: 0.0) in VELOCITY_HIGH ..< VELOCITY_MAX }) &&
+      eventually(r, phi = { it.velocity in VELOCITY_HIGH ..< VELOCITY_MAX }) &&
           !maxVelocity.holds(ctx, r)
     }
 
 /** Low velocity is defined as < [VELOCITY_HIGH]. */
 val lowVelocity =
-    predicate(Robot::class) { _, r -> globally(r, phi = { (it.velocity ?: 0.0) < VELOCITY_HIGH }) }
+    predicate(Robot::class) { _, r -> globally(r, phi = { it.velocity < VELOCITY_HIGH }) }
 // endregion
 
 // region acceleration
@@ -192,7 +192,7 @@ const val ACCELERATION_DECELERATION_STRONG_THRESHOLD: Double = -0.5
 val strongAcceleration =
     predicate(Robot::class) { _, r ->
       eventually(
-          r, phi = { (it.accelerationCAM ?: 0.0) >= ACCELERATION_ACCELERATION_STRONG_THRESHOLD })
+          r, phi = { it.accelerationCAM >= ACCELERATION_ACCELERATION_STRONG_THRESHOLD })
     }
 
 /**
@@ -204,7 +204,7 @@ val weakAcceleration =
       eventually(
           r,
           phi = {
-            (it.accelerationCAM ?: 0.0) in
+            it.accelerationCAM in
                 ACCELERATION_ACCELERATION_WEAK_THRESHOLD ..<
                     ACCELERATION_ACCELERATION_STRONG_THRESHOLD
           })
@@ -219,7 +219,7 @@ val noAcceleration =
       globally(
           r,
           phi = {
-            (it.accelerationCAM ?: 0.0) in
+            it.accelerationCAM in
                 ACCELERATION_DECELERATION_WEAK_THRESHOLD ..<
                     ACCELERATION_ACCELERATION_WEAK_THRESHOLD
           })
@@ -234,7 +234,7 @@ val weakDeceleration =
       eventually(
           r,
           phi = {
-            (it.accelerationCAM ?: 0.0) in
+            it.accelerationCAM in
                 ACCELERATION_DECELERATION_STRONG_THRESHOLD ..<
                     ACCELERATION_DECELERATION_WEAK_THRESHOLD
           })
@@ -244,18 +244,18 @@ val weakDeceleration =
 val strongDeceleration =
     predicate(Robot::class) { _, r ->
       eventually(
-          r, phi = { (it.accelerationCAM ?: 0.0) < ACCELERATION_DECELERATION_STRONG_THRESHOLD })
+          r, phi = { it.accelerationCAM < ACCELERATION_DECELERATION_STRONG_THRESHOLD })
     }
 // endregion
 
 // region lane type
 /** Robot is mainly driving on a straight lane. */
 val isOnStraightLane =
-    predicate(Robot::class) { _, r -> globally(r, phi = { it.lane!!.isStraight }) }
+    predicate(Robot::class) { _, r -> globally(r, phi = { it.lane.isStraight }) }
 
 /** Robot is mainly driving on a curved lane. */
 val isOnCurvedLane =
-    predicate(Robot::class) { _, r -> globally(r, phi = { !it.lane!!.isStraight }) }
+    predicate(Robot::class) { _, r -> globally(r, phi = { !it.lane.isStraight }) }
 
 // endregion
 
@@ -273,49 +273,49 @@ const val STEERING_ANGLE_LOW: Double = 7.5
 /** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
 val hardSteering =
     predicate(Robot::class) { _, r ->
-      eventually(r, phi = { (it.steeringAngle ?: 0.0) >= STEERING_ANGLE_HARD })
+      eventually(r, phi = { it.steeringAngle >= STEERING_ANGLE_HARD })
     }
 
 /** Low steering is defined in the interval ([STEERING_ANGLE_LOW] ... [STEERING_ANGLE_HARD]). */
 val lowSteering =
     predicate(Robot::class) { _, r ->
       eventually(
-          r, phi = { (it.steeringAngle ?: 0.0) in STEERING_ANGLE_LOW ..< STEERING_ANGLE_HARD })
+          r, phi = { it.steeringAngle in STEERING_ANGLE_LOW ..< STEERING_ANGLE_HARD })
     }
 
 /** No steering angle is defined as >= [STEERING_ANGLE_LOW]. */
 val noSteering =
     predicate(Robot::class) { _, r ->
-      eventually(r, phi = { (it.steeringAngle ?: 0.0) < STEERING_ANGLE_LOW })
+      eventually(r, phi = { it.steeringAngle < STEERING_ANGLE_LOW })
     }
 
 // endregion
 // TODO: Comments
 val enteringCurve =
     predicate(Robot::class) { _, r ->
-      r.lane!!.isCurve && r.lane.previousLane!!.isStraight
+      r.lane.isCurve && r.lane.previousLane.isStraight
     }
 val inCurve =
     predicate(Robot::class) { _, r ->
-      r.lane!!.isCurve && r.lane.previousLane!!.isCurve && r.lane.nextLane!!.isCurve
+      r.lane.isCurve && r.lane.previousLane.isCurve && r.lane.nextLane.isCurve
     }
 val exitingCurve =
-    predicate(Robot::class) { _, r -> r.lane!!.isCurve && r.lane.nextLane!!.isStraight }
+    predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.nextLane.isStraight }
 
 val enteringStraight =
-    predicate(Robot::class) { _, r -> r.lane!!.isStraight && r.lane.previousLane!!.isCurve }
+    predicate(Robot::class) { _, r -> r.lane.isStraight && r.lane.previousLane.isCurve }
 val inStraight =
     predicate(Robot::class) { _, r ->
-      r.lane!!.isStraight && r.lane.previousLane!!.isStraight && r.lane.nextLane!!.isStraight
+      r.lane.isStraight && r.lane.previousLane.isStraight && r.lane.nextLane.isStraight
     }
 val exitingStraight =
-    predicate(Robot::class) { _, r -> r.lane!!.isStraight && r.lane.nextLane!!.isCurve }
+    predicate(Robot::class) { _, r -> r.lane.isStraight && r.lane.nextLane.isCurve }
 
 const val CAM_DECELERATION_THRESHOLD = -4.0
 const val CAM_TIME_THRESHOLD_NANOS = 100_000L // 100ms
 val camMessageTimeout =
     predicate(Robot::class) { _, r ->
-      r.acceleration!! < -CAM_DECELERATION_THRESHOLD &&
+      r.acceleration < -CAM_DECELERATION_THRESHOLD &&
           eventually(
               r,
               phi = { it.dataSource == DataSource.CAM },

@@ -42,17 +42,18 @@ fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> {
                       length = lane.length,
                       width = lane.width,
                       waypoints = listOf(),
-                      isStraight = index % 2 != 0,
-                      previousLane = previousLane,
-                      nextLane = null)
-                  .also {
-                    it.waypoints =
+                      isStraight = index % 2 != 0)
+                  .also {l ->
+                    l.waypoints =
                         wp.map { wp ->
                           Waypoint(
-                              x = wp.x, y = wp.y, lane = it, distanceToStart = wp.distanceToStart)
+                              x = wp.x, y = wp.y, lane = l, distanceToStart = wp.distanceToStart)
                         }
-                    previousLane?.nextLane = it
-                    previousLane = it
+                    previousLane?.let {
+                      l.previousLane = it
+                      it.nextLane = l
+                    }
+                    previousLane = l
                   }
             }
       }
@@ -77,7 +78,7 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
   // tracked.
 
   val cleanedTicks =
-      ticks.filter { it.entities.count() == 3 && it.entities.all { t -> t.lane != null } }
+      ticks.filter { it.entities.count() == 3 && it.entities.all { t -> t.lane.laneID >= 0 } }
 
   check(cleanedTicks.any()) { "There is no TickData provided!" }
   check(cleanedTicks[0].entities.size == 3) {

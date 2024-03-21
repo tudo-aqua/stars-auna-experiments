@@ -63,6 +63,16 @@ fun main() {
 
   val tsc = tsc()
 
+  println("Projections:")
+  tsc.buildProjections().forEachIndexed { index, projection ->
+    println("TSC for Projection $projection:")
+    println(projection.tsc)
+    println("All possible instances:")
+    println(projection.possibleTSCInstances.size)
+    println()
+  }
+  println("-----------------")
+
   println("Import Track Data")
   val track = importTrackData()
 

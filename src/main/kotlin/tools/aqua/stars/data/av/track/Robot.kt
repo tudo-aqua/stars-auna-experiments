@@ -69,30 +69,32 @@ data class Robot(
     val steeringAngle: Double = 0.0,
 ) : EntityType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
 
-    /** Dummy constructor */
-    constructor(tickData: TickData) : this(
-        id = -1,
-        tickData = tickData,
-        posOnLane = 0.0,
-        lateralOffset = 0.0,
-        velocity = 0.0,
-        acceleration = 0.0,
-        position = Vector.zero,
-        rotation = Quaternion.zero,
-        posOnLaneCAM = 0.0,
-        lateralOffsetCAM = 0.0,
-        velocityCAM = 0.0,
-        accelerationCAM = 0.0,
-        dataSource = DataSource.NOT_SET,
-        lane = Lane(
-            laneID = -1,
-            length = 0.0,
-            width = 0.0,
-            waypoints = emptyList<Waypoint>(),
-            isStraight = true),
-        isPrimaryEntity = false,
-        steeringAngle = 0.0
-    )
+  /** Dummy constructor */
+  constructor(
+      tickData: TickData
+  ) : this(
+      id = -1,
+      tickData = tickData,
+      posOnLane = 0.0,
+      lateralOffset = 0.0,
+      velocity = 0.0,
+      acceleration = 0.0,
+      position = Vector.zero,
+      rotation = Quaternion.zero,
+      posOnLaneCAM = 0.0,
+      lateralOffsetCAM = 0.0,
+      velocityCAM = 0.0,
+      accelerationCAM = 0.0,
+      dataSource = DataSource.NOT_SET,
+      lane =
+          Lane(
+              laneID = -1,
+              length = 0.0,
+              width = 0.0,
+              waypoints = emptyList<Waypoint>(),
+              isStraight = true),
+      isPrimaryEntity = false,
+      steeringAngle = 0.0)
 
   /**
    * Clones the current [Robot] to the given [newTickData].

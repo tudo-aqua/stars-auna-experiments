@@ -27,7 +27,6 @@ import kotlin.math.sqrt
 import tools.aqua.stars.auna.experiments.ACCELERATION_WINDOW_SIZE
 import tools.aqua.stars.auna.experiments.STEERING_ANGLE_LIMIT
 import tools.aqua.stars.auna.importer.*
-import tools.aqua.stars.data.av.track.Lane
 
 /**
  * Returns a [List] of [TickData] based on the given [List] of [Message]s.

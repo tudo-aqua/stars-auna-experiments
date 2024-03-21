@@ -43,7 +43,7 @@ fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> {
                       width = lane.width,
                       waypoints = listOf(),
                       isStraight = index % 2 != 0)
-                  .also {l ->
+                  .also { l ->
                     l.waypoints =
                         wp.map { wp ->
                           Waypoint(

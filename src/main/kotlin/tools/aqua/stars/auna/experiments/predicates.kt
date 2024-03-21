@@ -149,9 +149,7 @@ const val VELOCITY_HIGH: Double = 1.5
 
 /** Maximum velocity is defined as >= [STEERING_ANGLE_LOW]. */
 val maxVelocity =
-    predicate(Robot::class) { _, r ->
-      eventually(r, phi = { it.steeringAngle >= VELOCITY_MAX })
-    }
+    predicate(Robot::class) { _, r -> eventually(r, phi = { it.steeringAngle >= VELOCITY_MAX }) }
 
 /** High velocity is defined in the interval ([VELOCITY_HIGH] ... [VELOCITY_MAX]). */
 val highVelocity =
@@ -191,8 +189,7 @@ const val ACCELERATION_DECELERATION_STRONG_THRESHOLD: Double = -0.5
 /** Strong acceleration is defined as > [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]. */
 val strongAcceleration =
     predicate(Robot::class) { _, r ->
-      eventually(
-          r, phi = { it.accelerationCAM >= ACCELERATION_ACCELERATION_STRONG_THRESHOLD })
+      eventually(r, phi = { it.accelerationCAM >= ACCELERATION_ACCELERATION_STRONG_THRESHOLD })
     }
 
 /**
@@ -243,19 +240,16 @@ val weakDeceleration =
 /** Strong deceleration is defined as < [ACCELERATION_DECELERATION_STRONG_THRESHOLD]. */
 val strongDeceleration =
     predicate(Robot::class) { _, r ->
-      eventually(
-          r, phi = { it.accelerationCAM < ACCELERATION_DECELERATION_STRONG_THRESHOLD })
+      eventually(r, phi = { it.accelerationCAM < ACCELERATION_DECELERATION_STRONG_THRESHOLD })
     }
 // endregion
 
 // region lane type
 /** Robot is mainly driving on a straight lane. */
-val isOnStraightLane =
-    predicate(Robot::class) { _, r -> globally(r, phi = { it.lane.isStraight }) }
+val isOnStraightLane = predicate(Robot::class) { _, r -> globally(r, phi = { it.lane.isStraight }) }
 
 /** Robot is mainly driving on a curved lane. */
-val isOnCurvedLane =
-    predicate(Robot::class) { _, r -> globally(r, phi = { !it.lane.isStraight }) }
+val isOnCurvedLane = predicate(Robot::class) { _, r -> globally(r, phi = { !it.lane.isStraight }) }
 
 // endregion
 
@@ -279,8 +273,7 @@ val hardSteering =
 /** Low steering is defined in the interval ([STEERING_ANGLE_LOW] ... [STEERING_ANGLE_HARD]). */
 val lowSteering =
     predicate(Robot::class) { _, r ->
-      eventually(
-          r, phi = { it.steeringAngle in STEERING_ANGLE_LOW ..< STEERING_ANGLE_HARD })
+      eventually(r, phi = { it.steeringAngle in STEERING_ANGLE_LOW ..< STEERING_ANGLE_HARD })
     }
 
 /** No steering angle is defined as >= [STEERING_ANGLE_LOW]. */
@@ -292,15 +285,12 @@ val noSteering =
 // endregion
 // TODO: Comments
 val enteringCurve =
-    predicate(Robot::class) { _, r ->
-      r.lane.isCurve && r.lane.previousLane.isStraight
-    }
+    predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.previousLane.isStraight }
 val inCurve =
     predicate(Robot::class) { _, r ->
       r.lane.isCurve && r.lane.previousLane.isCurve && r.lane.nextLane.isCurve
     }
-val exitingCurve =
-    predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.nextLane.isStraight }
+val exitingCurve = predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.nextLane.isStraight }
 
 val enteringStraight =
     predicate(Robot::class) { _, r -> r.lane.isStraight && r.lane.previousLane.isCurve }

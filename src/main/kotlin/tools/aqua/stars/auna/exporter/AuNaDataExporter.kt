@@ -49,7 +49,7 @@ val ACTOR_TYPES =
             height = 0.1f // TODO: get actual height
             ))
 
-/** The [Json] instance used for serialization with domain specific configuration */
+/** The [Json] instance used for serialization with domain specific configuration. */
 val json = Json { encodeDefaults = true }
 
 /** Exports calculated [Segment]s to the import format used by the STARS-Visualizer tool. */
@@ -77,7 +77,7 @@ fun main() {
 }
 
 /**
- * Exports static data to directory specified in [OUTPUT_DIR]
+ * Exports static data to directory specified in [OUTPUT_DIR].
  *
  * @param lanes experiment data as [List] of [Lane]s.
  */
@@ -112,7 +112,7 @@ private fun exportStaticData(lanes: List<Lane>) {
 @OptIn(ExperimentalSerializationApi::class)
 private fun exportDynamicData(lanes: List<Lane>) {
   println("Dynamic Data: Load Segments")
-  val segments = loadSegments(lanes)
+  val segments = loadSegments(lanes, false)
   println("Dynamic Data: Parse Segments")
 
   val primaryEntityIds = segments.groupBy { it.primaryEntityId }.map { it.key }.sorted()

@@ -20,6 +20,8 @@
 package tools.aqua.stars.auna.experiments
 
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
+import tools.aqua.stars.data.av.track.AuNaTimeDifference
+import tools.aqua.stars.data.av.track.DataSource
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.logic.kcmftbl.eventually
 import tools.aqua.stars.logic.kcmftbl.globally
@@ -147,22 +149,20 @@ const val VELOCITY_HIGH: Double = 1.5
 
 /** Maximum velocity is defined as >= [STEERING_ANGLE_LOW]. */
 val maxVelocity =
-  predicate(Robot::class) { _, r ->
-    eventually(r, phi = { (it.steeringAngle ?: 0.0) >= VELOCITY_MAX })
-  }
+    predicate(Robot::class) { _, r ->
+      eventually(r, phi = { (it.steeringAngle ?: 0.0) >= VELOCITY_MAX })
+    }
 
 /** High velocity is defined in the interval ([VELOCITY_HIGH] ... [VELOCITY_MAX]). */
 val highVelocity =
-  predicate(Robot::class) { ctx, r ->
-    eventually(
-      r, phi = { (it.velocity ?: 0.0) in VELOCITY_HIGH ..< VELOCITY_MAX }) && !maxVelocity.holds(ctx, r)
-  }
+    predicate(Robot::class) { ctx, r ->
+      eventually(r, phi = { (it.velocity ?: 0.0) in VELOCITY_HIGH ..< VELOCITY_MAX }) &&
+          !maxVelocity.holds(ctx, r)
+    }
 
 /** Low velocity is defined as < [VELOCITY_HIGH]. */
 val lowVelocity =
-  predicate(Robot::class) { _, r ->
-    globally(r, phi = { (it.velocity ?: 0.0) < VELOCITY_HIGH })
-  }
+    predicate(Robot::class) { _, r -> globally(r, phi = { (it.velocity ?: 0.0) < VELOCITY_HIGH }) }
 // endregion
 
 // region acceleration
@@ -290,9 +290,11 @@ val noSteering =
     }
 
 // endregion
-
+// TODO: Comments
 val enteringCurve =
-    predicate(Robot::class) { _, r -> r.lane!!.isCurve && r.lane.previousLane!!.isStraight }
+    predicate(Robot::class) { _, r ->
+      r.lane!!.isCurve && r.lane.previousLane!!.isStraight
+    }
 val inCurve =
     predicate(Robot::class) { _, r ->
       r.lane!!.isCurve && r.lane.previousLane!!.isCurve && r.lane.nextLane!!.isCurve
@@ -308,3 +310,14 @@ val inStraight =
     }
 val exitingStraight =
     predicate(Robot::class) { _, r -> r.lane!!.isStraight && r.lane.nextLane!!.isCurve }
+
+const val CAM_DECELERATION_THRESHOLD = -4.0
+const val CAM_TIME_THRESHOLD_NANOS = 100_000L // 100ms
+val camMessageTimeout =
+    predicate(Robot::class) { _, r ->
+      r.acceleration!! < -CAM_DECELERATION_THRESHOLD &&
+          eventually(
+              r,
+              phi = { it.dataSource == DataSource.CAM },
+              interval = AuNaTimeDifference(0) to AuNaTimeDifference(CAM_TIME_THRESHOLD_NANOS))
+    }

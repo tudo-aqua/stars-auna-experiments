@@ -21,6 +21,11 @@ import tools.aqua.stars.core.types.TickDifference
 
 class AuNaTimeDifference(val secondsDifference: Double, val nanosecondsDifference: Double) :
     TickDifference<AuNaTimeDifference> {
+
+  constructor(
+      nanosecondsDifference: Long
+  ) : this(nanosecondsDifference / 1e9, nanosecondsDifference % 1e9)
+
   override fun compareTo(other: AuNaTimeDifference): Int {
     return if (secondsDifference != other.secondsDifference) {
       secondsDifference.compareTo(other.secondsDifference)

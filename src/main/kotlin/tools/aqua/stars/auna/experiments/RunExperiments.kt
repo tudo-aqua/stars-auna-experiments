@@ -153,7 +153,7 @@ fun loadSegments(lanes: List<Lane>, spliceData: Boolean = true): Sequence<Segmen
       if (spliceData) {
         segmentTicksIntoSegments(path.name, ticks)
       } else {
-        segmentTicksToIncludeWholeDrive(path.name, ticks)
+        segmentTicksToIncludeWholeDriveForEachRobot(path.name, ticks)
       }
 
   println("Checksum Ticks: ${segments.sumOf{it.tickData.size}}")

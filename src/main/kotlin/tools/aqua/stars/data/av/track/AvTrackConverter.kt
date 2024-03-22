@@ -120,7 +120,10 @@ fun segmentTicksIntoSegments(sourceFile: String, ticks: List<TickData>): List<Se
  * @param ticks The [List] of [TickData].
  * @return [List] of [Segment]s based on the given [List] of [TickData].
  */
-fun segmentTicksToIncludeWholeDrive(sourceFile: String, ticks: List<TickData>): List<Segment> {
+fun segmentTicksToIncludeWholeDriveForEachRobot(
+    sourceFile: String,
+    ticks: List<TickData>
+): List<Segment> {
   // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
   // robots are tracked. For the analysis we only want the ticks in which all three robots are
   // tracked.
@@ -138,17 +141,18 @@ fun segmentTicksToIncludeWholeDrive(sourceFile: String, ticks: List<TickData>): 
         "The entities do not start on the same lane!"
       }
 
-  // Multiply segment for all robots as ego
-  return cleanedTicks[0].entities.map { egoRobot ->
+  return cleanedTicks[0].entities.map { robot ->
+    // Multiply segment for all robots as ego
     // Copy TickData for every robot as ego and set the isPrimaryEntity flag
     val copiedTicks =
         cleanedTicks.map {
           it.clone().also { t ->
-            t.entities.first { e -> e.id == egoRobot.id }.isPrimaryEntity = true
+            t.entities.first { e -> e.id == robot.id }.isPrimaryEntity = true
+            t.entities = listOf(t.entities.first { it.id == robot.id })
           }
         }
     Segment(
-        segmentId = egoRobot.id,
+        segmentId = robot.id,
         segmentSource = sourceFile,
         ticks = copiedTicks.associateBy { it.currentTick },
         previousSegment = null,

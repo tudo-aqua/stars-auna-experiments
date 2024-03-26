@@ -28,7 +28,11 @@ fun tsc() =
         root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
           all("TSCRoot") {
             projectionIDs =
-                mapOf(projRec("all"), proj("Driving situation"), proj("Driving maneuver"))
+                mapOf(
+                    projRec("all"),
+                    proj("Driving situation"),
+                    proj("Driving maneuver"),
+                    proj("Monitors"))
 
             all("Driving situation") {
               projectionIDs = mapOf(projRec("Driving situation"))
@@ -102,8 +106,8 @@ fun tsc() =
             }
 
             // region monitors
-            all("monitors") {
-              projectionIDs = mapOf(projRec("Driving situation"), projRec("Driving maneuver"))
+            all("Monitors") {
+              projectionIDs = mapOf(projRec("Monitors"))
               leaf("Max lateral offset") {
                 condition = { _ -> true }
                 monitorFunction = { ctx -> normalLateralOffset.holds(ctx) }

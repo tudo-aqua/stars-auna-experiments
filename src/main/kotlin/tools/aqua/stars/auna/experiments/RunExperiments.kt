@@ -22,9 +22,10 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
-import kotlin.io.path.name
+import kotlin.system.exitProcess
+import tools.aqua.stars.auna.experiments.slicer.SliceAcceleration
 import tools.aqua.stars.auna.importer.Message
-import tools.aqua.stars.auna.importer.Time
+import tools.aqua.stars.auna.importer.importDrivingData
 import tools.aqua.stars.auna.importer.importTrackData
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMaxStatisticsMetric
@@ -79,9 +80,17 @@ fun main() {
   println("Convert Track Data")
   val lanes = convertTrackToLanes(track, segmentsPerLane = 3)
 
-  println("Load Segments")
-  val segments = loadSegments(lanes)
+  println("Load Ticks")
+  val ticks = loadTicks(lanes)
 
+  println("Create Segments")
+  // val slicer = NoSlicing()
+  // val slicer = SliceEqualChunkSize()
+  val slicer = SliceAcceleration()
+  val segments = slicer.slice("", ticks)
+
+  println("Found ${segments.toList().size} segments.")
+  exitProcess(0)
   val tscEvaluation =
       TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
 
@@ -134,42 +143,23 @@ fun main() {
 }
 
 /**
- * Loads all [Segment]s based on the given [List] of [Lane]s.
+ * Loads all [TickData] based on the given [List] of [Lane]s.
  *
  * @param lanes The [List] of [Lane]s.
- * @return A [Sequence] of [Segment]s.
+ * @return A [List] of [TickData].
  */
-fun loadSegments(lanes: List<Lane>, spliceData: Boolean = true): Sequence<Segment> {
+fun loadTicks(lanes: List<Lane>): List<TickData> {
   val path = File(SIMULATION_RUN_FOLDER).toPath()
-  val sourcesToContentMap = tools.aqua.stars.auna.importer.importDrivingData(path)
-  val messages = sortMessagesBySentTime(sourcesToContentMap)
+  val messages =
+      importDrivingData(path)
+          .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
+          .sortedWith(
+              compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
+
   val waypoints = lanes.flatMap { it.waypoints }
 
-  println("Calculate ticks")
-  val ticks = getTicksFromMessages(messages, waypoints = waypoints)
-
-  println("Slice Ticks into Segments")
-  val segments =
-      if (spliceData) {
-        segmentTicksIntoSegments(path.name, ticks)
-      } else {
-        segmentTicksToIncludeWholeDrive(path.name, ticks)
-      }
-
-  println("Checksum Ticks: ${segments.sumOf{it.tickData.size}}")
-  return segments.asSequence()
+  return getTicksFromMessages(messages, waypoints = waypoints)
 }
-
-/**
- * Creates a sorted [List] of all [Message]s. Sorted by [Time.seconds] and [Time.nanoseconds].
- *
- * @param messageSourceToContentMap A [Map] which maps a [DataSource] to all its [Message]s.
- * @return A sorted [List] of [Message]s.
- */
-fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>): List<Message> =
-    messageSourceToContentMap
-        .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
-        .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
 
 /** Holds the name of the downloaded file used for this experiment setup. */
 val DOWNLOAD_FILE_NAME = "$DOWNLOAD_FOLDER_NAME.zip"

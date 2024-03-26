@@ -25,10 +25,12 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import tools.aqua.stars.auna.experiments.downloadAndUnzipExperimentsData
 import tools.aqua.stars.auna.experiments.downloadWaypointsData
-import tools.aqua.stars.auna.experiments.loadSegments
+import tools.aqua.stars.auna.experiments.loadTicks
+import tools.aqua.stars.auna.experiments.slicer.NoSlicing
 import tools.aqua.stars.auna.importer.Quaternion
 import tools.aqua.stars.auna.importer.Vector
 import tools.aqua.stars.auna.importer.importTrackData
+import tools.aqua.stars.core.evaluation.Slicer
 import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.convertTrackToLanes
@@ -71,7 +73,7 @@ fun main() {
   exportStaticData(lanes)
 
   println("Export Dynamic Data")
-  exportDynamicData(lanes)
+  exportDynamicData(lanes, NoSlicing())
 
   println("Export finished successfully")
 }
@@ -110,11 +112,17 @@ private fun exportStaticData(lanes: List<Lane>) {
  * @param lanes experiment data as [List] of [Lane]s.
  */
 @OptIn(ExperimentalSerializationApi::class)
-private fun exportDynamicData(lanes: List<Lane>) {
-  println("Dynamic Data: Load Segments")
-  val segments = loadSegments(lanes, false)
-  println("Dynamic Data: Parse Segments")
+private fun exportDynamicData(
+    lanes: List<Lane>,
+    slicer: Slicer<tools.aqua.stars.data.av.track.TickData, tools.aqua.stars.data.av.track.Segment>
+) {
+  println("Load Ticks")
+  val ticks = loadTicks(lanes)
 
+  println("Dynamic Data: Load Segments")
+  val segments = slicer.slice("", ticks)
+
+  println("Dynamic Data: Parse Segments")
   val primaryEntityIds = segments.groupBy { it.primaryEntityId }.map { it.key }.sorted()
 
   // Used as identifier for json file

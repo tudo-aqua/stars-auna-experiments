@@ -27,10 +27,10 @@ import tools.aqua.stars.auna.experiments.downloadAndUnzipExperimentsData
 import tools.aqua.stars.auna.experiments.downloadWaypointsData
 import tools.aqua.stars.auna.experiments.loadTicks
 import tools.aqua.stars.auna.experiments.slicer.NoSlicing
+import tools.aqua.stars.auna.experiments.slicer.Slicer
 import tools.aqua.stars.auna.importer.Quaternion
 import tools.aqua.stars.auna.importer.Vector
 import tools.aqua.stars.auna.importer.importTrackData
-import tools.aqua.stars.core.evaluation.Slicer
 import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.convertTrackToLanes
@@ -114,13 +114,13 @@ private fun exportStaticData(lanes: List<Lane>) {
 @OptIn(ExperimentalSerializationApi::class)
 private fun exportDynamicData(
     lanes: List<Lane>,
-    slicer: Slicer<tools.aqua.stars.data.av.track.TickData, tools.aqua.stars.data.av.track.Segment>
+    slicer: Slicer
 ) {
   println("Load Ticks")
   val ticks = loadTicks(lanes)
 
   println("Dynamic Data: Load Segments")
-  val segments = slicer.slice("", ticks)
+  val segments = slicer.slice(ticks)
 
   println("Dynamic Data: Parse Segments")
   val primaryEntityIds = segments.groupBy { it.primaryEntityId }.map { it.key }.sorted()

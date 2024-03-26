@@ -17,13 +17,12 @@
 
 package tools.aqua.stars.auna.experiments.slicer
 
-import tools.aqua.stars.core.evaluation.Slicer
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
-abstract class AuNaSlicer : Slicer<TickData, Segment> {
-  override fun slice(tickSource: String, ticks: List<TickData>): Sequence<Segment> {
+abstract class Slicer {
+  fun slice(ticks: List<TickData>): Sequence<Segment> {
     // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
     // robots are tracked. For the analysis we only want the ticks in which all three robots are
     // tracked.

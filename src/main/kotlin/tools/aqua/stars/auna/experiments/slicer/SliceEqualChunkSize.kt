@@ -22,7 +22,7 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
-class SliceEqualChunkSize : AuNaSlicer() {
+class SliceEqualChunkSize : Slicer() {
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> {
     val segments: MutableList<Segment> = mutableListOf()
     var previousSegment: Segment? = null
@@ -67,6 +67,9 @@ class SliceEqualChunkSize : AuNaSlicer() {
                 previousSegment = segment
               }
     }
+
+    segments.last().nextSegment = segments.first()
+    segments.first().previousSegment = segments.last()
 
     return segments
   }

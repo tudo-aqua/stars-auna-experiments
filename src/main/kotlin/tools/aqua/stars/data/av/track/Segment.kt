@@ -32,7 +32,7 @@ data class Segment(
     val segmentId: Int,
     override val segmentSource: String,
     override val ticks: Map<AuNaTimeUnit, TickData>,
-    val previousSegment: Segment?,
+    var previousSegment: Segment?,
     var nextSegment: Segment?
 ) : SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   /** Holds a [Map] which maps a timestamp to all relevant [TickData]s (based on [tickData]). */

@@ -22,7 +22,7 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
-class SliceAcceleration : AuNaSlicer() {
+class SliceAcceleration : Slicer() {
 
   /**
    * Threshold for acceleration phases. Transition from deceleration to acceleration is detected,
@@ -71,6 +71,9 @@ class SliceAcceleration : AuNaSlicer() {
                 previousSegment = segment
               }
     }
+
+    segments.last().nextSegment = segments.first()
+    segments.first().previousSegment = segments.last()
 
     return segments
   }

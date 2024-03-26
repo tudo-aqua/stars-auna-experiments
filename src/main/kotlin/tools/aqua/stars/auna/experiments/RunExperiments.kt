@@ -22,7 +22,6 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
-import kotlin.system.exitProcess
 import tools.aqua.stars.auna.experiments.slicer.SliceAcceleration
 import tools.aqua.stars.auna.importer.Message
 import tools.aqua.stars.auna.importer.importDrivingData
@@ -65,11 +64,11 @@ fun main() {
   val tsc = tsc()
 
   println("Projections:")
-  tsc.buildProjections().forEachIndexed { index, projection ->
-    println("TSC for Projection $projection:")
-    println(projection.tsc)
+  tsc.buildProjections().forEach {
+    println("TSC for Projection $it:")
+    println(it.tsc)
     println("All possible instances:")
-    println(projection.possibleTSCInstances.size)
+    println(it.possibleTSCInstances.size)
     println()
   }
   println("-----------------")
@@ -87,10 +86,9 @@ fun main() {
   // val slicer = NoSlicing()
   // val slicer = SliceEqualChunkSize()
   val slicer = SliceAcceleration()
-  val segments = slicer.slice("", ticks)
+  val segments = slicer.slice(ticks)
 
   println("Found ${segments.toList().size} segments.")
-  exitProcess(0)
   val tscEvaluation =
       TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
 

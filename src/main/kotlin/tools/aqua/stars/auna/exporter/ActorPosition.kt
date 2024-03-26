@@ -28,6 +28,8 @@ import kotlinx.serialization.Serializable
  *   information about e.g. the dimensions of this actor.
  * @property location The [Location] of this actor for this tick.
  * @property rotation The [Rotation] of this actor for this tick.
+ * @property description A description of this [ActorPosition]. Can be used to store additional
+ *   information about this actor for this tick.
  * @property trajectoryColors The colors of the trajectories of this [ActorPosition]. Each index of
  *   the list corresponds to a trajectory. Therefore, the length of this list is equal to the number
  *   of trajectories and each [ActorPosition] has the same number of trajectories.
@@ -38,5 +40,6 @@ data class ActorPosition(
     @SerialName("actorTypeId") val actorTypeId: String,
     @SerialName("location") val location: Location,
     @SerialName("rotation") val rotation: Rotation,
+    @SerialName("description") val description: String = "",
     @SerialName("trajectoryColors") val trajectoryColors: List<String> = emptyList(),
 )

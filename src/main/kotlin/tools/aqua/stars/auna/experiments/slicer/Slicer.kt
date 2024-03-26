@@ -22,7 +22,13 @@ import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
 abstract class Slicer {
-  fun slice(ticks: List<TickData>): Sequence<Segment> {
+  /**
+   * Slices ticks into segments.
+   *
+   * @param ticks The ticks to slice.
+   * @param entityIdFilter The entity IDs to filter for. If null, all entities are considered.
+   */
+  fun slice(ticks: List<TickData>, entityIdFilter: List<Int>? = null): Sequence<Segment> {
     // As the messages are not synchronized for the robots, there are some ticks, where only 1, or 2
     // robots are tracked. For the analysis we only want the ticks in which all three robots are
     // tracked.
@@ -38,8 +44,11 @@ abstract class Slicer {
         }
 
     return cleanedTicks.let { ct ->
+      val filter = if (entityIdFilter == null) ct[0].entities.map { it.id } else entityIdFilter
+
       ct[0]
           .entities
+          .filter { filter.contains(it.id) }
           .map { robot ->
             val copiedTicks =
                 ct.map {

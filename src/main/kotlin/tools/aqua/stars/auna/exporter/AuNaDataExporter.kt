@@ -112,10 +112,7 @@ private fun exportStaticData(lanes: List<Lane>) {
  * @param lanes experiment data as [List] of [Lane]s.
  */
 @OptIn(ExperimentalSerializationApi::class)
-private fun exportDynamicData(
-    lanes: List<Lane>,
-    slicer: Slicer
-) {
+private fun exportDynamicData(lanes: List<Lane>, slicer: Slicer) {
   println("Load Ticks")
   val ticks = loadTicks(lanes)
 

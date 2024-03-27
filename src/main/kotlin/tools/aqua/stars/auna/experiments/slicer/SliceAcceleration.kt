@@ -17,52 +17,64 @@
 
 package tools.aqua.stars.auna.experiments.slicer
 
-import tools.aqua.stars.auna.experiments.MIN_TICKS_PER_SEGMENT
+import tools.aqua.stars.auna.experiments.*
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
 class SliceAcceleration : Slicer() {
 
-  /**
-   * Threshold for acceleration phases. Transition from deceleration to acceleration is detected,
-   * when acceleration value climbs above [ACC_THRESHOLD].
-   */
-  private val ACC_THRESHOLD = 2
-  /**
-   * Threshold for deceleration phases. Transition from acceleration to deceleration is detected,
-   * when acceleration value drops below [DEC_THRESHOLD].
-   */
-  private val DEC_THRESHOLD = -2
-
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> {
-    val segments: MutableList<Segment> = mutableListOf()
-    var previousSegment: Segment? = null
-    var wasAccelerating = true
+    var wasAccelerating = false
 
     // Split ticks by acceleration threshold
     val currentSegmentTicks = mutableListOf<TickData>()
     val segmentTicks = mutableListOf<List<TickData>>()
-    for (tickData in ticks) {
+
+    var i = 0
+    val iterator = ticks.listIterator()
+    while (iterator.hasNext()) {
+      val tickData = iterator.next()
+      i++
       val currentEgoRobot = tickData.entities.first { it.id == egoRobot.id }
 
+      val acc = currentEgoRobot.acceleration
       if (slicePoint(currentEgoRobot.acceleration, wasAccelerating)) {
         segmentTicks += currentSegmentTicks.toList()
+
+        println("\rFound slicing point at $i.")
+
         currentSegmentTicks.clear()
         wasAccelerating = !wasAccelerating
+
+        while (iterator.hasPrevious()) {
+          val previousTickData = iterator.previous()
+          i--
+          val previousEgoRobot = previousTickData.entities.first { it.id == egoRobot.id }
+          val acc = previousEgoRobot.acceleration
+          if (slicePoint(previousEgoRobot.acceleration, wasAccelerating)) {
+            println("Rewinded to $i")
+            break
+          }
+        }
+
+        if (!iterator.hasPrevious()) {
+          println("Rewinded to start")
+        }
       }
 
+      print("\rFound ${segmentTicks.size} slicing points; Currently at ${tickData.currentTick.seconds}. $wasAccelerating")
       currentSegmentTicks += tickData
     }
     segmentTicks += currentSegmentTicks.toList()
 
     // Create segments
+    var previousSegment: Segment? = null
+    val segments: MutableList<Segment> = mutableListOf()
     for (segmentTickList in segmentTicks.filter { it.size >= MIN_TICKS_PER_SEGMENT }) {
-      if (segmentTickList.size < MIN_TICKS_PER_SEGMENT) continue
       segments +=
           Segment(
                   segmentId = segments.size,
-                  segmentSource = "",
                   ticks = segmentTickList.associateBy { it.currentTick },
                   previousSegment = previousSegment,
                   nextSegment = null)
@@ -80,8 +92,8 @@ class SliceAcceleration : Slicer() {
 
   private fun slicePoint(acc: Double, wasAccelerating: Boolean): Boolean =
       if (wasAccelerating) {
-        acc < DEC_THRESHOLD
+        acc < ACCELERATION_DECELERATION_STRONG_THRESHOLD
       } else {
-        acc > ACC_THRESHOLD
+        acc > ACCELERATION_ACCELERATION_STRONG_THRESHOLD
       }
 }

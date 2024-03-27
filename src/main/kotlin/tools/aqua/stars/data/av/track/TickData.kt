@@ -25,7 +25,7 @@ import tools.aqua.stars.core.types.TickDataType
  * the states of all [EntityType]s (see [Robot]) at the timestamp.
  *
  * @property currentTick The current timestamp in seconds
- * @property entities The [List] of [Robot]s for the [currentTick]
+ * @param entities The [List] of [Robot]s for the [currentTick]
  */
 data class TickData(override val currentTick: AuNaTimeUnit, override var entities: List<Robot>) :
     TickDataType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
@@ -45,10 +45,6 @@ data class TickData(override val currentTick: AuNaTimeUnit, override var entitie
     return newTick
   }
 
-  override fun equals(other: Any?): Boolean {
-    if (other is TickData) {
-      return this.currentTick == other.currentTick
-    }
-    return super.equals(other)
-  }
+  override fun equals(other: Any?): Boolean =
+      if (other is TickData) this.currentTick == other.currentTick else super.equals(other)
 }

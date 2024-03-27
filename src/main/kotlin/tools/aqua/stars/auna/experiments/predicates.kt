@@ -40,12 +40,6 @@ val normalLateralOffset =
     predicate(Robot::class) { _, r ->
       globally(r, phi = { it.lateralOffset <= MAX_LATERAL_OFFSET })
     }
-
-/// ** Exceeding the maximum lateral offset defined as > [MAX_LATERAL_OFFSET]. */
-// val maxLateralOffsetExceeded =
-//    predicate(Robot::class) { _, r ->
-//      eventually(r, phi = { (it.lateralOffset ?: 0.0) > MAX_LATERAL_OFFSET })
-//    }
 // endregion
 
 // region distance to previous vehicle
@@ -186,6 +180,12 @@ const val ACCELERATION_DECELERATION_WEAK_THRESHOLD: Double = -0.1
 /** Strong deceleration is defined as < [ACCELERATION_DECELERATION_STRONG_THRESHOLD]. */
 const val ACCELERATION_DECELERATION_STRONG_THRESHOLD: Double = -0.5
 
+/** Minimum duration between acceleration and deceleration in seconds. */
+const val MIN_ACCELERATION_TO_DECELERATION_DURATION: Double = 2.0
+
+/** Minimum duration between deceleration and acceleration in seconds. */
+const val MIN_DECELERATION_TO_ACCELERATION_DURATION: Double = 2.0
+
 /** Strong acceleration is defined as > [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]. */
 val strongAcceleration =
     predicate(Robot::class) { _, r ->
@@ -242,6 +242,36 @@ val strongDeceleration =
     predicate(Robot::class) { _, r ->
       eventually(r, phi = { it.accelerationCAM < ACCELERATION_DECELERATION_STRONG_THRESHOLD })
     }
+
+/**
+ * Acceleration to deceleration transition phase must be at least
+ * [MIN_ACCELERATION_TO_DECELERATION_DURATION] seconds long.
+ */
+val shortAccelerationToDecelerationTransition =
+    predicate(Robot::class) { _, r ->
+      r.acceleration >= ACCELERATION_ACCELERATION_WEAK_THRESHOLD &&
+          eventually(
+              entity = r,
+              phi = { it.acceleration <= ACCELERATION_DECELERATION_WEAK_THRESHOLD },
+              interval =
+                  AuNaTimeDifference(0) to
+                      AuNaTimeDifference(MIN_ACCELERATION_TO_DECELERATION_DURATION, 0.0))
+    }
+
+/**
+ * Deceleration to acceleration transition phase must be at least
+ * [MIN_DECELERATION_TO_ACCELERATION_DURATION] seconds long.
+ */
+val shortDecelerationToAccelerationTransition =
+    predicate(Robot::class) { _, r ->
+      r.acceleration <= ACCELERATION_DECELERATION_WEAK_THRESHOLD &&
+          eventually(
+              entity = r,
+              phi = { it.acceleration >= ACCELERATION_ACCELERATION_WEAK_THRESHOLD },
+              interval =
+                  AuNaTimeDifference(0) to
+                      AuNaTimeDifference(MIN_DECELERATION_TO_ACCELERATION_DURATION, 0.0))
+    }
 // endregion
 
 // region lane type
@@ -251,6 +281,24 @@ val isOnStraightLane = predicate(Robot::class) { _, r -> globally(r, phi = { it.
 /** Robot is mainly driving on a curved lane. */
 val isOnCurvedLane = predicate(Robot::class) { _, r -> globally(r, phi = { !it.lane.isStraight }) }
 
+/** Robot is currently driving on a straight lane and next segment is a curve. */
+val enteringCurve = //TODO: Docstrings missing
+  predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.previousLane.isStraight }
+
+val inCurve =
+  predicate(Robot::class) { _, r ->
+    r.lane.isCurve && r.lane.previousLane.isCurve && r.lane.nextLane.isCurve
+  }
+val exitingCurve = predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.nextLane.isStraight }
+
+val enteringStraight =
+  predicate(Robot::class) { _, r -> r.lane.isStraight && r.lane.previousLane.isCurve }
+val inStraight =
+  predicate(Robot::class) { _, r ->
+    r.lane.isStraight && r.lane.previousLane.isStraight && r.lane.nextLane.isStraight
+  }
+val exitingStraight =
+  predicate(Robot::class) { _, r -> r.lane.isStraight && r.lane.nextLane.isCurve }
 // endregion
 
 // region steering angle
@@ -281,28 +329,19 @@ val noSteering =
     predicate(Robot::class) { _, r ->
       eventually(r, phi = { it.steeringAngle < STEERING_ANGLE_LOW })
     }
-
 // endregion
-// TODO: Comments
-val enteringCurve =
-    predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.previousLane.isStraight }
-val inCurve =
-    predicate(Robot::class) { _, r ->
-      r.lane.isCurve && r.lane.previousLane.isCurve && r.lane.nextLane.isCurve
-    }
-val exitingCurve = predicate(Robot::class) { _, r -> r.lane.isCurve && r.lane.nextLane.isStraight }
 
-val enteringStraight =
-    predicate(Robot::class) { _, r -> r.lane.isStraight && r.lane.previousLane.isCurve }
-val inStraight =
-    predicate(Robot::class) { _, r ->
-      r.lane.isStraight && r.lane.previousLane.isStraight && r.lane.nextLane.isStraight
-    }
-val exitingStraight =
-    predicate(Robot::class) { _, r -> r.lane.isStraight && r.lane.nextLane.isCurve }
-
+// region CAM timeout
+/** Deceleration threshold from which a cam message must be sent. */
 const val CAM_DECELERATION_THRESHOLD = -4.0
+
+/** Time threshold in nanoseconds for a CAM message to be sent. */
 const val CAM_TIME_THRESHOLD_NANOS = 100_000L // 100ms
+
+/**
+ * A CAM message must be sent within [CAM_TIME_THRESHOLD_NANOS] after a deceleration of <
+ * [CAM_DECELERATION_THRESHOLD].
+ */
 val camMessageTimeout =
     predicate(Robot::class) { _, r ->
       r.acceleration < -CAM_DECELERATION_THRESHOLD &&
@@ -311,3 +350,4 @@ val camMessageTimeout =
               phi = { it.dataSource == DataSource.CAM },
               interval = AuNaTimeDifference(0) to AuNaTimeDifference(CAM_TIME_THRESHOLD_NANOS))
     }
+// endregion

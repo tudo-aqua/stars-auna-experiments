@@ -58,7 +58,6 @@ class SliceEqualChunkSize : Slicer() {
       segments +=
           Segment(
                   segmentId = segments.size,
-                  segmentSource = "",
                   ticks = segmentTickList.associateBy { it.currentTick },
                   previousSegment = previousSegment,
                   nextSegment = null)

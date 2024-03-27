@@ -26,7 +26,6 @@ class NoSlicing : Slicer() {
       listOf(
           Segment(
                   segmentId = egoRobot.id,
-                  segmentSource = "",
                   ticks = ticks.associateBy { it.currentTick },
                   previousSegment = null,
                   nextSegment = null,

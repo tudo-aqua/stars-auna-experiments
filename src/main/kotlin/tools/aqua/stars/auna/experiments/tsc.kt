@@ -120,6 +120,10 @@ fun tsc() =
                 condition = { _ -> true }
                 monitorFunction = { ctx -> strongDeceleration.holds(ctx) }
               }
+              leaf("Short acceleration phase") {
+                condition = { _ -> true }
+                monitorFunction = { ctx -> shortAccelerationToDecelerationTransition.holds(ctx) }
+              }
               leaf("CAM message timeout") {
                 condition = { _ -> true }
                 monitorFunction = { ctx -> camMessageTimeout.holds(ctx) }

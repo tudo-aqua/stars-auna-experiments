@@ -149,6 +149,8 @@ private fun exportDynamicData(lanes: List<Lane>, slicer: Slicer) {
                                               actorTypeId = DEFAULT_ACTOR_TYPE_ID,
                                               location = vectorToLocation(entity.position),
                                               rotation = quaternionToEuler(entity.rotation),
+                                              description =
+                                                  "${entity.velocity} m/s\n${entity.acceleration} m/s²",
                                               trajectoryColors =
                                                   listOf(
                                                       gradientColorValue(

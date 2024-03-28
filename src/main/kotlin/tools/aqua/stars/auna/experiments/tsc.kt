@@ -28,42 +28,31 @@ fun tsc() =
         root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
           all("TSCRoot") {
             projectionIDs =
-                mapOf(
-                    projRec("all"),
-                    proj("Driving situation"),
-                    proj("Driving maneuver"),
-                    proj("Monitors"))
+                mapOf(projRec("all"), proj("Driving situation"), proj("Driving maneuver"))
 
             all("Driving situation") {
               projectionIDs = mapOf(projRec("Driving situation"))
 
               exclusive("Lane Change") {
-                leaf("Entering Curve") { condition = { ctx -> enteringCurve.holds(ctx) } }
-                leaf("In Curve") { condition = { ctx -> inCurve.holds(ctx) } }
-                leaf("Exiting Curve") { condition = { ctx -> exitingCurve.holds(ctx) } }
-
                 leaf("Entering Straight") { condition = { ctx -> enteringStraight.holds(ctx) } }
                 leaf("In Straight") { condition = { ctx -> inStraight.holds(ctx) } }
-                leaf("Exiting Straight") { condition = { ctx -> exitingStraight.holds(ctx) } }
+                leaf("Exiting Straight") { condition = { ctx -> leavingStraight.holds(ctx) } }
+
+                leaf("Entering Tight Curve") {
+                  condition = { ctx -> enteringTightCurve.holds(ctx) }
+                }
+                leaf("In Tight Curve") { condition = { ctx -> inTightCurve.holds(ctx) } }
+                leaf("Exiting Tight Curve") { condition = { ctx -> leavingTightCurve.holds(ctx) } }
+
+                leaf("Entering Wide Curve") { condition = { ctx -> enteringWideCurve.holds(ctx) } }
+                leaf("In Wide Curve") { condition = { ctx -> inWideCurve.holds(ctx) } }
+                leaf("Exiting Wide Curve") { condition = { ctx -> leavingWideCurve.holds(ctx) } }
               }
 
               any("Distance to front vehicle") {
-                leaf("None") { condition = { ctx -> ctx.primaryEntityId == 1 } }
-                leaf("Normal") {
-                  condition = { ctx ->
-                    ctx.primaryEntityId > 1 && normalDistanceToFrontVehicle.holds(ctx)
-                  }
-                }
-                leaf("Min") {
-                  condition = { ctx ->
-                    ctx.primaryEntityId > 1 && minDistanceToFrontVehicleExceeded.holds(ctx)
-                  }
-                }
-                leaf("Max") {
-                  condition = { ctx ->
-                    ctx.primaryEntityId > 1 && maxDistanceToFrontVehicleExceeded.holds(ctx)
-                  }
-                }
+                leaf("High") { condition = { ctx -> highDistanceToFrontVehicle.holds(ctx) } }
+                leaf("Normal") { condition = { ctx -> normalDistanceToFrontVehicle.holds(ctx) } }
+                leaf("Low") { condition = { ctx -> lowDistanceToFrontVehicle.holds(ctx) } }
               }
 
               exclusive("Velocity") {
@@ -76,14 +65,12 @@ fun tsc() =
             all("Driving maneuver") {
               projectionIDs = mapOf(projRec(("Driving maneuver")))
 
-              any("Acceleration") {
+              exclusive("Acceleration") {
                 leaf("Weak Deceleration") { condition = { ctx -> weakDeceleration.holds(ctx) } }
                 leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
                 leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
                 leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
-                leaf("No Acceleration (Driving)") {
-                  condition = { ctx -> noAcceleration.holds(ctx) }
-                }
+                leaf("No Acceleration") { condition = { ctx -> noAcceleration.holds(ctx) } }
               }
 
               any("Steering Angle") {
@@ -105,30 +92,31 @@ fun tsc() =
               }
             }
 
-            // region monitors
             all("Monitors") {
-              projectionIDs = mapOf(projRec("Monitors"))
               leaf("Max lateral offset") {
                 condition = { _ -> true }
-                monitorFunction = { ctx -> normalLateralOffset.holds(ctx) }
-              }
-              leaf("Minimum distance to front robot") {
-                condition = { _ -> true }
-                monitorFunction = { ctx -> minDistanceToFrontVehicleExceeded.holds(ctx) }
-              }
-              leaf("Maximum deceleration") {
-                condition = { _ -> true }
-                monitorFunction = { ctx -> strongDeceleration.holds(ctx) }
-              }
-              leaf("Short acceleration phase") {
-                condition = { _ -> true }
-                monitorFunction = { ctx -> shortAccelerationToDecelerationTransition.holds(ctx) }
+                monitorFunction = { normalLateralOffset.holds(it) }
               }
               leaf("CAM message timeout") {
                 condition = { _ -> true }
-                monitorFunction = { ctx -> camMessageTimeout.holds(ctx) }
+                monitorFunction = { camMessageTimeout.holds(it) }
+              }
+              leaf("Maximum deceleration") {
+                condition = { _ -> true }
+                monitorFunction = { maxDecelerationExceeded.holds(it) }
+              }
+              leaf("Short acceleration phase") {
+                condition = { _ -> true }
+                monitorFunction = { noShortAccelerationToDecelerationTransition.holds(it) }
+              }
+              leaf("Short deceleration phase") {
+                condition = { _ -> true }
+                monitorFunction = { noShortDecelerationToAccelerationTransition.holds(it) }
+              }
+              leaf("Minimum distance to front robot") {
+                condition = { _ -> true }
+                monitorFunction = { minDistanceToFrontVehicleExceeded.holds(it) }
               }
             }
-            // endregion
           }
         })

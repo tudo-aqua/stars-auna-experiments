@@ -22,7 +22,6 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
-import kotlin.system.exitProcess
 import tools.aqua.stars.auna.experiments.slicer.SliceAcceleration
 import tools.aqua.stars.auna.importer.Message
 import tools.aqua.stars.auna.importer.importDrivingData
@@ -87,10 +86,10 @@ fun main() {
   // val slicer = NoSlicing()
   // val slicer = SliceEqualChunkSize()
   val slicer = SliceAcceleration()
-  val segments = slicer.slice(ticks, listOf(1))
+  val segments = slicer.slice(ticks.subList(0, ticks.size), listOf(2, 3))
 
   println("Found ${segments.toList().size} segments.")
-  exitProcess(0)
+
   val tscEvaluation =
       TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
 
@@ -98,7 +97,7 @@ fun main() {
       ValidTSCInstancesPerProjectionMetric<
           Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
 
-  val plotSegments = false
+  val plotSegments = true
   tscEvaluation.registerMetricProviders(
       // Generic metrics
       SegmentCountMetric(),

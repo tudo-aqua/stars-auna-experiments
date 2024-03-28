@@ -41,7 +41,21 @@ fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> {
                       length = lane.length,
                       width = lane.width,
                       waypoints = listOf(),
-                      isStraight = index % 2 != 0)
+                      laneCurvature =
+                          when (index % 4) {
+                            0 -> Lane.LaneCurvature.STRAIGHT
+                            1 -> Lane.LaneCurvature.WIDE_CURVE
+                            2 -> Lane.LaneCurvature.STRAIGHT
+                            3 -> Lane.LaneCurvature.TIGHT_CURVE
+                            else -> error("")
+                          },
+                      laneSegment =
+                          when (index2) {
+                            0 -> Lane.LaneSegment.ENTERING
+                            1 -> Lane.LaneSegment.MIDDLE
+                            2 -> Lane.LaneSegment.LEAVING
+                            else -> error("")
+                          })
                   .also { l ->
                     l.waypoints =
                         wp.map { wp ->

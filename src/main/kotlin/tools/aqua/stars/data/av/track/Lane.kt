@@ -31,15 +31,25 @@ data class Lane(
     val length: Double,
     val width: Double,
     var waypoints: List<Waypoint>,
-    var isStraight: Boolean,
+    val laneCurvature: LaneCurvature,
+    val laneSegment: LaneSegment,
 ) {
   lateinit var previousLane: Lane
   lateinit var nextLane: Lane
 
-  val isCurve
-    get() = !isStraight
-
   override fun toString(): String {
     return "Lane(id=$laneID, length=$length, width=$width, waypoints=${waypoints.count()})"
+  }
+
+  enum class LaneCurvature {
+    STRAIGHT,
+    TIGHT_CURVE,
+    WIDE_CURVE
+  }
+
+  enum class LaneSegment {
+    ENTERING,
+    MIDDLE,
+    LEAVING
   }
 }

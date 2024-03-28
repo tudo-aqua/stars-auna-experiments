@@ -24,8 +24,8 @@ import tools.aqua.stars.core.types.TickDataType
  * This class implements the [TickDataType] and holds a specific timestamp (see [currentTick]) and
  * the states of all [EntityType]s (see [Robot]) at the timestamp.
  *
- * @property currentTick The current timestamp in seconds
  * @param entities The [List] of [Robot]s for the [currentTick]
+ * @property currentTick The current timestamp in seconds
  */
 data class TickData(override val currentTick: AuNaTimeUnit, override var entities: List<Robot>) :
     TickDataType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {

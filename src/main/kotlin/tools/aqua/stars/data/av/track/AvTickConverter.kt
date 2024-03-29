@@ -110,9 +110,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
 
         tickData.entities.forEach {
           it.acceleration =
-              1000 *
-                  ((endValue.entities.first { r -> r.id == it.id }.velocity ?: 0.0) -
-                      (startValue.entities.first { r -> r.id == it.id }.velocity ?: 0.0)) /
+              1000 * ((endValue.getById(it.id).velocity) - (startValue.getById(it.id).velocity)) /
                   ACCELERATION_WINDOW_SIZE
         }
         print(

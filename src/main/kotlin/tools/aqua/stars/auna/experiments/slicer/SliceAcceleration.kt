@@ -17,67 +17,79 @@
 
 package tools.aqua.stars.auna.experiments.slicer
 
-import tools.aqua.stars.auna.experiments.MIN_TICKS_PER_SEGMENT
+import tools.aqua.stars.auna.experiments.ACCELERATION_ACCELERATION_WEAK_THRESHOLD
+import tools.aqua.stars.auna.experiments.ACCELERATION_DECELERATION_WEAK_THRESHOLD
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
+/**
+ * Slicer that splits the data into segments based on acceleration thresholds
+ * [ACCELERATION_ACCELERATION_WEAK_THRESHOLD] and [ACCELERATION_DECELERATION_WEAK_THRESHOLD]. Slices
+ * are created overlapping such that an acceleration phase holds all values between two
+ * [ACCELERATION_DECELERATION_WEAK_THRESHOLD] points and deceleration phase holds all values between
+ * two [ACCELERATION_ACCELERATION_WEAK_THRESHOLD] points.
+ */
 class SliceAcceleration : Slicer() {
 
-  /**
-   * Threshold for acceleration phases. Transition from deceleration to acceleration is detected,
-   * when acceleration value climbs above [ACC_THRESHOLD].
-   */
-  private val ACC_THRESHOLD = 0.5
-  /**
-   * Threshold for deceleration phases. Transition from acceleration to deceleration is detected,
-   * when acceleration value drops below [DEC_THRESHOLD].
-   */
-  private val DEC_THRESHOLD = -0.5
-
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> {
-    val segments: MutableList<Segment> = mutableListOf()
-    var previousSegment: Segment? = null
-    var wasAccelerating = true
+    // Determine whether to start with an acceleration or deceleration phase
+    var wasAccelerating = determineFirstPhase(ticks, egoRobot.id)
 
     // Split ticks by acceleration threshold
-    val currentSegmentTicks = mutableListOf<TickData>()
     val segmentTicks = mutableListOf<List<TickData>>()
-    for (tickData in ticks) {
-      val currentEgoRobot = tickData.entities.first { it.id == egoRobot.id }
+    val currentSegmentTicks = mutableListOf<TickData>()
+    val iterator = ticks.listIterator()
+    while (iterator.hasNext()) {
+      val tickData = iterator.next()
+      val currentEgoRobot = tickData.getById(egoRobot.id)
 
+      // Find slice point
       if (slicePoint(currentEgoRobot.acceleration, wasAccelerating)) {
+        // Reset tracking variables
         segmentTicks += currentSegmentTicks.toList()
         currentSegmentTicks.clear()
         wasAccelerating = !wasAccelerating
-      }
 
-      currentSegmentTicks += tickData
+        // Rewind to next slice point
+        while (iterator.hasPrevious()) {
+          val previousTickData = iterator.previous()
+          val previousEgoRobot = previousTickData.getById(egoRobot.id)
+
+          if (slicePoint(previousEgoRobot.acceleration, wasAccelerating)) {
+            iterator.next()
+            break
+          }
+        }
+      } else {
+        currentSegmentTicks += tickData
+      }
     }
     segmentTicks += currentSegmentTicks.toList()
 
     // Create segments
-    for (segmentTickList in segmentTicks.filter { it.size >= MIN_TICKS_PER_SEGMENT }) {
-      if (segmentTickList.size < MIN_TICKS_PER_SEGMENT) continue
-      segments +=
-          Segment(
-                  segmentId = segments.size,
-                  ticks = segmentTickList.associateBy { it.currentTick },
-                  previousSegment = previousSegment,
-                  nextSegment = null)
-              .also { segment ->
-                segment.tickData.forEach { it.segment = segment }
-                previousSegment = segment
-              }
-    }
-
-    return segments
+    return createSegments(segmentTicks)
   }
 
   private fun slicePoint(acc: Double, wasAccelerating: Boolean): Boolean =
       if (wasAccelerating) {
-        acc <= DEC_THRESHOLD
+        acc <= ACCELERATION_DECELERATION_WEAK_THRESHOLD
       } else {
-        acc >= ACC_THRESHOLD
+        acc >= ACCELERATION_ACCELERATION_WEAK_THRESHOLD
       }
+
+  private fun determineFirstPhase(ticks: List<TickData>, egoId: Int): Boolean {
+    for (tickData in ticks) {
+      val currentEgoRobot = tickData.getById(egoId)
+
+      if (currentEgoRobot.acceleration >= ACCELERATION_ACCELERATION_WEAK_THRESHOLD) {
+        return true
+      }
+
+      if (currentEgoRobot.acceleration <= ACCELERATION_DECELERATION_WEAK_THRESHOLD) {
+        return false
+      }
+    }
+    error("No slice point found!")
+  }
 }

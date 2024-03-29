@@ -33,6 +33,13 @@ data class TickData(override val currentTick: AuNaTimeUnit, override var entitie
   override lateinit var segment: Segment
 
   /**
+   * Returns Robot with id [robotId].
+   *
+   * @throws NoSuchElementException if no Robot with id [robotId] is found.
+   */
+  fun getById(robotId: Int): Robot = entities.first { it.id == robotId }
+
+  /**
    * Clones this [TickData] object.
    *
    * @return The cloned [TickData] object.

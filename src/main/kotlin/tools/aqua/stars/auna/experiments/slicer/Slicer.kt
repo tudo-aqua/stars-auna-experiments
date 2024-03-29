@@ -17,6 +17,7 @@
 
 package tools.aqua.stars.auna.experiments.slicer
 
+import tools.aqua.stars.auna.experiments.MIN_TICKS_PER_SEGMENT
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
@@ -51,16 +52,36 @@ abstract class Slicer {
           .filter { filter.contains(it.id) }
           .map { robot ->
             val copiedTicks =
-                ct.map {
-                  it.clone().also { t ->
-                    t.entities.first { e -> e.id == robot.id }.isPrimaryEntity = true
-                  }
-                }
+                ct.map { it.clone().also { t -> t.getById(robot.id).isPrimaryEntity = true } }
             slice(copiedTicks, robot)
           }
           .flatten()
           .asSequence()
     }
+  }
+
+  fun createSegments(segmentTicks: List<List<TickData>>): List<Segment> {
+    val segments: MutableList<Segment> = mutableListOf()
+    var previousSegment: Segment? = null
+
+    for (segmentTickList in segmentTicks.filter { it.size >= MIN_TICKS_PER_SEGMENT }) {
+      if (segmentTickList.size < MIN_TICKS_PER_SEGMENT) continue
+      segments +=
+          Segment(
+                  segmentId = segments.size,
+                  ticks = segmentTickList.associateBy { it.currentTick },
+                  previousSegment = previousSegment,
+                  nextSegment = null)
+              .also { segment ->
+                segment.tickData.forEach { it.segment = segment }
+                previousSegment = segment
+              }
+    }
+
+    segments.last().nextSegment = segments.first()
+    segments.first().previousSegment = segments.last()
+
+    return segments
   }
 
   abstract fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment>

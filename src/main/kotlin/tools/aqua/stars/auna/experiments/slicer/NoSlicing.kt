@@ -23,12 +23,5 @@ import tools.aqua.stars.data.av.track.TickData
 
 class NoSlicing : Slicer() {
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> =
-      listOf(
-          Segment(
-                  segmentId = egoRobot.id,
-                  ticks = ticks.associateBy { it.currentTick },
-                  previousSegment = null,
-                  nextSegment = null,
-              )
-              .also { segment -> segment.tickData.forEach { it.segment = segment } })
+      createSegments(listOf(ticks))
 }

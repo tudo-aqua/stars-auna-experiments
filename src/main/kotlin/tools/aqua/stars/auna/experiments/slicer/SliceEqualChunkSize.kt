@@ -17,26 +17,21 @@
 
 package tools.aqua.stars.auna.experiments.slicer
 
-import tools.aqua.stars.auna.experiments.MIN_TICKS_PER_SEGMENT
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
 class SliceEqualChunkSize : Slicer() {
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> {
-    val segments: MutableList<Segment> = mutableListOf()
-    var previousSegment: Segment? = null
-
     // Split ticks by line change
     var currentLane = egoRobot.lane
     val currentSegmentTicks = mutableListOf<TickData>()
     val segmentTicks = mutableListOf<List<TickData>>()
 
     // Split track on lane changes and the chunk those segments into [SEGMENTS_PER_LANE] evenly
-    // spaced
-    // [Segment]s.
+    // spaced Segments.
     for (tickData in ticks) {
-      val currentEgoRobot = tickData.entities.first { it.id == egoRobot.id }
+      val currentEgoRobot = tickData.getById(egoRobot.id)
       val newLane = currentEgoRobot.lane
 
       // The ego robot is still on the same lane.
@@ -52,24 +47,6 @@ class SliceEqualChunkSize : Slicer() {
     }
     segmentTicks += currentSegmentTicks.toList()
 
-    // Create segments
-    for (segmentTickList in segmentTicks.filter { it.size >= MIN_TICKS_PER_SEGMENT }) {
-      if (segmentTickList.size < MIN_TICKS_PER_SEGMENT) continue
-      segments +=
-          Segment(
-                  segmentId = segments.size,
-                  ticks = segmentTickList.associateBy { it.currentTick },
-                  previousSegment = previousSegment,
-                  nextSegment = null)
-              .also { segment ->
-                segment.tickData.forEach { it.segment = segment }
-                previousSegment = segment
-              }
-    }
-
-    segments.last().nextSegment = segments.first()
-    segments.first().previousSegment = segments.last()
-
-    return segments
+    return createSegments(segmentTicks)
   }
 }

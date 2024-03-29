@@ -32,6 +32,4 @@ data class Odometry(
     val velocityVector = this.twist.twist.linear
     return sqrt(velocityVector.x.pow(2) + velocityVector.y.pow(2) + velocityVector.z.pow(2))
   }
-
-  fun getAngularVelocity() {}
 }

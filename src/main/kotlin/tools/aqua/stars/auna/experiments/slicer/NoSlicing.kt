@@ -21,6 +21,7 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
+@Suppress("unused")
 class NoSlicing : Slicer() {
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> =
       createSegments(listOf(ticks))

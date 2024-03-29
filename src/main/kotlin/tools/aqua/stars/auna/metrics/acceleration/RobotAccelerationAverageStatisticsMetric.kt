@@ -40,7 +40,7 @@ class RobotAccelerationAverageStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val robotIdToSumOfAcceleration =
-        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.acceleration ?: 0.0 } }
+        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.acceleration } }
 
     robotIdToSumOfAcceleration.forEach {
       logFiner(

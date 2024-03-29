@@ -239,6 +239,7 @@ fun downloadWaypointsData() {
  * @return the extracted directory i.e, [extractTo] folder if [extractHere] is `true` and
  *   [extractTo]\zipFile\ folder otherwise.
  */
+@Suppress("SameParameterValue")
 private fun extractZipFile(
     zipFile: File,
     extractTo: File,

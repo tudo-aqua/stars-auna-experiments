@@ -21,16 +21,15 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.letsPlot.core.spec.back.transform.bistro.util.plot
 import tools.aqua.stars.core.metric.providers.Plottable
 import tools.aqua.stars.core.metric.providers.SegmentMetricProvider
 import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotAccelerationStatisticsMetric(val plotSegments: Boolean = true) :
+class RobotAccelerationStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
-  var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
+  private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
 
   override fun evaluate(
@@ -40,6 +39,7 @@ class RobotAccelerationStatisticsMetric(val plotSegments: Boolean = true) :
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlots() {
     val folderName = "robot-acceleration-statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
@@ -58,7 +58,7 @@ class RobotAccelerationStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.acceleration ?: 0.0 }
+                val yValues = robotStates.map { it.acceleration }
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
@@ -156,6 +156,7 @@ class RobotAccelerationStatisticsMetric(val plotSegments: Boolean = true) :
     println("\rWriting PLots for Robot acceleration: finished")
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlotDataCSV() {
     val finished = AtomicInteger(0)
 
@@ -173,7 +174,7 @@ class RobotAccelerationStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.acceleration ?: 0.0 }
+                val yValues = robotStates.map { it.acceleration }
                 val xValues = robotStates.map { it.tickData.currentTick.seconds }
 
                 combinedValuesMap[legendEntry] = xValues to yValues

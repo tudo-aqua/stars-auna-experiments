@@ -40,7 +40,7 @@ class RobotVelocityMaxStatisticsMetric(
 
     // Maximum velocity for robots
     val maximumRobotVelocity =
-        robotIdToRobotStateMap.map { it.key to it.value.maxOf { it.velocity ?: 0.0 } }
+        robotIdToRobotStateMap.map { it.key to it.value.maxOf { t -> t.velocity } }
     maximumRobotVelocity.forEach {
       currentMax[it.first] =
           maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)

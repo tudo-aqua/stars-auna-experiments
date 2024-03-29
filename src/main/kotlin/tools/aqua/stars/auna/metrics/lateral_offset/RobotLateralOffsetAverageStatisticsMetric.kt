@@ -40,7 +40,7 @@ class RobotLateralOffsetAverageStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val robotIdToSumOfLateralOffset =
-        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.lateralOffset ?: 0.0 } }
+        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.lateralOffset } }
 
     robotIdToSumOfLateralOffset.forEach {
       logFiner(

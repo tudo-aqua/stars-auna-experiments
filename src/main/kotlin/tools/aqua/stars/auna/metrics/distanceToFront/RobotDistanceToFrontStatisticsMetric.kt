@@ -27,9 +27,10 @@ import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotDistanceToFrontStatisticsMetric(val plotSegments: Boolean = true) :
+class RobotDistanceToFrontStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
-  var robotIdToDistanceAtTickMap: MutableMap<Int, List<Pair<TickData, Double>>> = mutableMapOf()
+  private var robotIdToDistanceAtTickMap: MutableMap<Int, List<Pair<TickData, Double>>> =
+      mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
@@ -52,6 +53,7 @@ class RobotDistanceToFrontStatisticsMetric(val plotSegments: Boolean = true) :
             distanceToFrontForPrimaryEntityInSegment
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlots() {
     val folderName = "robot-distance-to-front-statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
@@ -159,6 +161,7 @@ class RobotDistanceToFrontStatisticsMetric(val plotSegments: Boolean = true) :
     println("\rWriting Plots for Robot distance to front: finished")
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlotDataCSV() {
     val finished = AtomicInteger(0)
 

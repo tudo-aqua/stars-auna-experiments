@@ -54,4 +54,8 @@ data class TickData(override val currentTick: AuNaTimeUnit, override var entitie
 
   override fun equals(other: Any?): Boolean =
       if (other is TickData) this.currentTick == other.currentTick else super.equals(other)
+
+  override fun hashCode(): Int {
+    return currentTick.hashCode()
+  }
 }

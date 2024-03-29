@@ -39,7 +39,7 @@ class RobotSteeringAngleMinStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val minimumRobotSteeringAngle =
-        robotIdToRobotStateMap.map { it.key to it.value.minOf { it.steeringAngle ?: 0.0 } }
+        robotIdToRobotStateMap.map { it.key to it.value.minOf { t -> t.steeringAngle } }
     minimumRobotSteeringAngle.forEach {
       currentMin[it.first] =
           minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)

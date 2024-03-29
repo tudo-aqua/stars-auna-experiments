@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AckermannDriveStamped(
-    @SerialName("msg") override val header: tools.aqua.stars.auna.importer.Header,
-    @SerialName("drive") val ackermannDrive: tools.aqua.stars.auna.importer.AckermannDrive
-) : tools.aqua.stars.auna.importer.Message
+    @SerialName("msg") override val header: Header,
+    @SerialName("drive") val ackermannDrive: AckermannDrive
+) : Message

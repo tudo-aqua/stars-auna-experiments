@@ -27,7 +27,7 @@ import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotSteeringAngleStatisticsMetric(val plotSegments: Boolean = true) :
+class RobotSteeringAngleStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
@@ -39,6 +39,7 @@ class RobotSteeringAngleStatisticsMetric(val plotSegments: Boolean = true) :
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlots() {
     val folderName = "steering_angle_statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
@@ -57,7 +58,7 @@ class RobotSteeringAngleStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.steeringAngle ?: 0.0 }
+                val yValues = robotStates.map { it.steeringAngle }
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
@@ -161,6 +162,7 @@ class RobotSteeringAngleStatisticsMetric(val plotSegments: Boolean = true) :
     println("\rWriting Plots for Robot steering angle: finished")
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlotDataCSV() {
     val finished = AtomicInteger(0)
 
@@ -178,7 +180,7 @@ class RobotSteeringAngleStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.steeringAngle ?: 0.0 }
+                val yValues = robotStates.map { it.steeringAngle }
                 val xValues = robotStates.map { it.tickData.currentTick.seconds }
 
                 combinedValuesMap[legendEntry] = xValues to yValues

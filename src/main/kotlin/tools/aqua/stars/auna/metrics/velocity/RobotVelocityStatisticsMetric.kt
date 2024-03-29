@@ -25,7 +25,7 @@ import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotVelocityStatisticsMetric(val plotSegments: Boolean = true) :
+class RobotVelocityStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
@@ -37,6 +37,7 @@ class RobotVelocityStatisticsMetric(val plotSegments: Boolean = true) :
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlots() {
     val folderName = "velocity-statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
@@ -55,7 +56,7 @@ class RobotVelocityStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.velocity ?: 0.0 }
+                val yValues = robotStates.map { it.velocity }
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
@@ -158,6 +159,7 @@ class RobotVelocityStatisticsMetric(val plotSegments: Boolean = true) :
     println("\rWriting Plots for Robot velocity: finished")
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlotDataCSV() {
     val finished = AtomicInteger(0)
 
@@ -175,7 +177,7 @@ class RobotVelocityStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.velocity ?: 0.0 }
+                val yValues = robotStates.map { it.velocity }
                 val xValues = robotStates.map { it.tickData.currentTick.seconds }
 
                 combinedValuesMap[legendEntry] = xValues to yValues

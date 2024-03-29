@@ -40,7 +40,7 @@ class RobotSteeringAngleAverageStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val robotIdToSumOfSteeringAngle =
-        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.steeringAngle ?: 0.0 } }
+        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.steeringAngle } }
 
     robotIdToSumOfSteeringAngle.forEach {
       logFiner(

@@ -45,7 +45,7 @@ abstract class Slicer {
         }
 
     return cleanedTicks.let { ct ->
-      val filter = if (entityIdFilter == null) ct[0].entities.map { it.id } else entityIdFilter
+      val filter = entityIdFilter ?: ct[0].entities.map { it.id }
 
       ct[0]
           .entities

@@ -39,7 +39,7 @@ class RobotLateralOffsetMaxStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val maximumRobotLateralOffset =
-        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).max() }
+        robotIdToRobotStateMap.map { it.key to it.value.maxOf { t -> t.lateralOffset } }
     maximumRobotLateralOffset.forEach {
       currentMax[it.first] =
           maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)

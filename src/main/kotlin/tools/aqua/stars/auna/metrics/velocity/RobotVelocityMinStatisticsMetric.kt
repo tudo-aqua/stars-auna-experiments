@@ -39,7 +39,7 @@ class RobotVelocityMinStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val minimumRobotVelocity =
-        robotIdToRobotStateMap.map { it.key to it.value.minOf { it.velocity ?: 0.0 } }
+        robotIdToRobotStateMap.map { it.key to it.value.minOf { t -> t.velocity } }
     minimumRobotVelocity.forEach {
       currentMin[it.first] =
           minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)

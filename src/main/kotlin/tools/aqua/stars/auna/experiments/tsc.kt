@@ -117,6 +117,10 @@ fun tsc() =
                 condition = { _ -> true }
                 monitorFunction = { minDistanceToFrontVehicleExceeded.holds(it) }
               }
+              leaf("Maximum distance to front robot") {
+                condition = { _ -> true }
+                monitorFunction = { maxDistanceToFrontVehicleExceeded.holds(it) }
+              }
             }
           }
         })

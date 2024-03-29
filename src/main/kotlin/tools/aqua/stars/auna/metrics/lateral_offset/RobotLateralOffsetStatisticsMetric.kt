@@ -27,7 +27,7 @@ import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotLateralOffsetStatisticsMetric(val plotSegments: Boolean = true) :
+class RobotLateralOffsetStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
   private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
@@ -39,6 +39,7 @@ class RobotLateralOffsetStatisticsMetric(val plotSegments: Boolean = true) :
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlots() {
     val folderName = "lateral-offset-statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
@@ -58,7 +59,7 @@ class RobotLateralOffsetStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
+                val yValues = robotStates.map { it.lateralOffset }
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
@@ -162,6 +163,7 @@ class RobotLateralOffsetStatisticsMetric(val plotSegments: Boolean = true) :
     println("\rWriting Plots for Robot lateral offset: finished")
   }
 
+  @Suppress("DuplicatedCode")
   override fun writePlotDataCSV() {
     val finished = AtomicInteger(0)
 
@@ -179,7 +181,7 @@ class RobotLateralOffsetStatisticsMetric(val plotSegments: Boolean = true) :
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.lateralOffset ?: 0.0 }
+                val yValues = robotStates.map { it.lateralOffset }
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues

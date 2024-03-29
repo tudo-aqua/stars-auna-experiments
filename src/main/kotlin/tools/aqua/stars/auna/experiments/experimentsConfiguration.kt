@@ -33,9 +33,6 @@ val WAYPOINTS_FILE_NAME = "flw_waypoints.json"
 /** The size of the window for the moving average acceleration in ms. */
 val ACCELERATION_WINDOW_SIZE = 100
 
-/** The number of segments per lane. */
-val SEGMENTS_PER_LANE = 3
-
 /** The minimum ticks per segment. */
 val MIN_TICKS_PER_SEGMENT = 10
 

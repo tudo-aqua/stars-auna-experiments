@@ -40,7 +40,7 @@ class RobotSteeringAngleMaxStatisticsMetric(
 
     // Maximum steering angle for robots
     val maximumRobotSteeringAngle =
-        robotIdToRobotStateMap.map { it.key to it.value.maxOf { it.steeringAngle ?: 0.0 } }
+        robotIdToRobotStateMap.map { it.key to it.value.maxOf { t -> t.steeringAngle } }
     maximumRobotSteeringAngle.forEach {
       currentMax[it.first] =
           maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)

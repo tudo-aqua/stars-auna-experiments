@@ -19,6 +19,7 @@ package tools.aqua.stars.data.av.track
 
 import tools.aqua.stars.core.types.TickUnit
 
+@Suppress("MemberVisibilityCanBePrivate")
 class AuNaTimeUnit(val seconds: Double, val nanoseconds: Double) :
     TickUnit<AuNaTimeUnit, AuNaTimeDifference> {
   override fun compareTo(other: AuNaTimeUnit): Int {
@@ -53,6 +54,6 @@ class AuNaTimeUnit(val seconds: Double, val nanoseconds: Double) :
   fun clone(): AuNaTimeUnit = AuNaTimeUnit(this.seconds, this.nanoseconds)
 
   companion object {
-    val Zero = AuNaTimeUnit(0.0, 0.0)
+    @Suppress("unused") val Zero = AuNaTimeUnit(0.0, 0.0)
   }
 }

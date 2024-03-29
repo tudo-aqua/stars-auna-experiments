@@ -228,6 +228,7 @@ private fun thresholdTrajectories(robot: Robot, tick: tools.aqua.stars.data.av.t
                     DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH to "#00FF00",
                     DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH + 0.0000001 to "#0020f5")))
 
+@Suppress("unused")
 private fun gradientTrajectories(robot: Robot, tick: tools.aqua.stars.data.av.track.TickData) =
     listOf(
         gradientColorValue(

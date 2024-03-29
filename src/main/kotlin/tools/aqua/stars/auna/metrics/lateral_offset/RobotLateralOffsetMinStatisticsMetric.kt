@@ -39,7 +39,7 @@ class RobotLateralOffsetMinStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val minimumRobotLateralOffset =
-        robotIdToRobotStateMap.map { it.key to (it.value.mapNotNull { it.lateralOffset }).min() }
+        robotIdToRobotStateMap.map { it.key to it.value.minOf { t -> t.lateralOffset } }
     minimumRobotLateralOffset.forEach {
       currentMin[it.first] =
           minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)

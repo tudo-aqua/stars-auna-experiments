@@ -75,6 +75,7 @@ fun importTrackData(): Track = getJsonContentOfPath(Path(WAYPOINTS_FILE_NAME))
  * extensions: ".json", ".zip". The generic parameter [T] specifies the class to which the content
  * should be parsed to
  */
+@Suppress("DuplicatedCode")
 @OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T> getJsonContentOfPath(inputFilePath: Path): T {
   // Create JsonBuilder with correct settings

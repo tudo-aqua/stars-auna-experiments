@@ -39,10 +39,10 @@ class RobotAccelerationMaxStatisticsMetric(
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
     val maximumRobotAcceleration =
-        robotIdToRobotStateMap.map { it.key to it.value.mapNotNull { it.acceleration }.max() }
+        robotIdToRobotStateMap.map { it.key to it.value.maxOf { t -> t.acceleration } }
     maximumRobotAcceleration.forEach {
-      val maxof = maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)
-      currentMax[it.first] = maxof
+      currentMax[it.first] =
+          maxOf(currentMax.getOrDefault(it.first, Double.NEGATIVE_INFINITY), it.second)
       logFiner(
           "The maximum acceleration of robot with id '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }

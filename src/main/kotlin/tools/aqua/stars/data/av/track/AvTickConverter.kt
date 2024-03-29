@@ -466,13 +466,13 @@ private fun getNearestPointOnLineInterval(
 
   return when {
     lineProjection < 0 ->
-        boundA.first to boundA.second // nearest point of line is not on line -> take bound A
+        boundA.first to boundA.second // nearest point of line is not on the line -> take bound A
     lineProjection > 1 ->
-        boundB.first to boundB.second // nearest point of line is not on line -> take bound B
+        boundB.first to boundB.second // nearest point of line is not on the line -> take bound B
     else ->
         boundA.first + lineProjection * lineAToB.first to
             boundA.second +
-                lineProjection * lineAToB.second // nearest point is on line -> return it
+                lineProjection * lineAToB.second // nearest point is on the line -> return it
   }
 }
 

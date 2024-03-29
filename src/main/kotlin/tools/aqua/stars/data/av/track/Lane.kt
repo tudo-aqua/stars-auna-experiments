@@ -24,7 +24,8 @@ package tools.aqua.stars.data.av.track
  * @param length The length of the [Lane] in meters.
  * @param width The width of the [Lane] in meters.
  * @param waypoints The [List] of [Waypoint]s which represent the ideal line for this [Lane].
- * @param isStraight Whether this [Lane] is straight or not.
+ * @param laneCurvature The curvature of this [Lane].
+ * @param laneSegment The segment of this [Lane].
  */
 data class Lane(
     val laneID: Int,

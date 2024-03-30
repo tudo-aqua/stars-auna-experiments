@@ -16,7 +16,7 @@
  */
 
 plugins {
-  kotlin("jvm") version "1.9.22"
+  kotlin("jvm") version "2.0.0-Beta4"
   application
   id("com.diffplug.spotless") version "6.25.0"
   kotlin("plugin.serialization") version "1.9.21"
@@ -31,17 +31,18 @@ repositories {
   mavenLocal()
 }
 
-var starsVersion = "0.2.2"
+// var starsVersion = "0.2.2"
 
 dependencies {
   testImplementation(kotlin("test"))
-  implementation("tools.aqua:stars-core:$starsVersion")
-  implementation("tools.aqua:stars-logic-kcmftbl:$starsVersion")
-  implementation("tools.aqua:stars-data-av:$starsVersion")
-  implementation("tools.aqua:stars-importer-carla:$starsVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+  implementation("tools.aqua:stars-core")
+  implementation("tools.aqua:stars-logic-kcmftbl")
+  implementation("tools.aqua:stars-data-av")
+  implementation("tools.aqua:stars-importer-carla")
   implementation("de.sciss:kdtree:0.1.1")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.5.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 }
 
 spotless {

@@ -22,5 +22,6 @@ enum class DataSource {
   VICON_POSE,
   ODOMETRY,
   CAM,
+  ACKERMANN_CMD,
   NOT_SET
 }

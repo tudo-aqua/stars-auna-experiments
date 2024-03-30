@@ -24,18 +24,38 @@ import tools.aqua.stars.core.types.TickDataType
  * This class implements the [TickDataType] and holds a specific timestamp (see [currentTick]) and
  * the states of all [EntityType]s (see [Robot]) at the timestamp.
  *
- * @param currentTick The current timestamp in seconds
  * @param entities The [List] of [Robot]s for the [currentTick]
+ * @property currentTick The current timestamp in seconds
  */
-data class TickData(override val currentTick: Double, override var entities: List<Robot>) :
-    TickDataType<Robot, TickData, Segment> {
-  /** Holds a reference to the [Segment] in which this [TickData] is included and analyzed */
+data class TickData(override val currentTick: AuNaTimeUnit, override var entities: List<Robot>) :
+    TickDataType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
+  /** Holds a reference to the [Segment] in which this [TickData] is included and analyzed. */
   override lateinit var segment: Segment
 
-  override fun equals(other: Any?): Boolean {
-    if (other is TickData) {
-      return this.currentTick == other.currentTick
-    }
-    return super.equals(other)
+  /**
+   * Returns Robot with id [robotId].
+   *
+   * @throws NoSuchElementException if no Robot with id [robotId] is found.
+   */
+  fun getById(robotId: Int): Robot = entities.first { it.id == robotId }
+
+  /**
+   * Clones this [TickData] object.
+   *
+   * @return The cloned [TickData] object.
+   */
+  fun clone(): TickData {
+    val newTick = TickData(currentTick.clone(), listOf())
+    val entityCopies = entities.map { it.copyToNewTick(newTick) }
+    newTick.entities = entityCopies
+
+    return newTick
+  }
+
+  override fun equals(other: Any?): Boolean =
+      if (other is TickData) this.currentTick == other.currentTick else super.equals(other)
+
+  override fun hashCode(): Int {
+    return currentTick.hashCode()
   }
 }

@@ -22,80 +22,146 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.zip.ZipFile
-import kotlin.io.path.name
-import tools.aqua.stars.auna.metrics.RobotAccelerationStatisticsMetric
-import tools.aqua.stars.auna.metrics.RobotLateralOffsetStatisticsMetric
-import tools.aqua.stars.auna.metrics.RobotVelocityStatisticsMetric
+import tools.aqua.stars.auna.experiments.slicer.SliceAcceleration
+import tools.aqua.stars.auna.importer.Message
+import tools.aqua.stars.auna.importer.importDrivingData
+import tools.aqua.stars.auna.importer.importTrackData
+import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.acceleration.RobotAccelerationStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.lateral_offset.RobotLateralOffsetStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.steering_angle.RobotSteeringAngleStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotVelocityAverageStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMaxStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMinStatisticsMetric
+import tools.aqua.stars.auna.metrics.velocity.RobotVelocityStatisticsMetric
 import tools.aqua.stars.core.evaluation.TSCEvaluation
-import tools.aqua.stars.core.metric.metrics.evaluation.*
+import tools.aqua.stars.core.metric.metrics.evaluation.InvalidTSCInstancesPerProjectionMetric
+import tools.aqua.stars.core.metric.metrics.evaluation.MissedTSCInstancesPerProjectionMetric
+import tools.aqua.stars.core.metric.metrics.evaluation.SegmentCountMetric
+import tools.aqua.stars.core.metric.metrics.evaluation.ValidTSCInstancesPerProjectionMetric
 import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
 import tools.aqua.stars.core.metric.metrics.postEvaluation.MissingPredicateCombinationsPerProjectionMetric
 import tools.aqua.stars.data.av.track.*
-import tools.aqua.stars.importer.auna.Message
-import tools.aqua.stars.importer.auna.Time
-import tools.aqua.stars.importer.auna.importDrivingData
-import tools.aqua.stars.importer.auna.importTrackData
 
+/** Executes the experiments. */
 fun main() {
   downloadAndUnzipExperimentsData()
   downloadWaypointsData()
   println("Finished downloading files")
 
   val tsc = tsc()
+
+  println("Projections:")
+  tsc.buildProjections().forEach {
+    println("TSC for Projection $it:")
+    println(it.tsc)
+    println("All possible instances:")
+    println(it.possibleTSCInstances.size)
+    println()
+  }
+  println("-----------------")
+
   println("Import Track Data")
   val track = importTrackData()
+
   println("Convert Track Data")
-  val lanes = convertTrackToLanes(track)
-  println("Load Segments")
-  val segments = loadSegments(lanes)
+  val lanes = convertTrackToLanes(track, segmentsPerLane = 3)
+
+  println("Load Ticks")
+  val ticks = loadTicks(lanes)
+
+  println("Create Segments")
+  // val slicer = NoSlicing()
+  // val slicer = SliceEqualChunkSize()
+  val slicer = SliceAcceleration()
+  val segments = slicer.slice(ticks.subList(0, ticks.size), listOf(2, 3))
+
+  println("Found ${segments.toList().size} segments.")
 
   val tscEvaluation =
       TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
 
-  tscEvaluation.registerMetricProvider(SegmentCountMetric())
-  tscEvaluation.registerMetricProvider(SegmentDurationPerIdentifierMetric())
-  tscEvaluation.registerMetricProvider(TotalSegmentTimeLengthMetric())
   val validTSCInstancesPerProjectionMetric =
-      ValidTSCInstancesPerProjectionMetric<Robot, TickData, Segment>()
-  tscEvaluation.registerMetricProvider(validTSCInstancesPerProjectionMetric)
-  tscEvaluation.registerMetricProvider(InvalidTSCInstancesPerProjectionMetric())
-  tscEvaluation.registerMetricProvider(MissedTSCInstancesPerProjectionMetric())
-  tscEvaluation.registerMetricProvider(
-      MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric))
-  tscEvaluation.registerMetricProvider(FailedMonitorsMetric(validTSCInstancesPerProjectionMetric))
+      ValidTSCInstancesPerProjectionMetric<
+          Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
 
-  tscEvaluation.registerMetricProvider(RobotVelocityStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotLateralOffsetStatisticsMetric())
-  tscEvaluation.registerMetricProvider(RobotAccelerationStatisticsMetric())
+  val plotSegments = true
+  tscEvaluation.registerMetricProviders(
+      // Generic metrics
+      SegmentCountMetric(),
+      validTSCInstancesPerProjectionMetric,
+      InvalidTSCInstancesPerProjectionMetric(),
+      MissedTSCInstancesPerProjectionMetric(),
+      MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric),
+      FailedMonitorsMetric(validTSCInstancesPerProjectionMetric),
 
+      // Velocity
+      RobotVelocityStatisticsMetric(plotSegments),
+      RobotVelocityAverageStatisticsMetric(),
+      RobotVelocityMinStatisticsMetric(),
+      RobotVelocityMaxStatisticsMetric(),
+
+      // Acceleration
+      RobotAccelerationStatisticsMetric(plotSegments),
+      RobotAccelerationAverageStatisticsMetric(),
+      RobotAccelerationMinStatisticsMetric(),
+      RobotAccelerationMaxStatisticsMetric(),
+
+      // Steering angle
+      RobotSteeringAngleStatisticsMetric(plotSegments),
+      RobotSteeringAngleAverageStatisticsMetric(),
+      RobotSteeringAngleMinStatisticsMetric(),
+      RobotSteeringAngleMaxStatisticsMetric(),
+
+      // Lateral Offset
+      RobotLateralOffsetStatisticsMetric(plotSegments),
+      RobotLateralOffsetAverageStatisticsMetric(),
+      RobotLateralOffsetMinStatisticsMetric(),
+      RobotLateralOffsetMaxStatisticsMetric(),
+
+      // Distance to front
+      RobotDistanceToFrontStatisticsMetric(plotSegments),
+      RobotDistanceToFrontAverageStatisticsMetric(),
+      RobotDistanceToFrontMinStatisticsMetric(),
+      RobotDistanceToFrontMaxStatisticsMetric(),
+  )
   println("Run Evaluation")
   tscEvaluation.runEvaluation()
 }
 
-fun loadSegments(lanes: List<Lane>): Sequence<Segment> {
+/**
+ * Loads all [TickData] based on the given [List] of [Lane]s.
+ *
+ * @param lanes The [List] of [Lane]s.
+ * @return A [List] of [TickData].
+ */
+fun loadTicks(lanes: List<Lane>): List<TickData> {
   val path = File(SIMULATION_RUN_FOLDER).toPath()
-  val sourcesToContentMap = importDrivingData(path)
-  val messages = sortMessagesBySentTime(sourcesToContentMap)
+  val messages =
+      importDrivingData(path)
+          .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
+          .sortedWith(
+              compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
+
   val waypoints = lanes.flatMap { it.waypoints }
-  println("Calculate ticks")
-  val ticks = getTicksFromMessages(messages, waypoints = waypoints)
-  println("Slice Ticks into Segments")
-  val segments = segmentTicksIntoSegments(path.name, ticks)
-  println("Checksum Ticks: ${segments.sumOf{it.tickData.size}}")
-  return segments.asSequence()
+
+  return getTicksFromMessages(messages, waypoints = waypoints)
 }
 
-/**
- * Creates a sorted [List] of all [Message]s. Sorted by [Time.seconds] and [Time.nanoseconds].
- *
- * @param messageSourceToContentMap A [Map] which maps a [DataSource] to all its [Message]s.
- * @return A sorted [List] of [Message]s.
- */
-fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>): List<Message> {
-  return messageSourceToContentMap
-      .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
-      .sortedWith(compareBy({ it.header.timeStamp.seconds }, { it.header.timeStamp.nanoseconds }))
-}
+/** Holds the name of the downloaded file used for this experiment setup. */
+val DOWNLOAD_FILE_NAME = "$DOWNLOAD_FOLDER_NAME.zip"
 
 /**
  * Checks if the experiments data is available. Otherwise, it is downloaded and extracted to the
@@ -104,7 +170,7 @@ fun sortMessagesBySentTime(messageSourceToContentMap: Map<DataSource, List<Any>>
 fun downloadAndUnzipExperimentsData() {
   if (!File(DOWNLOAD_FOLDER_NAME).exists()) {
     println("The experiments data is missing.")
-    if (!File("$DOWNLOAD_FOLDER_NAME.zip").exists()) {
+    if (!File(DOWNLOAD_FILE_NAME).exists()) {
       println("The experiments data zip file is missing.")
       if (DOWNLOAD_EXPERIMENTS_DATA) {
         println("Start with downloading the experiments data. This may take a while.")
@@ -114,14 +180,12 @@ fun downloadAndUnzipExperimentsData() {
         simulationDataMissing()
       }
     }
-    if (!File("$DOWNLOAD_FOLDER_NAME.zip").exists()) {
+    if (!File(DOWNLOAD_FILE_NAME).exists()) {
       simulationDataMissing()
     }
     println("Extract experiments data from zip file.")
     extractZipFile(
-        zipFile = File("$DOWNLOAD_FOLDER_NAME.zip"),
-        extractTo = File("./$DOWNLOAD_FOLDER_NAME"),
-        true)
+        zipFile = File(DOWNLOAD_FILE_NAME), extractTo = File("./$DOWNLOAD_FOLDER_NAME"), true)
   }
   if (!File(DOWNLOAD_FOLDER_NAME).exists()) {
     simulationDataMissing()
@@ -134,15 +198,14 @@ fun downloadAndUnzipExperimentsData() {
  */
 fun simulationDataMissing() {
   error(
-      "The experiments data is not available. Either download it: $DRIVING_DATA_DOWNLOAD_URL and $TRACK_DATA_DOWNLOAD_URL or set " +
+      "The experiments data is not available. " +
+          "Either download it: $DRIVING_DATA_DOWNLOAD_URL and $TRACK_DATA_DOWNLOAD_URL or set " +
           "DOWNLOAD_EXPERIMENTS_DATA to 'true'")
 }
 
 /** Download the experiments data and saves it in the root directory of the project. */
 fun downloadExperimentsData() {
-  URL(DRIVING_DATA_DOWNLOAD_URL).openStream().use {
-    Files.copy(it, Paths.get("$DOWNLOAD_FOLDER_NAME.zip"))
-  }
+  URL(DRIVING_DATA_DOWNLOAD_URL).openStream().use { Files.copy(it, Paths.get(DOWNLOAD_FILE_NAME)) }
 }
 
 /** Download the waypoint data and saves it in the root directory of the project. */
@@ -166,9 +229,9 @@ fun downloadWaypointsData() {
 }
 
 /**
- * Extract a zip file into any directory
+ * Extract a zip file into any directory.
  *
- * @param zipFile src zip file
+ * @param zipFile src zip file.
  * @param extractTo directory to extract into. There will be new folder with the zip's name inside
  *   [extractTo] directory.
  * @param extractHere no extra folder will be created and will be extracted directly inside
@@ -176,37 +239,36 @@ fun downloadWaypointsData() {
  * @return the extracted directory i.e, [extractTo] folder if [extractHere] is `true` and
  *   [extractTo]\zipFile\ folder otherwise.
  */
+@Suppress("SameParameterValue")
 private fun extractZipFile(
     zipFile: File,
     extractTo: File,
     extractHere: Boolean = false,
-): File? {
-  return try {
-    val outputDir =
-        if (extractHere) {
-          extractTo
-        } else {
-          File(extractTo, zipFile.nameWithoutExtension)
-        }
-
-    ZipFile(zipFile).use { zip ->
-      zip.entries().asSequence().forEach { entry ->
-        zip.getInputStream(entry).use { input ->
-          if (entry.isDirectory) {
-            val d = File(outputDir, entry.name)
-            if (!d.exists()) d.mkdirs()
+): File? =
+    try {
+      val outputDir =
+          if (extractHere) {
+            extractTo
           } else {
-            val f = File(outputDir, entry.name)
-            if (f.parentFile?.exists() != true) f.parentFile?.mkdirs()
+            File(extractTo, zipFile.nameWithoutExtension)
+          }
 
-            f.outputStream().use { output -> input.copyTo(output) }
+      ZipFile(zipFile).use { zip ->
+        zip.entries().asSequence().forEach { entry ->
+          zip.getInputStream(entry).use { input ->
+            if (entry.isDirectory) {
+              File(outputDir, entry.name).mkdirs()
+            } else {
+              File(outputDir, entry.name).let {
+                it.parentFile?.mkdirs()
+                it.outputStream().use { output -> input.copyTo(output) }
+              }
+            }
           }
         }
       }
+      extractTo
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
     }
-    extractTo
-  } catch (e: Exception) {
-    e.printStackTrace()
-    null
-  }
-}

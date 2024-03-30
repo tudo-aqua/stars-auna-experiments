@@ -20,12 +20,37 @@ package tools.aqua.stars.data.av.track
 /**
  * This class represents the [Lane] on which the [Robot]s are driving on.
  *
- * @param length The length of the [Lane] in meters
- * @param width The width of the [Lane] in meters
- * @param waypoints The [List] of [Waypoint]s which represent the ideal line for this [Lane]
+ * @param laneID The id of this [Lane].
+ * @param length The length of the [Lane] in meters.
+ * @param width The width of the [Lane] in meters.
+ * @param waypoints The [List] of [Waypoint]s which represent the ideal line for this [Lane].
+ * @param laneCurvature The curvature of this [Lane].
+ * @param laneSegment The segment of this [Lane].
  */
-data class Lane(val length: Double, val width: Double, var waypoints: List<Waypoint>) {
+data class Lane(
+    val laneID: Int,
+    val length: Double,
+    val width: Double,
+    var waypoints: List<Waypoint>,
+    val laneCurvature: LaneCurvature,
+    val laneSegment: LaneSegment,
+) {
+  lateinit var previousLane: Lane
+  lateinit var nextLane: Lane
+
   override fun toString(): String {
-    return "Lane(length=$length, width=$width, waypoints=${waypoints.count()})"
+    return "Lane(id=$laneID, length=$length, width=$width, waypoints=${waypoints.count()})"
+  }
+
+  enum class LaneCurvature {
+    STRAIGHT,
+    TIGHT_CURVE,
+    WIDE_CURVE
+  }
+
+  enum class LaneSegment {
+    ENTERING,
+    MIDDLE,
+    LEAVING
   }
 }

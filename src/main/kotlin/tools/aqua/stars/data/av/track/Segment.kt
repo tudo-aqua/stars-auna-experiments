@@ -22,21 +22,22 @@ import tools.aqua.stars.core.types.SegmentType
 /**
  * This class implements the [SegmentType] and holds the sliced analysis data in semantic segments.
  *
- * @param segmentSource Specifies the file from which the data of this [Segment] comes from
- * @param tickData The [List] of [TickData]s relevant for the [Segment]
+ * @param segmentId The id of this [Segment].
+ * @param ticks The [TickData]s relevant for the [Segment].
+ * @param previousSegment The [Segment] before this [Segment].
+ * @param nextSegment The [Segment] after this [Segment].
  */
 data class Segment(
     val segmentId: Int,
-    override val segmentSource: String,
-    override val tickData: List<TickData>
-) : SegmentType<Robot, TickData, Segment> {
-  /** Holds a [Map] which maps a timestamp to all relevant [TickData]s (based on [tickData]) */
-  override val ticks: Map<Double, TickData> = tickData.associateBy { it.currentTick }
-  /** Holds a [List] of all available timestamps in this [Segment] (based on [tickData]) */
-  override val tickIDs: List<Double> = tickData.map { it.currentTick }
-  /** Holds the first timestamp for this [Segment] */
-  override val firstTickId: Double = this.tickIDs.first()
-  /** Holds the id of the primary entity for this [Segment] */
+    override val ticks: Map<AuNaTimeUnit, TickData>,
+    var previousSegment: Segment?,
+    var nextSegment: Segment?
+) : SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
+
+  override val segmentSource: String
+    get() = ""
+
+  /** Holds the id of the primary entity for this [Segment]. */
   override val primaryEntityId: Int
     get() {
       require(tickData.any()) {
@@ -45,11 +46,16 @@ data class Segment(
       require(tickData.first().entities.any()) {
         "There is no Entity in the first TickData. Cannot get primaryEntityId for this Segment"
       }
-      val firstEgo = tickData.first().entities.first()
+      require(tickData.first().entities.any { it.isPrimaryEntity }) {
+        "There need to be at least one 'primary' entity."
+      }
+      val firstEgo = tickData.first().entities.first { it.isPrimaryEntity }
       return firstEgo.id
     }
 
-  override fun getSegmentIdentifier(): String {
-    return "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] with primary entity id ${primaryEntityId})"
-  }
+  override fun getSegmentIdentifier(): String =
+      "Segment($segmentId with ticks from [${tickData.first().currentTick}..${tickData.last().currentTick}] " +
+          "with primary entity id ${primaryEntityId})"
+
+  override fun toString(): String = getSegmentIdentifier()
 }

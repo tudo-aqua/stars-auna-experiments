@@ -203,17 +203,13 @@ private fun thresholdTrajectories(robot: Robot, tick: tools.aqua.stars.data.av.t
                     MAX_LATERAL_OFFSET to "#FF0000")),
         // Steering Angle
         gradientColorValue(
-            value = robot.steeringAngle,
+            value = abs(robot.steeringAngle),
             valueColors =
                 listOf(
-                    -STEERING_ANGLE_HARD to "#0020f5",
-                    -STEERING_ANGLE_LOW - 0.000001 to "#0020f5",
-                    -STEERING_ANGLE_LOW to "#85ade8",
-                    -0.000001 to "#85ade8",
                     0.0 to "#000000",
-                    0.0000001 to "#E8766c",
+                    STEERING_ANGLE_LOW - 0.000001 to "#000000",
                     STEERING_ANGLE_LOW to "#E8766c",
-                    STEERING_ANGLE_LOW + 0.000001 to "#e80500",
+                    STEERING_ANGLE_HARD - 0.000001 to "#E8766c",
                     STEERING_ANGLE_HARD to "#e80500")),
         gradientColorValue(
             // Distance to Front

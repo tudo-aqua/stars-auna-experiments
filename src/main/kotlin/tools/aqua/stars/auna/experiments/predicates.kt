@@ -25,7 +25,6 @@ import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.logic.kcmftbl.eventually
 import tools.aqua.stars.logic.kcmftbl.globally
-import tools.aqua.stars.logic.kcmftbl.until
 
 // region distance to previous vehicle
 /*
@@ -34,26 +33,21 @@ import tools.aqua.stars.logic.kcmftbl.until
 /**
  * High distance to the previous vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH].
  */
-const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH: Double = 2.0
+const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH: Double = 3.0
 
 /** Low distance to the previous vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW]. */
-const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW: Double = 1.0
+const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW: Double =
+    1.1664 // break distance: (10.8km/h / 10)^2. 3m/s = 10.8km/h
 
 /** High distance to the front vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH]. */
 val highDistanceToFrontVehicle = // FIXME: Measure across multiple lanes
     predicate(Robot::class) { _, r ->
       val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
-      until(
+      eventually(
           r,
           frontRobot,
-          phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
-          phi2 = { rb1, rb2 ->
-            eventually(
-                rb1,
-                rb2,
-                phi = { rbt1, rbt2 ->
-                  rbt1.distanceToOther(rbt2) > DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
-                })
+          phi = { rbt1, rbt2 ->
+            rbt1.distanceToOther(rbt2) > DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
           })
     }
 
@@ -64,18 +58,12 @@ val highDistanceToFrontVehicle = // FIXME: Measure across multiple lanes
 val normalDistanceToFrontVehicle =
     predicate(Robot::class) { _, r ->
       val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
-      until(
+      globally(
           r,
           frontRobot,
-          phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
-          phi2 = { rb1, rb2 ->
-            globally(
-                rb1,
-                rb2,
-                phi = { rbt1, rbt2 ->
-                  rbt1.distanceToOther(rbt2) in
-                      DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW..DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
-                })
+          phi = { rbt1, rbt2 ->
+            rbt1.distanceToOther(rbt2) in
+                DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW..DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
           })
     }
 
@@ -83,18 +71,10 @@ val normalDistanceToFrontVehicle =
 val lowDistanceToFrontVehicle =
     predicate(Robot::class) { _, r ->
       val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
-      until(
+      eventually(
           r,
           frontRobot,
-          phi1 = { rb1, rb2 -> rb1.lane != rb2.lane },
-          phi2 = { rb1, rb2 ->
-            eventually(
-                rb1,
-                rb2,
-                phi = { rb1, rb2 ->
-                  rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW
-                })
-          })
+          phi = { rb1, rb2 -> rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW })
     }
 // endregion
 

@@ -33,7 +33,7 @@ import tools.aqua.stars.logic.kcmftbl.until
  */
 
 /** Exceeding the maximum lateral offset defined as > [MAX_LATERAL_OFFSET]. */
-const val MAX_LATERAL_OFFSET: Double = 0.5
+const val MAX_LATERAL_OFFSET: Double = 0.4
 
 /** Normal lateral offset defined as <= [MAX_LATERAL_OFFSET]. */
 val normalLateralOffset =

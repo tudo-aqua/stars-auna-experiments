@@ -19,6 +19,7 @@
 
 package tools.aqua.stars.auna.experiments
 
+import kotlin.math.abs
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.Robot
@@ -249,23 +250,24 @@ private val wideCurve =
 const val STEERING_ANGLE_HARD: Double = 10.0
 
 /** Low steering angle is defined as >= [STEERING_ANGLE_LOW]. */
-const val STEERING_ANGLE_LOW: Double = 3.0
+const val STEERING_ANGLE_LOW: Double = 2.5
 
 /** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
 val hardSteering =
     predicate(Robot::class) { _, r ->
-      eventually(r, phi = { it.steeringAngle >= STEERING_ANGLE_HARD })
+      eventually(r, phi = { abs(it.steeringAngle) >= STEERING_ANGLE_HARD })
     }
 
 /** Low steering is defined in the interval ([STEERING_ANGLE_LOW] ... [STEERING_ANGLE_HARD]). */
 val lowSteering =
     predicate(Robot::class) { ctx, r ->
-      eventually(r, phi = { it.steeringAngle >= STEERING_ANGLE_LOW }) && !hardSteering.holds(ctx, r)
+      eventually(r, phi = { abs(it.steeringAngle) >= STEERING_ANGLE_LOW }) &&
+          !hardSteering.holds(ctx, r)
     }
 
 /** No steering angle is defined as >= [STEERING_ANGLE_LOW]. */
 val noSteering =
     predicate(Robot::class) { _, r ->
-      globally(r, phi = { it.steeringAngle <= STEERING_ANGLE_LOW })
+      globally(r, phi = { abs(it.steeringAngle) <= STEERING_ANGLE_LOW })
     }
 // endregion

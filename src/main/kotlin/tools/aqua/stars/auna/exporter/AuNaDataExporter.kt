@@ -218,11 +218,12 @@ private fun thresholdTrajectories(robot: Robot, tick: tools.aqua.stars.data.av.t
                 listOf(
                     -1.0 to "#333333", // just applies to front robot
                     0.0 to "#333333",
-                    0.000000001 to "#FF0000",
-                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW to "#FF0000",
-                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW + 0.0000001 to "#00FF00",
-                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH to "#00FF00",
-                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH + 0.0000001 to "#0020f5")))
+                    0.000000001 to "#e80500",
+                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW - 0.0000001 to "#e80500",
+                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW to "#0b9c03",
+                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH - 0.0000001 to "#0b9c03",
+                    DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH to "#e3db00",
+                )))
 
 @Suppress("unused")
 private fun gradientTrajectories(robot: Robot, tick: tools.aqua.stars.data.av.track.TickData) =

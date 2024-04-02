@@ -94,7 +94,8 @@ fun tsc() =
                 leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
                 leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
                 leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
-//                leaf("No Acceleration") { condition = { ctx -> noAcceleration.holds(ctx) } }
+                //                leaf("No Acceleration") { condition = { ctx ->
+                // noAcceleration.holds(ctx) } }
               }
 
               any("Steering Angle") {

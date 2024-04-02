@@ -24,7 +24,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToStream
 import tools.aqua.stars.auna.experiments.*
-import tools.aqua.stars.auna.experiments.slicer.SliceEqualChunkSize
+import tools.aqua.stars.auna.experiments.slicer.SliceAcceleration
 import tools.aqua.stars.auna.experiments.slicer.Slicer
 import tools.aqua.stars.auna.importer.Quaternion
 import tools.aqua.stars.auna.importer.Vector
@@ -71,7 +71,7 @@ fun main() {
   exportStaticData(lanes)
 
   println("Export Dynamic Data")
-  exportDynamicData(lanes, SliceEqualChunkSize())
+  exportDynamicData(lanes, SliceAcceleration())
 
   println("Export finished successfully")
 }
@@ -175,13 +175,12 @@ private fun thresholdTrajectories(robot: Robot, tick: tools.aqua.stars.data.av.t
             valueColors =
                 listOf(
                     ACCELERATION_DECELERATION_STRONG_THRESHOLD to "#0000FF",
-                    ACCELERATION_DECELERATION_WEAK_THRESHOLD - 0.000001 to "#0000FF",
+                    ACCELERATION_DECELERATION_STRONG_THRESHOLD + 0.000001 to "#18daf0",
                     ACCELERATION_DECELERATION_WEAK_THRESHOLD to "#18daf0",
-                    -0.0000001 to "#18daf0",
-                    0.0 to "#ffffff",
-                    0.0000001 to "#f09733",
+                    ACCELERATION_DECELERATION_WEAK_THRESHOLD + 0.0000001 to "#000000",
+                    ACCELERATION_ACCELERATION_WEAK_THRESHOLD - 0.0000001 to "#000000",
                     ACCELERATION_ACCELERATION_WEAK_THRESHOLD to "#f09733",
-                    ACCELERATION_ACCELERATION_WEAK_THRESHOLD + 0.000001 to "#FF0000",
+                    ACCELERATION_ACCELERATION_STRONG_THRESHOLD - 0.000001 to "#f09733",
                     ACCELERATION_ACCELERATION_STRONG_THRESHOLD to "#FF0000")),
         // Velocity
         gradientColorValue(

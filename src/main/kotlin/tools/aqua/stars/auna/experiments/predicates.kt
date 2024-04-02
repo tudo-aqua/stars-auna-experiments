@@ -144,11 +144,11 @@ val weakAcceleration =
           !strongAcceleration.holds(ctx, r)
     }
 
-///**
+/// **
 // * No acceleration is defined in the interval ([ACCELERATION_DECELERATION_WEAK_THRESHOLD] ...
 // * [ACCELERATION_ACCELERATION_WEAK_THRESHOLD]).
 // */
-//val noAcceleration =
+// val noAcceleration =
 //    predicate(Robot::class) { _, r ->
 //      globally(
 //          r,

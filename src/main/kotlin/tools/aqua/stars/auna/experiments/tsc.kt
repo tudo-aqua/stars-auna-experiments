@@ -28,12 +28,26 @@ fun tsc() =
         root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
           all("TSCRoot") {
             projectionIDs =
-                mapOf(projRec("all"), proj("Driving situation"), proj("Driving maneuver"))
+                mapOf(
+                    projRec("all"),
+                    proj("Driving situation"),
+                    proj("Lane Change"),
+                    proj("Distance to front vehicle"),
+                    proj("Velocity"),
+                    proj("Driving maneuver"),
+                    proj("Acceleration"),
+                    proj("Steering Angle"))
 
             all("Driving situation") {
-              projectionIDs = mapOf(projRec("Driving situation"))
+              projectionIDs =
+                  mapOf(
+                      projRec("Driving situation"),
+                      proj("Lane Change"),
+                      proj("Distance to front vehicle"),
+                      proj("Velocity"))
 
               exclusive("Lane Change") {
+                projectionIDs = mapOf(projRec("Lane Change"))
                 leaf("Entering Straight") { condition = { ctx -> enteringStraight.holds(ctx) } }
                 leaf("In Straight") { condition = { ctx -> inStraight.holds(ctx) } }
                 leaf("Exiting Straight") { condition = { ctx -> leavingStraight.holds(ctx) } }
@@ -49,13 +63,21 @@ fun tsc() =
                 leaf("Exiting Wide Curve") { condition = { ctx -> leavingWideCurve.holds(ctx) } }
               }
 
-              any("Distance to front vehicle") {
-                leaf("High") { condition = { ctx -> highDistanceToFrontVehicle.holds(ctx) } }
-                leaf("Normal") { condition = { ctx -> normalDistanceToFrontVehicle.holds(ctx) } }
-                leaf("Low") { condition = { ctx -> lowDistanceToFrontVehicle.holds(ctx) } }
+              exclusive("Distance to front vehicle") {
+                projectionIDs = mapOf(projRec("Distance to front vehicle"))
+                leaf("High distance to front vehicle") {
+                  condition = { ctx -> highDistanceToFrontVehicle.holds(ctx) }
+                }
+                leaf("Normal distance to front vehicle") {
+                  condition = { ctx -> normalDistanceToFrontVehicle.holds(ctx) }
+                }
+                leaf("Low distance to front vehicle") {
+                  condition = { ctx -> lowDistanceToFrontVehicle.holds(ctx) }
+                }
               }
 
               exclusive("Velocity") {
+                projectionIDs = mapOf(projRec("Velocity"))
                 leaf("Low Velocity") { condition = { ctx -> lowVelocity.holds(ctx) } }
                 leaf("High Velocity") { condition = { ctx -> highVelocity.holds(ctx) } }
                 leaf("Max Velocity") { condition = { ctx -> maxVelocity.holds(ctx) } }
@@ -63,17 +85,20 @@ fun tsc() =
             }
 
             all("Driving maneuver") {
-              projectionIDs = mapOf(projRec(("Driving maneuver")))
+              projectionIDs =
+                  mapOf(projRec("Driving maneuver"), proj("Acceleration"), proj("Steering Angle"))
 
               exclusive("Acceleration") {
+                projectionIDs = mapOf(projRec("Acceleration"))
                 leaf("Weak Deceleration") { condition = { ctx -> weakDeceleration.holds(ctx) } }
                 leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
                 leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
                 leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
-                leaf("No Acceleration") { condition = { ctx -> noAcceleration.holds(ctx) } }
+//                leaf("No Acceleration") { condition = { ctx -> noAcceleration.holds(ctx) } }
               }
 
               any("Steering Angle") {
+                projectionIDs = mapOf(projRec("Steering Angle"))
                 leaf("No Steering") {
                   condition = { ctx ->
                     ctx.entityIds.any { entityId -> noSteering.holds(ctx, entityId = entityId) }

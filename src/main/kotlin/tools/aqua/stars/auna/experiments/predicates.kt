@@ -40,7 +40,7 @@ const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW: Double =
     1.1664 // break distance: (10.8km/h / 10)^2. 3m/s = 10.8km/h
 
 /** High distance to the front vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH]. */
-val highDistanceToFrontVehicle = // FIXME: Measure across multiple lanes
+val highDistanceToFrontVehicle =
     predicate(Robot::class) { _, r ->
       val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
       eventually(
@@ -144,19 +144,19 @@ val weakAcceleration =
           !strongAcceleration.holds(ctx, r)
     }
 
-/**
- * No acceleration is defined in the interval ([ACCELERATION_DECELERATION_WEAK_THRESHOLD] ...
- * [ACCELERATION_ACCELERATION_WEAK_THRESHOLD]).
- */
-val noAcceleration =
-    predicate(Robot::class) { _, r ->
-      globally(
-          r,
-          phi = {
-            it.acceleration in
-                ACCELERATION_DECELERATION_WEAK_THRESHOLD..ACCELERATION_ACCELERATION_WEAK_THRESHOLD
-          })
-    }
+///**
+// * No acceleration is defined in the interval ([ACCELERATION_DECELERATION_WEAK_THRESHOLD] ...
+// * [ACCELERATION_ACCELERATION_WEAK_THRESHOLD]).
+// */
+//val noAcceleration =
+//    predicate(Robot::class) { _, r ->
+//      globally(
+//          r,
+//          phi = {
+//            it.acceleration in
+//                ACCELERATION_DECELERATION_WEAK_THRESHOLD..ACCELERATION_ACCELERATION_WEAK_THRESHOLD
+//          })
+//    }
 
 /**
  * Weak deceleration is defined in the interval ([ACCELERATION_DECELERATION_STRONG_THRESHOLD] ...

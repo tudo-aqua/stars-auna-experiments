@@ -26,107 +26,28 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.logic.kcmftbl.eventually
 import tools.aqua.stars.logic.kcmftbl.globally
 
-// region distance to previous vehicle
-/*
- * The distance to the previous robot in m.
- */
-/**
- * High distance to the previous vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH].
- */
-const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH: Double = 3.0
-
-/** Low distance to the previous vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW]. */
-const val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW: Double =
-    1.1664 // break distance: (10.8km/h / 10)^2. 3m/s = 10.8km/h
-
-/** High distance to the front vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH]. */
-val highDistanceToFrontVehicle =
-    predicate(Robot::class) { _, r ->
-      val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
-      eventually(
-          r,
-          frontRobot,
-          phi = { rbt1, rbt2 ->
-            rbt1.distanceToOther(rbt2) > DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
-          })
-    }
-
-/**
- * The distance to the front vehicle is in the normal range if it is in the interval
- * ([DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW] ... [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH]).
- */
-val normalDistanceToFrontVehicle =
-    predicate(Robot::class) { _, r ->
-      val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
-      globally(
-          r,
-          frontRobot,
-          phi = { rbt1, rbt2 ->
-            rbt1.distanceToOther(rbt2) in
-                DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW..DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
-          })
-    }
-
-/** Low distance to the front vehicle is defined as < [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW]. */
-val lowDistanceToFrontVehicle =
-    predicate(Robot::class) { _, r ->
-      val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
-      eventually(
-          r,
-          frontRobot,
-          phi = { rb1, rb2 -> rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW })
-    }
-// endregion
-
-// region velocity
-/*
- * The velocity of the robot in m/s.
- */
-
-/** Maximum velocity is defined as >= [VELOCITY_MAX]. */
-const val VELOCITY_MAX: Double = 2.75
-
-/** High velocity is defined as >= [VELOCITY_HIGH]. */
-const val VELOCITY_HIGH: Double = 1.5
-
-/** Maximum velocity is defined as >= [VELOCITY_MAX]. */
-val maxVelocity =
-    predicate(Robot::class) { _, r -> eventually(r, phi = { it.velocity >= VELOCITY_MAX }) }
-
-/** High velocity is defined in the interval ([VELOCITY_HIGH] ... [VELOCITY_MAX]). */
-val highVelocity =
-    predicate(Robot::class) { ctx, r ->
-      eventually(r, phi = { it.velocity in VELOCITY_HIGH ..< VELOCITY_MAX }) &&
-          !maxVelocity.holds(ctx, r)
-    }
-
-/** Low velocity is defined as < [VELOCITY_HIGH]. */
-val lowVelocity =
-    predicate(Robot::class) { _, r -> globally(r, phi = { it.velocity < VELOCITY_HIGH }) }
-// endregion
-
 // region acceleration
 /*
  * The acceleration of the robot in m/s^2.
  */
 
 /** Strong acceleration is defined as >= [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]. */
-const val ACCELERATION_ACCELERATION_STRONG_THRESHOLD: Double = 2.0
+val ACCELERATION_ACCELERATION_STRONG_THRESHOLD: Double = 2.0
 
 /**
  * Weak acceleration is defined in the interval ([ACCELERATION_ACCELERATION_WEAK_THRESHOLD] ...
  * [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]).
  */
-const val ACCELERATION_ACCELERATION_WEAK_THRESHOLD: Double = 0.5
+val ACCELERATION_ACCELERATION_WEAK_THRESHOLD: Double = 0.5
 
 /**
  * Weak deceleration is defined in the interval ([ACCELERATION_DECELERATION_STRONG_THRESHOLD] ...
  * [ACCELERATION_DECELERATION_WEAK_THRESHOLD]).
  */
-const val ACCELERATION_DECELERATION_WEAK_THRESHOLD: Double = -0.5
+val ACCELERATION_DECELERATION_WEAK_THRESHOLD: Double = -ACCELERATION_ACCELERATION_WEAK_THRESHOLD
 
 /** Strong deceleration is defined as < [ACCELERATION_DECELERATION_STRONG_THRESHOLD]. */
-const val ACCELERATION_DECELERATION_STRONG_THRESHOLD: Double = -2.0
+val ACCELERATION_DECELERATION_STRONG_THRESHOLD: Double = -ACCELERATION_ACCELERATION_STRONG_THRESHOLD
 
 /** Strong acceleration is defined as > [ACCELERATION_ACCELERATION_STRONG_THRESHOLD]. */
 val strongAcceleration =
@@ -175,6 +96,116 @@ val strongDeceleration =
     }
 // endregion
 
+// region velocity
+/*
+ * The velocity of the robot in m/s.
+ */
+
+/** Maximum velocity is defined as >= [VELOCITY_MAX]. */
+val VELOCITY_MAX: Double = 2.75
+
+/** High velocity is defined as >= [VELOCITY_HIGH]. */
+val VELOCITY_HIGH: Double = 1.5
+
+/** Maximum velocity is defined as >= [VELOCITY_MAX]. */
+val maxVelocity =
+    predicate(Robot::class) { _, r -> eventually(r, phi = { it.velocity >= VELOCITY_MAX }) }
+
+/** High velocity is defined in the interval ([VELOCITY_HIGH] ... [VELOCITY_MAX]). */
+val highVelocity =
+    predicate(Robot::class) { ctx, r ->
+      eventually(r, phi = { it.velocity in VELOCITY_HIGH ..< VELOCITY_MAX }) &&
+          !maxVelocity.holds(ctx, r)
+    }
+
+/** Low velocity is defined as < [VELOCITY_HIGH]. */
+val lowVelocity =
+    predicate(Robot::class) { _, r -> globally(r, phi = { it.velocity < VELOCITY_HIGH }) }
+// endregion
+
+// region steering angle
+/*
+ * The steering angle of the robot in degrees.
+ */
+
+/** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
+val STEERING_ANGLE_HARD: Double = 10.0
+
+/** Low steering angle is defined as >= [STEERING_ANGLE_LOW]. */
+val STEERING_ANGLE_LOW: Double = 2.5
+
+/** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
+val hardSteering =
+    predicate(Robot::class) { _, r ->
+      eventually(r, phi = { abs(it.steeringAngle) >= STEERING_ANGLE_HARD })
+    }
+
+/** Low steering is defined in the interval ([STEERING_ANGLE_LOW] ... [STEERING_ANGLE_HARD]). */
+val lowSteering =
+    predicate(Robot::class) { ctx, r ->
+      eventually(r, phi = { abs(it.steeringAngle) >= STEERING_ANGLE_LOW }) &&
+          !hardSteering.holds(ctx, r)
+    }
+
+/** No steering angle is defined as >= [STEERING_ANGLE_LOW]. */
+val noSteering =
+    predicate(Robot::class) { _, r ->
+      globally(r, phi = { abs(it.steeringAngle) <= STEERING_ANGLE_LOW })
+    }
+// endregion
+
+// region distance to previous vehicle
+/*
+ * The distance to the previous robot in m.
+ */
+/**
+ * High distance to the previous vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH].
+ */
+val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH: Double = 3.0
+
+/** Low distance to the previous vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW]. */
+val DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW: Double =
+    1.1664 // break distance: (10.8km/h / 10)^2. 3m/s = 10.8km/h
+
+/** High distance to the front vehicle is defined as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH]. */
+val highDistanceToFrontVehicle =
+    predicate(Robot::class) { _, r ->
+      val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
+      eventually(
+          r,
+          frontRobot,
+          phi = { rbt1, rbt2 ->
+            rbt1.distanceToOther(rbt2) > DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
+          })
+    }
+
+/**
+ * The distance to the front vehicle is in the normal range if it is in the interval
+ * ([DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW] ... [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH]).
+ */
+val normalDistanceToFrontVehicle =
+    predicate(Robot::class) { _, r ->
+      val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
+      globally(
+          r,
+          frontRobot,
+          phi = { rbt1, rbt2 ->
+            rbt1.distanceToOther(rbt2) in
+                DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW..DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH
+          })
+    }
+
+/** Low distance to the front vehicle is defined as < [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW]. */
+val lowDistanceToFrontVehicle =
+    predicate(Robot::class) { _, r ->
+      val frontRobot = checkNotNull(r.tickData.getEntityById(r.id - 1))
+      eventually(
+          r,
+          frontRobot,
+          phi = { rb1, rb2 -> rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_LOW })
+    }
+// endregion
+
 // region lane type
 /** Robot is currently entering a straight lane. */
 val enteringStraight =
@@ -219,35 +250,4 @@ private val tightCurve =
 private val wideCurve =
     predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.WIDE_CURVE }
 
-// endregion
-
-// region steering angle
-/*
- * The steering angle of the robot in degrees.
- */
-
-/** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
-const val STEERING_ANGLE_HARD: Double = 10.0
-
-/** Low steering angle is defined as >= [STEERING_ANGLE_LOW]. */
-const val STEERING_ANGLE_LOW: Double = 2.5
-
-/** Hard steering angle is defined as >= [STEERING_ANGLE_HARD]. */
-val hardSteering =
-    predicate(Robot::class) { _, r ->
-      eventually(r, phi = { abs(it.steeringAngle) >= STEERING_ANGLE_HARD })
-    }
-
-/** Low steering is defined in the interval ([STEERING_ANGLE_LOW] ... [STEERING_ANGLE_HARD]). */
-val lowSteering =
-    predicate(Robot::class) { ctx, r ->
-      eventually(r, phi = { abs(it.steeringAngle) >= STEERING_ANGLE_LOW }) &&
-          !hardSteering.holds(ctx, r)
-    }
-
-/** No steering angle is defined as >= [STEERING_ANGLE_LOW]. */
-val noSteering =
-    predicate(Robot::class) { _, r ->
-      globally(r, phi = { abs(it.steeringAngle) <= STEERING_ANGLE_LOW })
-    }
 // endregion

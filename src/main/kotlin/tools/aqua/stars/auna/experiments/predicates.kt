@@ -84,7 +84,7 @@ val lowDistanceToFrontVehicle =
  */
 
 /** Maximum velocity is defined as >= [VELOCITY_MAX]. */
-const val VELOCITY_MAX: Double = 2.5
+const val VELOCITY_MAX: Double = 2.75
 
 /** High velocity is defined as >= [VELOCITY_HIGH]. */
 const val VELOCITY_HIGH: Double = 1.5

@@ -77,3 +77,27 @@ fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> {
         it.last().nextLane = it.first()
       }
 }
+
+/**
+ * Converts the given serialized [Track] into a single [Lane].
+ *
+ * @param track The [Track] that should be converted.
+ * @return The converted [Lane].
+ */
+fun convertTrackToSingleLane(track: Track): Lane {
+  val newLane =
+      Lane(
+          laneID = 0,
+          laneCurvature = Lane.LaneCurvature.STRAIGHT,
+          laneSegment = Lane.LaneSegment.ENTERING,
+          width = track.lanes[0].width,
+          length = track.lanes[0].length,
+          waypoints = listOf())
+  newLane.waypoints =
+      track.lanes
+          .map { it.waypoints.map { wp -> Waypoint(wp.x, wp.y, wp.distanceToStart, newLane) } }
+          .flatten()
+          .toMutableList()
+          .also { it.addAll(it.subList(0, 10).map { it.copy() }) }
+  return newLane
+}

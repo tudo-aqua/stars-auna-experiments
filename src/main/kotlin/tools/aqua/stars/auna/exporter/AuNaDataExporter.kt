@@ -31,7 +31,7 @@ import tools.aqua.stars.auna.importer.Vector
 import tools.aqua.stars.auna.importer.importTrackData
 import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.Robot
-import tools.aqua.stars.data.av.track.convertTrackToLanes
+import tools.aqua.stars.data.av.track.convertTrackToSingleLane
 
 const val OUTPUT_DIR = "./stars-auna-export/"
 const val OUTPUT_FILE_NAME = "auna"
@@ -62,7 +62,7 @@ fun main() {
   println("Import Track Data")
   val track = importTrackData()
   println("Convert Track Data")
-  val lanes = convertTrackToLanes(track, segmentsPerLane = 3)
+  val lanes = listOf(convertTrackToSingleLane(track))
 
   println("Create Export Directory")
   File(OUTPUT_DIR).mkdirs()

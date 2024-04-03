@@ -17,6 +17,9 @@
 
 package tools.aqua.stars.auna.importer
 
+import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.sqrt
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,6 +30,31 @@ data class Quaternion(
     @SerialName("z") val z: Double,
     @SerialName("w") val w: Double
 ) {
+
+  /** Calculate the roll value for this quaternion. */
+  val roll: Double
+    get() {
+      val sinrCosp = 2 * (w * x + y * z)
+      val cosrCosp = 1 - 2 * (x * x + y * y)
+      return atan2(sinrCosp, cosrCosp)
+    }
+
+  /** Calculate the pitch value for this quaternion. */
+  val pitch: Double
+    get() {
+      val sinp = sqrt(1 + 2 * (w * y - x * z))
+      val cosp = sqrt(1 - 2 * (w * y - x * z))
+      return 2 * atan2(sinp, cosp) - PI / 2
+    }
+
+  /** Calculate the yaw value for this quaternion. */
+  val yaw: Double
+    get() {
+      val sinyCosp = 2 * (w * z + x * y)
+      val cosyCosp = 1 - 2 * (y * y + z * z)
+      return atan2(sinyCosp, cosyCosp)
+    }
+
   companion object {
     val zero: Quaternion = Quaternion(0.0, 0.0, 0.0, 0.0)
   }

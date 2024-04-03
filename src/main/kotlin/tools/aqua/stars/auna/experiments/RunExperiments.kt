@@ -51,8 +51,7 @@ import tools.aqua.stars.core.metric.metrics.evaluation.InvalidTSCInstancesPerPro
 import tools.aqua.stars.core.metric.metrics.evaluation.MissedTSCInstancesPerProjectionMetric
 import tools.aqua.stars.core.metric.metrics.evaluation.SegmentCountMetric
 import tools.aqua.stars.core.metric.metrics.evaluation.ValidTSCInstancesPerProjectionMetric
-import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
-import tools.aqua.stars.core.metric.metrics.postEvaluation.MissingPredicateCombinationsPerProjectionMetric
+import tools.aqua.stars.core.metric.metrics.postEvaluation.*
 import tools.aqua.stars.data.av.track.*
 
 /** Executes the experiments. */
@@ -86,7 +85,7 @@ fun main() {
   // val slicer = NoSlicing()
   // val slicer = SliceEqualChunkSize()
   val slicer = SliceAcceleration()
-  val segments = slicer.slice(ticks.subList(0, ticks.size), listOf(2, 3))
+  val segments = slicer.slice(ticks, listOf(2, 3))
 
   println("Found ${segments.toList().size} segments.")
 
@@ -106,6 +105,8 @@ fun main() {
       MissedTSCInstancesPerProjectionMetric(),
       MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric),
       FailedMonitorsMetric(validTSCInstancesPerProjectionMetric),
+      FailedMonitorsGroupedMetric(validTSCInstancesPerProjectionMetric),
+      FailedMonitorsGroupedByNodeMetric(validTSCInstancesPerProjectionMetric, onlyLeafNodes = true),
 
       // Velocity
       RobotVelocityStatisticsMetric(plotSegments),

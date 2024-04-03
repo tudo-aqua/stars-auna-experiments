@@ -187,7 +187,9 @@ private fun getRobotFromMessageAndLatestInformationFromAckermannDriveStamped(
         velocity = latestRobot.velocity,
         acceleration = latestRobot.acceleration,
         position = latestRobot.position,
+        positionCAM = latestRobot.positionCAM,
         rotation = latestRobot.rotation,
+        thetaCAM = latestRobot.thetaCAM,
         posOnLaneCAM = latestRobot.posOnLaneCAM,
         lateralOffsetCAM = latestRobot.lateralOffsetCAM,
         velocityCAM = latestRobot.velocityCAM,
@@ -230,7 +232,9 @@ private fun getRobotFromMessageAndLatestInformationFromCAM(
       velocity = latestRobot.velocity,
       acceleration = latestRobot.acceleration,
       position = latestRobot.position,
+      positionCAM = Vector(message.x, message.y, message.z), // From Message
       rotation = latestRobot.rotation,
+      thetaCAM = message.theta, // From Message
       posOnLaneCAM = posOnLaneAndLateralOffset.first.distanceToStart, // From Message
       lateralOffsetCAM = posOnLaneAndLateralOffset.second, // From Message
       velocityCAM = message.v, // From Message
@@ -268,7 +272,9 @@ private fun getRobotFromMessageAndLatestInformationFromOdometry(
                 (tickData.currentTick - (latestRobot.tickData.currentTick))
                     .toDoubleValue(), // Calculated*/
         position = latestRobot.position,
+        positionCAM = latestRobot.positionCAM,
         rotation = latestRobot.rotation,
+        thetaCAM = latestRobot.thetaCAM,
         posOnLaneCAM = latestRobot.posOnLaneCAM,
         lateralOffsetCAM = latestRobot.lateralOffsetCAM,
         velocityCAM = latestRobot.velocityCAM,
@@ -307,7 +313,9 @@ private fun getRobotFromMessageAndLatestInformationFromViconPose(
       velocity = latestRobot.velocity,
       acceleration = 0.0, // latestRobot.acceleration,
       position = message.transform.translation, // From Message
+      positionCAM = latestRobot.positionCAM,
       rotation = message.transform.rotation, // From Message
+      thetaCAM = latestRobot.thetaCAM,
       posOnLaneCAM = latestRobot.posOnLaneCAM,
       lateralOffsetCAM = latestRobot.lateralOffsetCAM,
       velocityCAM = latestRobot.velocityCAM,

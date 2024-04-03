@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-@file:Suppress("NAME_SHADOWING")
+@file:Suppress("MayBeConstant")
 
 package tools.aqua.stars.auna.experiments
 
-import java.lang.Math.pow
 import kotlin.math.*
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.AuNaTimeDifference
@@ -27,7 +26,6 @@ import tools.aqua.stars.data.av.track.DataSource
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.logic.kcmftbl.eventually
 import tools.aqua.stars.logic.kcmftbl.globally
-import tools.aqua.stars.logic.kcmftbl.until
 
 // region lateral offset
 /*
@@ -35,7 +33,7 @@ import tools.aqua.stars.logic.kcmftbl.until
  */
 
 /** Exceeding the maximum lateral offset defined as > [MAX_LATERAL_OFFSET]. */
-const val MAX_LATERAL_OFFSET: Double = 0.4
+val MAX_LATERAL_OFFSET: Double = 0.4
 
 /** Normal lateral offset defined as <= [MAX_LATERAL_OFFSET]. */
 val normalLateralOffset =
@@ -90,71 +88,21 @@ val maxDistanceToFrontVehicleExceeded =
  */
 
 /** Exceeding the maximum deceleration is defined as < -3.0 m/s². */
-const val MAXIMUM_DECELERATION_THRESHOLD: Double = -3.0
-
-/** Minimum duration between acceleration and deceleration in seconds. */
-const val MIN_ACCELERATION_TO_DECELERATION_DURATION: Double = 2.0
-
-/** Minimum duration between deceleration and acceleration in seconds. */
-const val MIN_DECELERATION_TO_ACCELERATION_DURATION: Double = 2.0
+val MAXIMUM_DECELERATION_THRESHOLD: Double = -3.0
 
 /** Exceeding the maximum deceleration is defined as > [MAXIMUM_DECELERATION_THRESHOLD]. */
 val maxDecelerationExceeded =
     predicate(Robot::class) { _, r ->
       globally(r, phi = { it.acceleration > MAXIMUM_DECELERATION_THRESHOLD })
     }
-
-/**
- * Acceleration to deceleration transition phase must be at least
- * [MIN_ACCELERATION_TO_DECELERATION_DURATION] seconds long.
- */
-val noShortAccelerationToDecelerationTransition =
-    predicate(Robot::class) { _, r ->
-      globally(
-          r,
-          phi = { r ->
-            r.acceleration >= ACCELERATION_ACCELERATION_WEAK_THRESHOLD &&
-                globally(
-                    r,
-                    phi = { r.acceleration > ACCELERATION_DECELERATION_WEAK_THRESHOLD },
-                    interval =
-                        AuNaTimeDifference(0) to
-                            AuNaTimeDifference(MIN_ACCELERATION_TO_DECELERATION_DURATION, 0.0))
-          })
-    }
-
-/**
- * Deceleration to acceleration transition phase must be at least
- * [MIN_DECELERATION_TO_ACCELERATION_DURATION] seconds long.
- */
-val noShortDecelerationToAccelerationTransition =
-    predicate(Robot::class) { _, r ->
-      globally(
-          r,
-          phi = { r ->
-            r.acceleration <= ACCELERATION_DECELERATION_WEAK_THRESHOLD &&
-                globally(
-                    r,
-                    phi = { r.acceleration < ACCELERATION_ACCELERATION_WEAK_THRESHOLD },
-                    interval =
-                        AuNaTimeDifference(0) to
-                            AuNaTimeDifference(MIN_DECELERATION_TO_ACCELERATION_DURATION, 0.0))
-          })
-    }
 // endregion
 
 // region CAM timeout
 
-/** Timeout in nanoseconds for a CAM message to be sent. */
-const val CAM_TIMEOUT_NANOS = 1_100_000_000L // 1.1s
+/** Timeout slack in nanoseconds for a CAM message to be sent. */
+val CAM_SLACK_NANOS = 20_000_000L // 5ms
 
-/** Timeout in nanoseconds for a CAM message to be sent after velocity change. */
-const val CAM_VELOCITY_CHANGE_TIMEOUT_NANOS = 50_000_000L // 50ms
-
-/** Timeout in nanoseconds for a CAM message to be sent after location change. */
-const val CAM_LOCATION_CHANGE_TIMEOUT_NANOS = 50_000_000L // 50ms
-
-/** A CAM message must be sent within [CAM_TIMEOUT_NANOS] after a previous CAM message. */
+/** A CAM message must be sent within [CAM_SLACK_NANOS] after a previous CAM message. */
 val camMessageTimeout =
     predicate(Robot::class) { _, r ->
       globally(
@@ -164,74 +112,88 @@ val camMessageTimeout =
                 eventually(
                     r1,
                     phi = { r2 -> r1.id == r2.id && r2.dataSource == DataSource.CAM },
-                    interval = AuNaTimeDifference(0L) to AuNaTimeDifference(CAM_TIMEOUT_NANOS))
+                    interval =
+                        AuNaTimeDifference(1) to
+                            AuNaTimeDifference(1_000_000_000 + CAM_SLACK_NANOS))
           })
     }
 
-/** A CAM message must be sent within [CAM_VELOCITY_CHANGE_TIMEOUT_NANOS] after speed change. */
+/** A CAM message must be sent within [CAM_SLACK_NANOS] after speed change. */
 val camMessageSpeedChange =
     predicate(Robot::class) { _, r ->
       globally(
           r,
           phi = { r1 ->
             r1.dataSource != DataSource.CAM ||
-                until(
+                globally(
                     r1,
-                    phi1 = { r2 -> abs(r1.velocityCAM - r2.velocity) < 0.05 },
-                    phi2 = { r2 ->
-                      eventually(
-                          r2,
-                          phi = { r3 -> r3.dataSource == DataSource.CAM },
-                          interval =
-                              AuNaTimeDifference(0) to
-                                  AuNaTimeDifference(CAM_VELOCITY_CHANGE_TIMEOUT_NANOS))
+                    phi = { r2 -> r1.id != r2.id || abs(r1.velocityCAM - r2.velocity) < 0.05 }) ||
+                eventually(
+                    r1,
+                    phi = { r2 ->
+                      r1.id == r2.id &&
+                          abs(r1.velocityCAM - r2.velocity) >= 0.05 &&
+                          eventually(
+                              r2,
+                              phi = { r3 ->
+                                r2 !== r3 && r2.id == r3.id && r3.dataSource == DataSource.CAM
+                              },
+                              interval =
+                                  AuNaTimeDifference(1) to AuNaTimeDifference(CAM_SLACK_NANOS))
                     })
           })
     }
 
-/** A CAM message must be sent within [CAM_LOCATION_CHANGE_TIMEOUT_NANOS] after location change. */
+/** A CAM message must be sent within [CAM_SLACK_NANOS] after location change. */
 val camMessageLocationChange =
     predicate(Robot::class) { _, r ->
       globally(
           r,
           phi = { r1 ->
             r1.dataSource != DataSource.CAM ||
-                until(
+                globally(r1, phi = { r2 -> r1.id != r2.id || posDiff(r1, r2) < 0.4 }) ||
+                eventually(
                     r1,
-                    phi1 = { r2 ->
-                      sqrt(
-                          (r1.positionCAM.x - r2.position.x).pow(2) +
-                              (r1.positionCAM.y - r2.position.y).pow(2)) < 0.4
-                    },
-                    phi2 = { r2 ->
-                      eventually(
-                          r2,
-                          phi = { r3 -> r3.dataSource == DataSource.CAM },
-                          interval =
-                              AuNaTimeDifference(0) to
-                                  AuNaTimeDifference(CAM_LOCATION_CHANGE_TIMEOUT_NANOS))
+                    phi = { r2 ->
+                      r1.id == r2.id &&
+                          posDiff(r1, r2) >= 0.4 &&
+                          eventually(
+                              r2,
+                              phi = { r3 ->
+                                r2 !== r3 && r2.id == r3.id && r3.dataSource == DataSource.CAM
+                              },
+                              interval =
+                                  AuNaTimeDifference(1) to AuNaTimeDifference(CAM_SLACK_NANOS))
                     })
           })
     }
 
-/** A CAM message must be sent within [CAM_LOCATION_CHANGE_TIMEOUT_NANOS] after rotation change. */
+private fun posDiff(r1: Robot, r2: Robot) =
+    sqrt((r1.positionCAM.x - r2.position.x).pow(2) + (r1.positionCAM.y - r2.position.y).pow(2))
+
+/** A CAM message must be sent within [CAM_SLACK_NANOS] after rotation change. */
 val camMessageRotationChange =
     predicate(Robot::class) { _, r ->
       globally(
           r,
           phi = { r1 ->
             r1.dataSource != DataSource.CAM ||
-                until(
+                globally(r1, phi = { r2 -> r1.id != r2.id || yawDiff(r1, r2) < (4 * PI / 180) }) ||
+                eventually(
                     r1,
-                    phi1 = { r2 -> abs(r1.thetaCAM - r2.rotation.yaw) < (4 * PI / 180) },
-                    phi2 = { r2 ->
-                      eventually(
-                          r2,
-                          phi = { r3 -> r3.dataSource == DataSource.CAM },
-                          interval =
-                              AuNaTimeDifference(0) to
-                                  AuNaTimeDifference(CAM_LOCATION_CHANGE_TIMEOUT_NANOS))
+                    phi = { r2 ->
+                      r1.id == r2.id &&
+                          yawDiff(r1, r2) >= (4 * PI / 180) &&
+                          eventually(
+                              r2,
+                              phi = { r3 ->
+                                r2 !== r3 && r2.id == r3.id && r3.dataSource == DataSource.CAM
+                              },
+                              interval =
+                                  AuNaTimeDifference(1) to AuNaTimeDifference(CAM_SLACK_NANOS))
                     })
           })
     }
+
+private fun yawDiff(r1: Robot, r2: Robot) = abs(r1.thetaCAM - r2.rotation.yaw)
 // endregion

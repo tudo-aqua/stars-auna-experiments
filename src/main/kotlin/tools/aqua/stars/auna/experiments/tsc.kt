@@ -119,55 +119,17 @@ fun tsc() =
             }
 
             all("Monitors") {
-              leaf("Max lateral offset") {
-                condition = { _ -> true }
-                monitorFunction = { normalLateralOffset.holds(it) }
-                onlyMonitor = true
+              monitor("Max lateral offset") { normalLateralOffset.holds(it) }
+              monitor("CAM message timeout") { camMessageTimeout.holds(it) }
+              monitor("CAM message speed change") { camMessageSpeedChange.holds(it) }
+              monitor("CAM message location change") { camMessageLocationChange.holds(it) }
+              monitor("CAM message rotation change") { camMessageRotationChange.holds(it) }
+              monitor("Maximum deceleration") { maxDecelerationExceeded.holds(it) }
+              monitor("Minimum distance to front robot") {
+                minDistanceToFrontVehicleExceeded.holds(it)
               }
-              leaf("CAM message timeout") {
-                condition = { _ -> true }
-                monitorFunction = { camMessageTimeout.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("CAM message speed change") {
-                condition = { _ -> true }
-                monitorFunction = { camMessageSpeedChange.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("CAM message location change") {
-                condition = { _ -> true }
-                monitorFunction = { camMessageLocationChange.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("CAM message rotation change") {
-                condition = { _ -> true }
-                monitorFunction = { camMessageRotationChange.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("Maximum deceleration") {
-                condition = { _ -> true }
-                monitorFunction = { maxDecelerationExceeded.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("Short acceleration phase") {
-                condition = { _ -> true }
-                monitorFunction = { noShortAccelerationToDecelerationTransition.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("Short deceleration phase") {
-                condition = { _ -> true }
-                monitorFunction = { noShortDecelerationToAccelerationTransition.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("Minimum distance to front robot") {
-                condition = { _ -> true }
-                monitorFunction = { minDistanceToFrontVehicleExceeded.holds(it) }
-                onlyMonitor = true
-              }
-              leaf("Maximum distance to front robot") {
-                condition = { _ -> true }
-                monitorFunction = { maxDistanceToFrontVehicleExceeded.holds(it) }
-                onlyMonitor = true
+              monitor("Maximum distance to front robot") {
+                maxDistanceToFrontVehicleExceeded.holds(it)
               }
             }
           }

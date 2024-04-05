@@ -17,40 +17,39 @@
 
 package tools.aqua.stars.data.av.track
 
+import java.math.BigInteger
+import kotlin.math.roundToLong
 import tools.aqua.stars.core.types.TickDifference
 
-class AuNaTimeDifference(val secondsDifference: Double, val nanosecondsDifference: Double) :
-    TickDifference<AuNaTimeDifference> {
+class AuNaTimeDifference(val differenceNanos: BigInteger) : TickDifference<AuNaTimeDifference> {
+
+  val seconds
+    get() = differenceNanos / 1e9.toLong().toBigInteger()
+
+  val millis
+    get() = differenceNanos / 1e6.toLong().toBigInteger()
+
+  val micros
+    get() = differenceNanos / 1e3.toLong().toBigInteger()
+
+  constructor(differenceNanos: Long) : this(differenceNanos.toBigInteger())
 
   constructor(
-      nanosecondsDifference: Long
-  ) : this(nanosecondsDifference / 1e9, nanosecondsDifference % 1e9)
+      secondsDifference: Double,
+      nanosecondsDifference: Double
+  ) : this(
+      (secondsDifference * 1e9).roundToLong().toBigInteger() +
+          nanosecondsDifference.roundToLong().toBigInteger())
 
-  override fun compareTo(other: AuNaTimeDifference): Int {
-    return if (secondsDifference != other.secondsDifference) {
-      secondsDifference.compareTo(other.secondsDifference)
-    } else {
-      nanosecondsDifference.compareTo(other.nanosecondsDifference)
-    }
-  }
+  override fun compareTo(other: AuNaTimeDifference): Int =
+      differenceNanos.compareTo(other.differenceNanos)
 
   override fun minus(other: AuNaTimeDifference): AuNaTimeDifference =
-      AuNaTimeDifference(
-          secondsDifference - other.secondsDifference,
-          nanosecondsDifference - other.nanosecondsDifference)
+      AuNaTimeDifference(differenceNanos - other.differenceNanos)
 
   override fun plus(other: AuNaTimeDifference): AuNaTimeDifference =
-      AuNaTimeDifference(
-          secondsDifference + other.secondsDifference,
-          nanosecondsDifference + other.nanosecondsDifference)
+      AuNaTimeDifference(differenceNanos + other.differenceNanos)
 
-  @Suppress("unused")
-  fun toDoubleValue(): Double {
-    return secondsDifference +
-        (nanosecondsDifference / 1e9) // 1e9 represents one billion (nanoseconds in a second)
-  }
-
-  override fun toString(): String {
-    return "(${secondsDifference}s, ${nanosecondsDifference}ns)"
-  }
+  override fun toString(): String =
+      "(${seconds}s, ${millis.mod(1e3.toLong().toBigInteger())}ms, ${micros.mod(1e3.toLong().toBigInteger())}µs, ${differenceNanos.mod(1e3.toLong().toBigInteger())}ns)"
 }

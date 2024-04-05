@@ -175,7 +175,7 @@ class RobotAccelerationStatisticsMetric(private val plotSegments: Boolean = true
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
                 val yValues = robotStates.map { it.acceleration }
-                val xValues = robotStates.map { it.tickData.currentTick.seconds }
+                val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
 

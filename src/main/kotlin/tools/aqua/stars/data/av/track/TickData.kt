@@ -27,8 +27,11 @@ import tools.aqua.stars.core.types.TickDataType
  * @param entities The [List] of [Robot]s for the [currentTick]
  * @property currentTick The current timestamp in seconds
  */
-data class TickData(override val currentTick: AuNaTimeUnit, override var entities: List<Robot>) :
-    TickDataType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
+data class TickData(
+    override val currentTick: AuNaTimeUnit,
+    override var entities: List<Robot>,
+    var id: Int = -1
+) : TickDataType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
   /** Holds a reference to the [Segment] in which this [TickData] is included and analyzed. */
   override lateinit var segment: Segment
 
@@ -45,9 +48,12 @@ data class TickData(override val currentTick: AuNaTimeUnit, override var entitie
    * @return The cloned [TickData] object.
    */
   fun clone(): TickData {
-    val newTick = TickData(currentTick.clone(), listOf())
+    val newTick = TickData(currentTick.clone(), listOf(), -1)
     val entityCopies = entities.map { it.copyToNewTick(newTick) }
     newTick.entities = entityCopies
+    newTick.id = id
+
+    if (this::segment.isInitialized) newTick.segment = segment
 
     return newTick
   }

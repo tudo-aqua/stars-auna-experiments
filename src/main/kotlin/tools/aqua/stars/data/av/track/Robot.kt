@@ -65,7 +65,7 @@ data class Robot(
     val lateralOffsetCAM: Double = 0.0,
     val velocityCAM: Double = 0.0,
     val accelerationCAM: Double = 0.0,
-    val dataSource: DataSource = DataSource.NOT_SET,
+    var dataSource: DataSource = DataSource.NOT_SET,
     val lane: Lane,
     var isPrimaryEntity: Boolean,
     val steeringAngle: Double = 0.0,

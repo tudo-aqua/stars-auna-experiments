@@ -17,41 +17,48 @@
 
 package tools.aqua.stars.data.av.track
 
+import java.math.BigInteger
+import kotlin.math.roundToLong
 import tools.aqua.stars.core.types.TickUnit
 
 @Suppress("MemberVisibilityCanBePrivate")
-class AuNaTimeUnit(val seconds: Double, val nanoseconds: Double) :
-    TickUnit<AuNaTimeUnit, AuNaTimeDifference> {
-  override fun compareTo(other: AuNaTimeUnit): Int {
-    return if (seconds != other.seconds) {
-      seconds.compareTo(other.seconds)
-    } else {
-      nanoseconds.compareTo(other.nanoseconds)
-    }
-  }
+class AuNaTimeUnit(val nanos: BigInteger) : TickUnit<AuNaTimeUnit, AuNaTimeDifference> {
+
+  val seconds
+    get() = nanos / 1e9.toLong().toBigInteger()
+
+  val millis
+    get() = nanos / 1e6.toLong().toBigInteger()
+
+  val micros
+    get() = nanos / 1e3.toLong().toBigInteger()
+
+  constructor(
+      seconds: Double,
+      nanoseconds: Double
+  ) : this((seconds * 1e9).roundToLong().toBigInteger() + nanoseconds.roundToLong().toBigInteger())
+
+  override fun compareTo(other: AuNaTimeUnit): Int = nanos.compareTo(other.nanos)
 
   override fun minus(other: AuNaTimeDifference): AuNaTimeUnit =
-      AuNaTimeUnit(seconds - other.secondsDifference, nanoseconds - other.nanosecondsDifference)
+      AuNaTimeUnit(nanos - other.differenceNanos)
 
   override fun minus(other: AuNaTimeUnit): AuNaTimeDifference =
-      AuNaTimeDifference(seconds - other.seconds, nanoseconds - other.nanoseconds)
+      AuNaTimeDifference(nanos - other.nanos)
 
   override fun plus(other: AuNaTimeDifference): AuNaTimeUnit =
-      AuNaTimeUnit(seconds + other.secondsDifference, nanoseconds + other.nanosecondsDifference)
+      AuNaTimeUnit(nanos + other.differenceNanos)
 
-  fun toSeconds(): Double {
-    return seconds + (nanoseconds / 1e9) // 1e9 represents one billion (nanoseconds in a second)
-  }
+  fun toSeconds(): Double = (nanos.toBigDecimal() / 1e9.toBigDecimal()).toDouble()
 
-  fun toMillis(): Double {
-    return seconds * 1000 + (nanoseconds / 1e6)
-  }
+  fun toMillis(): Double = (nanos.toBigDecimal() / 1e6.toBigDecimal()).toDouble()
 
-  override fun toString(): String {
-    return "${toSeconds()}s" // "(${seconds}s, ${nanoseconds}ns)"
-  }
+  override fun toString(): String =
+      "(${seconds}s, ${millis.mod(1e3.toLong().toBigInteger())}ms, ${micros.mod(1e3.toLong().toBigInteger())}µs, ${nanos.mod(1e3.toLong().toBigInteger())}ns)"
 
-  fun clone(): AuNaTimeUnit = AuNaTimeUnit(this.seconds, this.nanoseconds)
+  fun clone(): AuNaTimeUnit = AuNaTimeUnit(nanos)
+
+  fun equals(other: AuNaTimeUnit): Boolean = nanos == other.nanos
 
   companion object {
     @Suppress("unused") val Zero = AuNaTimeUnit(0.0, 0.0)

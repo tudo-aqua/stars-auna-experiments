@@ -47,7 +47,9 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
         // Create empty TickData object for later reference
         val tickData =
             TickData(
-                currentTick = message.header.timeStamp.toAuNaTimeUnit(), entities = mutableListOf())
+                currentTick = message.header.timeStamp.toAuNaTimeUnit(),
+                entities = mutableListOf(),
+                id = -1)
         // Get the robot id for the current message
         val robotId = getRobotIdFromMessage(message)
         // Save robot id
@@ -118,6 +120,7 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
       }
       .also { println("\rCalculated ${tickArray.size} average accelerations (100%)") }
 
+  ticks.forEachIndexed { index, tickData -> tickData.id = index }
   return ticks
 }
 

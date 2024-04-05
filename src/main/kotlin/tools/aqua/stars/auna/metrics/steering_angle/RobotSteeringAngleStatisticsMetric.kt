@@ -181,7 +181,7 @@ class RobotSteeringAngleStatisticsMetric(private val plotSegments: Boolean = tru
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
                 val yValues = robotStates.map { it.steeringAngle }
-                val xValues = robotStates.map { it.tickData.currentTick.seconds }
+                val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
 

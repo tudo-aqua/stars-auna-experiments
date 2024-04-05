@@ -29,7 +29,7 @@ import tools.aqua.stars.core.types.SegmentType
  */
 data class Segment(
     val segmentId: Int,
-    override val ticks: Map<AuNaTimeUnit, TickData>,
+    override var ticks: Map<AuNaTimeUnit, TickData>,
     var previousSegment: Segment?,
     var nextSegment: Segment?
 ) : SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {

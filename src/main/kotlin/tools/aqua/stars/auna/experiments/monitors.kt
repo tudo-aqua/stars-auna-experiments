@@ -98,72 +98,138 @@ val maxDecelerationExceeded =
 // endregion
 
 // region CAM timeout
+/*
+ * Timeout for CAM messages that should be sent.
+ */
 
 /** Timeout slack in nanoseconds for a CAM message to be sent. */
-val CAM_SLACK_NANOS = 20_000_000L // 5ms
+val CAM_SLACK_NANOS = 5_000_000L // 5ms
 
-/** A CAM message must be sent within [CAM_SLACK_NANOS] after a previous CAM message. */
-val camMessageTimeout =
+/** Eventually there is a CAM message within the next 1000ms + slack. */
+val nextCAMMessageWithin1000ms =
     predicate(Robot::class) { _, r ->
+      eventually(
+          r,
+          phi = { r1 -> r !== r1 && r.id == r1.id && r1.dataSource == DataSource.CAM },
+          interval = AuNaTimeDifference(0) to AuNaTimeDifference(1_000_000_000 + CAM_SLACK_NANOS))
+    }
+
+/** Eventually there is a CAM message within slack time. */
+val nextCAMMessageWithinSlackTime =
+    predicate(Robot::class) { _, r ->
+      eventually(
+          r,
+          phi = { r1 -> r !== r1 && r.id == r1.id && r1.dataSource == DataSource.CAM },
+          interval = AuNaTimeDifference(0) to AuNaTimeDifference(CAM_SLACK_NANOS))
+    }
+
+/** There are no more ticks 1000ms from now. */
+val noMoreTicksWithin1000ms =
+    predicate(Robot::class) { _, r ->
+      !eventually(
+          r,
+          phi = { true },
+          interval =
+              AuNaTimeDifference(1_000_000_000 + CAM_SLACK_NANOS) to
+                  AuNaTimeDifference(Long.MAX_VALUE))
+    }
+
+/** There are no more ticks within slack from now. */
+val noMoreTicksWithinSlack =
+    predicate(Robot::class) { _, r ->
+      !eventually(
+          r,
+          phi = { true },
+          interval = AuNaTimeDifference(CAM_SLACK_NANOS) to AuNaTimeDifference(Long.MAX_VALUE))
+    }
+
+/** There are no more speed changes in this segment. */
+val noFurtherSpeedChanges =
+    predicate(Robot::class) { _, r ->
+      globally(r, phi = { r1 -> r.id != r1.id || abs(r.velocityCAM - r1.velocity) < 0.05 })
+    }
+
+/** There are no more position changes in this segment. */
+val noFurtherPositionChanges =
+    predicate(Robot::class) { _, r ->
+      globally(r, phi = { r1 -> r.id != r1.id || posDiff(r, r1) < 0.4 })
+    }
+
+/** There are no more rotation changes in this segment. */
+val noFurtherRotationChanges =
+    predicate(Robot::class) { _, r ->
+      globally(r, phi = { r1 -> r.id != r1.id || yawDiff(r, r1) < (4 * PI / 180) })
+    }
+
+/**
+ * A CAM message must be sent within [CAM_SLACK_NANOS] after a previous CAM message.
+ *
+ * I.e. For this robot there are no more ticks within the next 1000ms OR there is a CAM message
+ * within the next 1000ms + slack.
+ */
+val camMessageTimeout =
+    predicate(Robot::class) { ctx, r ->
       globally(
           r,
           phi = { r1 ->
-            r1.dataSource != DataSource.CAM ||
-                eventually(
-                    r1,
-                    phi = { r2 -> r1.id == r2.id && r2.dataSource == DataSource.CAM },
-                    interval =
-                        AuNaTimeDifference(1) to
-                            AuNaTimeDifference(1_000_000_000 + CAM_SLACK_NANOS))
+            // This tick is no CAM message
+            r.id != r1.id ||
+                r1.dataSource != DataSource.CAM ||
+                noMoreTicksWithin1000ms.holds(ctx, r1) ||
+                nextCAMMessageWithin1000ms.holds(ctx, r1)
           })
     }
 
-/** A CAM message must be sent within [CAM_SLACK_NANOS] after speed change. */
+/**
+ * A CAM message must be sent within [CAM_SLACK_NANOS] after speed change.
+ *
+ * I.e. For this robot there are no more speed changes OR there is a speed change for this robot AND
+ * from then there are either no more ticks within the slack time OR there is a CAM message within
+ * the slack time.
+ */
 val camMessageSpeedChange =
-    predicate(Robot::class) { _, r ->
+    predicate(Robot::class) { ctx, r ->
       globally(
           r,
           phi = { r1 ->
-            r1.dataSource != DataSource.CAM ||
-                globally(
-                    r1,
-                    phi = { r2 -> r1.id != r2.id || abs(r1.velocityCAM - r2.velocity) < 0.05 }) ||
+            r.id != r1.id ||
+                r1.dataSource != DataSource.CAM ||
+                noFurtherSpeedChanges.holds(ctx, r1) ||
                 eventually(
                     r1,
                     phi = { r2 ->
-                      r1.id == r2.id &&
+                      r1 !== r2 &&
+                          r1.id == r2.id &&
                           abs(r1.velocityCAM - r2.velocity) >= 0.05 &&
-                          eventually(
-                              r2,
-                              phi = { r3 ->
-                                r2 !== r3 && r2.id == r3.id && r3.dataSource == DataSource.CAM
-                              },
-                              interval =
-                                  AuNaTimeDifference(1) to AuNaTimeDifference(CAM_SLACK_NANOS))
+                          (noMoreTicksWithinSlack.holds(ctx, r2) ||
+                              nextCAMMessageWithinSlackTime.holds(ctx, r2))
                     })
           })
     }
 
-/** A CAM message must be sent within [CAM_SLACK_NANOS] after location change. */
+/**
+ * A CAM message must be sent within [CAM_SLACK_NANOS] after location change.
+ *
+ * I.e. For this robot there are no more location changes OR there is a location change for this
+ * robot AND from then there are either no more ticks within the slack time OR there is a CAM
+ * message within the slack time.
+ */
 val camMessageLocationChange =
-    predicate(Robot::class) { _, r ->
+    predicate(Robot::class) { ctx, r ->
       globally(
           r,
           phi = { r1 ->
-            r1.dataSource != DataSource.CAM ||
-                globally(r1, phi = { r2 -> r1.id != r2.id || posDiff(r1, r2) < 0.4 }) ||
+            r.id != r1.id ||
+                r1.dataSource != DataSource.CAM ||
+                noFurtherPositionChanges.holds(ctx, r1) ||
                 eventually(
                     r1,
                     phi = { r2 ->
-                      r1.id == r2.id &&
+                      r1 !== r2 &&
+                          r1.id == r2.id &&
                           posDiff(r1, r2) >= 0.4 &&
-                          eventually(
-                              r2,
-                              phi = { r3 ->
-                                r2 !== r3 && r2.id == r3.id && r3.dataSource == DataSource.CAM
-                              },
-                              interval =
-                                  AuNaTimeDifference(1) to AuNaTimeDifference(CAM_SLACK_NANOS))
+                          (noMoreTicksWithinSlack.holds(ctx, r2) ||
+                              nextCAMMessageWithinSlackTime.holds(ctx, r2))
                     })
           })
     }
@@ -171,26 +237,29 @@ val camMessageLocationChange =
 private fun posDiff(r1: Robot, r2: Robot) =
     sqrt((r1.positionCAM.x - r2.position.x).pow(2) + (r1.positionCAM.y - r2.position.y).pow(2))
 
-/** A CAM message must be sent within [CAM_SLACK_NANOS] after rotation change. */
+/**
+ * A CAM message must be sent within [CAM_SLACK_NANOS] after rotation change.
+ *
+ * I.e. For this robot there are no more rotation changes OR there is a rotation change for this
+ * robot AND from then there are either no more ticks within the slack time OR there is a CAM
+ * message within the slack time.
+ */
 val camMessageRotationChange =
-    predicate(Robot::class) { _, r ->
+    predicate(Robot::class) { ctx, r ->
       globally(
           r,
           phi = { r1 ->
-            r1.dataSource != DataSource.CAM ||
-                globally(r1, phi = { r2 -> r1.id != r2.id || yawDiff(r1, r2) < (4 * PI / 180) }) ||
+            r.id != r1.id ||
+                r1.dataSource != DataSource.CAM ||
+                noFurtherRotationChanges.holds(ctx, r1) ||
                 eventually(
                     r1,
                     phi = { r2 ->
-                      r1.id == r2.id &&
+                      r1 !== r2 &&
+                          r1.id == r2.id &&
                           yawDiff(r1, r2) >= (4 * PI / 180) &&
-                          eventually(
-                              r2,
-                              phi = { r3 ->
-                                r2 !== r3 && r2.id == r3.id && r3.dataSource == DataSource.CAM
-                              },
-                              interval =
-                                  AuNaTimeDifference(1) to AuNaTimeDifference(CAM_SLACK_NANOS))
+                          (noMoreTicksWithinSlack.holds(ctx, r2) ||
+                              nextCAMMessageWithinSlackTime.holds(ctx, r2))
                     })
           })
     }

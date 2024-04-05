@@ -69,7 +69,7 @@ abstract class Slicer {
       segments +=
           Segment(
                   segmentId = segments.size,
-                  ticks = segmentTickList.associateBy { it.currentTick },
+                  ticks = segmentTickList.map { it.clone() }.associateBy { it.currentTick },
                   previousSegment = previousSegment,
                   nextSegment = null)
               .also { segment ->

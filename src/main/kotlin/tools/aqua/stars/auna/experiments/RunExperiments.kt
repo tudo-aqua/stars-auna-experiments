@@ -96,7 +96,7 @@ fun main() {
       ValidTSCInstancesPerProjectionMetric<
           Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
 
-  val plotSegments = false
+  val plotSegments = true
   tscEvaluation.registerMetricProviders(
       // Generic metrics
       SegmentCountMetric(),

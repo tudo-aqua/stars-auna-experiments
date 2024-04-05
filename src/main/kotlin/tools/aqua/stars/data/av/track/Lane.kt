@@ -43,9 +43,10 @@ data class Lane(
   }
 
   enum class LaneCurvature {
-    STRAIGHT,
+    WIDE_CURVE,
+    TOP_STRAIGHT,
     TIGHT_CURVE,
-    WIDE_CURVE
+    BOTTOM_STRAIGHT
   }
 
   enum class LaneSegment {

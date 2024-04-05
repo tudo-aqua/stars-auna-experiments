@@ -48,9 +48,21 @@ fun tsc() =
 
               exclusive("Lane Change") {
                 projectionIDs = mapOf(projRec("Lane Change"))
-                leaf("Entering Straight") { condition = { ctx -> enteringStraight.holds(ctx) } }
-                leaf("In Straight") { condition = { ctx -> inStraight.holds(ctx) } }
-                leaf("Exiting Straight") { condition = { ctx -> leavingStraight.holds(ctx) } }
+                leaf("Entering Top Straight") {
+                  condition = { ctx -> enteringTopStraight.holds(ctx) }
+                }
+                leaf("In Top Straight") { condition = { ctx -> inTopStraight.holds(ctx) } }
+                leaf("Exiting Top Straight") {
+                  condition = { ctx -> leavingTopStraight.holds(ctx) }
+                }
+
+                leaf("Entering Bottom Straight") {
+                  condition = { ctx -> enteringBottomStraight.holds(ctx) }
+                }
+                leaf("In Bottom Straight") { condition = { ctx -> inBottomStraight.holds(ctx) } }
+                leaf("Exiting Bottom Straight") {
+                  condition = { ctx -> leavingBottomStraight.holds(ctx) }
+                }
 
                 leaf("Entering Tight Curve") {
                   condition = { ctx -> enteringTightCurve.holds(ctx) }

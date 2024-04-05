@@ -96,7 +96,7 @@ data class Robot(
               length = 0.0,
               width = 0.0,
               waypoints = emptyList<Waypoint>(),
-              laneCurvature = Lane.LaneCurvature.STRAIGHT,
+              laneCurvature = Lane.LaneCurvature.TOP_STRAIGHT,
               laneSegment = Lane.LaneSegment.MIDDLE),
       isPrimaryEntity = false,
       steeringAngle = 0.0)

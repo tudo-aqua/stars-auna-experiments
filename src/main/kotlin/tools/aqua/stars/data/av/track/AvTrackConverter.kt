@@ -43,10 +43,10 @@ fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> {
                       waypoints = listOf(),
                       laneCurvature =
                           when (index % 4) {
-                            0 -> Lane.LaneCurvature.STRAIGHT
-                            1 -> Lane.LaneCurvature.WIDE_CURVE
-                            2 -> Lane.LaneCurvature.STRAIGHT
-                            3 -> Lane.LaneCurvature.TIGHT_CURVE
+                            0 -> Lane.LaneCurvature.WIDE_CURVE
+                            1 -> Lane.LaneCurvature.TOP_STRAIGHT
+                            2 -> Lane.LaneCurvature.TIGHT_CURVE
+                            3 -> Lane.LaneCurvature.BOTTOM_STRAIGHT
                             else -> error("")
                           },
                       laneSegment =
@@ -88,7 +88,7 @@ fun convertTrackToSingleLane(track: Track): Lane {
   val newLane =
       Lane(
           laneID = 0,
-          laneCurvature = Lane.LaneCurvature.STRAIGHT,
+          laneCurvature = Lane.LaneCurvature.BOTTOM_STRAIGHT,
           laneSegment = Lane.LaneSegment.ENTERING,
           width = track.lanes[0].width,
           length = track.lanes[0].length,

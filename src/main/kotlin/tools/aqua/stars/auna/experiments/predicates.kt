@@ -207,15 +207,25 @@ val lowDistanceToFrontVehicle =
 // endregion
 
 // region lane type
-/** Robot is currently entering a straight lane. */
-val enteringStraight =
-    predicate(Robot::class) { ctx, r -> entering.holds(ctx, r) && straight.holds(ctx, r) }
-/** Robot is currently driving on a straight lane. */
-val inStraight =
-    predicate(Robot::class) { ctx, r -> middle.holds(ctx, r) && straight.holds(ctx, r) }
-/** Robot is currently leaving on a straight lane. */
-val leavingStraight =
-    predicate(Robot::class) { ctx, r -> leaving.holds(ctx, r) && straight.holds(ctx, r) }
+/** Robot is currently entering the top straight lane. */
+val enteringTopStraight =
+    predicate(Robot::class) { ctx, r -> entering.holds(ctx, r) && topStraight.holds(ctx, r) }
+/** Robot is currently driving on the top straight lane. */
+val inTopStraight =
+    predicate(Robot::class) { ctx, r -> middle.holds(ctx, r) && topStraight.holds(ctx, r) }
+/** Robot is currently leaving on the top straight lane. */
+val leavingTopStraight =
+    predicate(Robot::class) { ctx, r -> leaving.holds(ctx, r) && topStraight.holds(ctx, r) }
+
+/** Robot is currently entering the bottom straight lane. */
+val enteringBottomStraight =
+    predicate(Robot::class) { ctx, r -> entering.holds(ctx, r) && bottomStraight.holds(ctx, r) }
+/** Robot is currently driving on the bottom straight lane. */
+val inBottomStraight =
+    predicate(Robot::class) { ctx, r -> middle.holds(ctx, r) && bottomStraight.holds(ctx, r) }
+/** Robot is currently leaving on the bottom straight lane. */
+val leavingBottomStraight =
+    predicate(Robot::class) { ctx, r -> leaving.holds(ctx, r) && bottomStraight.holds(ctx, r) }
 
 /** Robot is currently entering a tight curve. */
 val enteringTightCurve =
@@ -243,8 +253,10 @@ private val middle =
     predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.MIDDLE }
 private val leaving =
     predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.LEAVING }
-private val straight =
-    predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.STRAIGHT }
+private val topStraight =
+    predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.TOP_STRAIGHT }
+private val bottomStraight =
+    predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.BOTTOM_STRAIGHT }
 private val tightCurve =
     predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.TIGHT_CURVE }
 private val wideCurve =

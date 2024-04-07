@@ -49,9 +49,9 @@ class AuNaTimeUnit(val nanos: BigInteger) : TickUnit<AuNaTimeUnit, AuNaTimeDiffe
   override fun plus(other: AuNaTimeDifference): AuNaTimeUnit =
       AuNaTimeUnit(nanos + other.differenceNanos)
 
-  fun toSeconds(): Double = (nanos.toBigDecimal() / 1e9.toBigDecimal()).toDouble()
+  fun toSeconds(): Double = (nanos.toBigDecimal().divide(1e9.toBigDecimal())).toDouble()
 
-  fun toMillis(): Double = (nanos.toBigDecimal() / 1e6.toBigDecimal()).toDouble()
+  fun toMillis(): Double = (nanos.toBigDecimal().divide(1e6.toBigDecimal())).toDouble()
 
   override fun toString(): String =
       "(${seconds}s, ${millis.mod(1e3.toLong().toBigInteger())}ms, ${micros.mod(1e3.toLong().toBigInteger())}µs, ${nanos.mod(1e3.toLong().toBigInteger())}ns)"

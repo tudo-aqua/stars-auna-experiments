@@ -39,7 +39,7 @@ class RobotVelocityStatisticsMetric(private val plotSegments: Boolean = true) :
 
   @Suppress("DuplicatedCode")
   override fun writePlots() {
-    val folderName = "velocity-statistics"
+    val folderName = "robot-velocity-statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
     val finished = AtomicInteger(0)
 

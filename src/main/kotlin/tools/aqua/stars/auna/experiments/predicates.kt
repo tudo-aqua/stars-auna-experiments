@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-@file:Suppress("NAME_SHADOWING")
+@file:Suppress("MayBeConstant", "MagicNumber")
 
 package tools.aqua.stars.auna.experiments
 
@@ -105,16 +105,16 @@ val strongDeceleration =
 val VELOCITY_MAX: Double = 2.75
 
 /** High velocity is defined as >= [VELOCITY_HIGH]. */
-val VELOCITY_HIGH: Double = 1.5
+val VELOCITY_HIGH: Double = 2.0
 
 /** Maximum velocity is defined as >= [VELOCITY_MAX]. */
 val maxVelocity =
-    predicate(Robot::class) { _, r -> eventually(r, phi = { it.velocity >= VELOCITY_MAX }) }
+    predicate(Robot::class) { _, r -> eventually(r, phi = { it.velocity > VELOCITY_MAX }) }
 
 /** High velocity is defined in the interval ([VELOCITY_HIGH] ... [VELOCITY_MAX]). */
 val highVelocity =
     predicate(Robot::class) { ctx, r ->
-      eventually(r, phi = { it.velocity in VELOCITY_HIGH ..< VELOCITY_MAX }) &&
+      eventually(r, phi = { it.velocity in VELOCITY_HIGH..VELOCITY_MAX }) &&
           !maxVelocity.holds(ctx, r)
     }
 

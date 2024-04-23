@@ -42,37 +42,25 @@ fun tsc() =
               projectionIDs =
                   mapOf(
                       projRec("Driving situation"),
-                      proj("Lane Change"),
+                      proj("Position on Track"),
                       proj("Distance to front vehicle"),
                       proj("Velocity"))
 
-              exclusive("Lane Change") {
-                projectionIDs = mapOf(projRec("Lane Change"))
-                leaf("Entering Top Straight") {
-                  condition = { ctx -> enteringTopStraight.holds(ctx) }
-                }
-                leaf("In Top Straight") { condition = { ctx -> inTopStraight.holds(ctx) } }
-                leaf("Exiting Top Straight") {
-                  condition = { ctx -> leavingTopStraight.holds(ctx) }
+              all("Position on Track") {
+                projectionIDs = mapOf(projRec("Position on Track"))
+
+                exclusive("Lane Type") {
+                  leaf("Bottom Straight") { condition = { ctx -> topStraight.holds(ctx) } }
+                  leaf("Bottom Straight") { condition = { ctx -> bottomStraight.holds(ctx) } }
+                  leaf("Wide Curve") { condition = { ctx -> wideCurve.holds(ctx) } }
+                  leaf("Tight Curve") { condition = { ctx -> tightCurve.holds(ctx) } }
                 }
 
-                leaf("Entering Bottom Straight") {
-                  condition = { ctx -> enteringBottomStraight.holds(ctx) }
+                exclusive("Lane Section") {
+                  leaf("Entering Track Section") { condition = { ctx -> entering.holds(ctx) } }
+                  leaf("In Track Section") { condition = { ctx -> middle.holds(ctx) } }
+                  leaf("Exiting Track Section") { condition = { ctx -> leaving.holds(ctx) } }
                 }
-                leaf("In Bottom Straight") { condition = { ctx -> inBottomStraight.holds(ctx) } }
-                leaf("Exiting Bottom Straight") {
-                  condition = { ctx -> leavingBottomStraight.holds(ctx) }
-                }
-
-                leaf("Entering Tight Curve") {
-                  condition = { ctx -> enteringTightCurve.holds(ctx) }
-                }
-                leaf("In Tight Curve") { condition = { ctx -> inTightCurve.holds(ctx) } }
-                leaf("Exiting Tight Curve") { condition = { ctx -> leavingTightCurve.holds(ctx) } }
-
-                leaf("Entering Wide Curve") { condition = { ctx -> enteringWideCurve.holds(ctx) } }
-                leaf("In Wide Curve") { condition = { ctx -> inWideCurve.holds(ctx) } }
-                leaf("Exiting Wide Curve") { condition = { ctx -> leavingWideCurve.holds(ctx) } }
               }
 
               exclusive("Distance to front vehicle") {

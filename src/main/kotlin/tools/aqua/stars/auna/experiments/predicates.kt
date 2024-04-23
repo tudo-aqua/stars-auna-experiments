@@ -207,59 +207,23 @@ val lowDistanceToFrontVehicle =
 // endregion
 
 // region lane type
-/** Robot is currently entering the top straight lane. */
-val enteringTopStraight =
-    predicate(Robot::class) { ctx, r -> entering.holds(ctx, r) && topStraight.holds(ctx, r) }
-/** Robot is currently driving on the top straight lane. */
-val inTopStraight =
-    predicate(Robot::class) { ctx, r -> middle.holds(ctx, r) && topStraight.holds(ctx, r) }
-/** Robot is currently leaving on the top straight lane. */
-val leavingTopStraight =
-    predicate(Robot::class) { ctx, r -> leaving.holds(ctx, r) && topStraight.holds(ctx, r) }
+/** Robot is currently entering the track section. */
+val entering = predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.ENTERING }
+/** Robot is currently driving in the middle of the track section. */
+val middle = predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.MIDDLE }
+/** Robot is currently leaving the track section. */
+val leaving = predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.LEAVING }
 
-/** Robot is currently entering the bottom straight lane. */
-val enteringBottomStraight =
-    predicate(Robot::class) { ctx, r -> entering.holds(ctx, r) && bottomStraight.holds(ctx, r) }
-/** Robot is currently driving on the bottom straight lane. */
-val inBottomStraight =
-    predicate(Robot::class) { ctx, r -> middle.holds(ctx, r) && bottomStraight.holds(ctx, r) }
-/** Robot is currently leaving on the bottom straight lane. */
-val leavingBottomStraight =
-    predicate(Robot::class) { ctx, r -> leaving.holds(ctx, r) && bottomStraight.holds(ctx, r) }
-
-/** Robot is currently entering a tight curve. */
-val enteringTightCurve =
-    predicate(Robot::class) { ctx, r -> entering.holds(ctx, r) && tightCurve.holds(ctx, r) }
-/** Robot is currently driving in a tight curve. */
-val inTightCurve =
-    predicate(Robot::class) { ctx, r -> middle.holds(ctx, r) && tightCurve.holds(ctx, r) }
-/** Robot is currently leaving a tight curve. */
-val leavingTightCurve =
-    predicate(Robot::class) { ctx, r -> leaving.holds(ctx, r) && tightCurve.holds(ctx, r) }
-
-/** Robot is currently entering a wide curve. */
-val enteringWideCurve =
-    predicate(Robot::class) { ctx, r -> entering.holds(ctx, r) && wideCurve.holds(ctx, r) }
-/** Robot is currently driving in a wide curve. */
-val inWideCurve =
-    predicate(Robot::class) { ctx, r -> middle.holds(ctx, r) && wideCurve.holds(ctx, r) }
-/** Robot is currently leaving a wide curve. */
-val leavingWideCurve =
-    predicate(Robot::class) { ctx, r -> leaving.holds(ctx, r) && wideCurve.holds(ctx, r) }
-
-private val entering =
-    predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.ENTERING }
-private val middle =
-    predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.MIDDLE }
-private val leaving =
-    predicate(Robot::class) { _, r -> r.lane.laneSegment == Lane.LaneSegment.LEAVING }
-private val topStraight =
+/** Robot is currently leaving in the top straight section. */
+val topStraight =
     predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.TOP_STRAIGHT }
-private val bottomStraight =
+/** Robot is currently leaving in the bottom straight section. */
+val bottomStraight =
     predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.BOTTOM_STRAIGHT }
-private val tightCurve =
+/** Robot is currently in the tight curve. */
+val tightCurve =
     predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.TIGHT_CURVE }
-private val wideCurve =
+/** Robot is currently in the wide curve. */
+val wideCurve =
     predicate(Robot::class) { _, r -> r.lane.laneCurvature == Lane.LaneCurvature.WIDE_CURVE }
-
 // endregion

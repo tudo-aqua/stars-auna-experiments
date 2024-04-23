@@ -134,8 +134,8 @@ fun tsc() =
               monitor("Max lateral offset") { normalLateralOffset.holds(it) }
               monitor("CAM message timeout") { camMessageTimeout.holds(it) }
               monitor("CAM message speed change") { camMessageSpeedChange.holds(it) }
-              monitor("CAM message location change") { camMessageLocationChange.holds(it) }
-              monitor("CAM message rotation change") { camMessageRotationChange.holds(it) }
+              monitor("CAM message location change") { camMessagePositionChange.holds(it) }
+              monitor("CAM message rotation change") { camMessageHeadingChange.holds(it) }
               monitor("Maximum deceleration") { maxDecelerationExceeded.holds(it) }
               monitor("Minimum distance to front robot") {
                 minDistanceToFrontVehicleExceeded.holds(it)

@@ -31,7 +31,7 @@ fun tsc() =
                 mapOf(
                     projRec("all"),
                     proj("Driving situation"),
-                    proj("Lane Change"),
+                    proj("Position on Track"),
                     proj("Distance to front vehicle"),
                     proj("Velocity"),
                     proj("Driving maneuver"),
@@ -50,16 +50,16 @@ fun tsc() =
                 projectionIDs = mapOf(projRec("Position on Track"))
 
                 exclusive("Lane Type") {
-                  leaf("Bottom Straight") { condition = { ctx -> topStraight.holds(ctx) } }
+                  leaf("Top Straight") { condition = { ctx -> topStraight.holds(ctx) } }
                   leaf("Bottom Straight") { condition = { ctx -> bottomStraight.holds(ctx) } }
                   leaf("Wide Curve") { condition = { ctx -> wideCurve.holds(ctx) } }
                   leaf("Tight Curve") { condition = { ctx -> tightCurve.holds(ctx) } }
                 }
 
                 exclusive("Lane Section") {
-                  leaf("Entering Track Section") { condition = { ctx -> entering.holds(ctx) } }
-                  leaf("In Track Section") { condition = { ctx -> middle.holds(ctx) } }
-                  leaf("Exiting Track Section") { condition = { ctx -> leaving.holds(ctx) } }
+                  leaf("Entering") { condition = { ctx -> entering.holds(ctx) } }
+                  leaf("Middle") { condition = { ctx -> middle.holds(ctx) } }
+                  leaf("Exiting") { condition = { ctx -> leaving.holds(ctx) } }
                 }
               }
 
@@ -94,8 +94,6 @@ fun tsc() =
                 leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
                 leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
                 leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
-                //                leaf("No Acceleration") { condition = { ctx ->
-                // noAcceleration.holds(ctx) } }
               }
 
               any("Steering Angle") {

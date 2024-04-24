@@ -50,18 +50,15 @@ val normalLateralOffset =
 /** Distance in m to front vehicle must globally be greater than breaking distance. */
 val minDistanceToFrontVehicleExceeded =
     predicate(Robot::class) { _, r ->
-      val frontRobot = r.tickData.getEntityById(r.id - 1)
-      if (frontRobot == null) false
-      else
-          globally(
-              r,
-              frontRobot,
-              phi = { rb1, rb2,
-                ->
-                // Distance in m to front vehicle is smaller than breaking distance, i.e. ((v * 3.6)
-                // / 10) ^ 2
-                rb1.distanceToOther(rb2) > (0.36 * rb1.velocity).pow(2)
-              })
+      globally(
+          r,
+          r.tickData.getEntityById(r.id - 1)!!,
+          phi = { rb1, rb2,
+            ->
+            // Distance in m to front vehicle is smaller than breaking distance,
+            // i.e. ((v * 3.6) / 10) ^ 2
+            rb1.distanceToOther(rb2) > (0.36 * rb1.velocity).pow(2)
+          })
     }
 
 /**
@@ -70,16 +67,12 @@ val minDistanceToFrontVehicleExceeded =
  */
 val maxDistanceToFrontVehicleExceeded =
     predicate(Robot::class) { _, r ->
-      val frontRobot = r.tickData.getEntityById(r.id - 1)
-      if (frontRobot == null) false
-      else
-          globally(
-              r,
-              frontRobot,
-              phi = { rb1, rb2,
-                ->
-                rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH * 1.25
-              })
+      globally(
+          r,
+          r.tickData.getEntityById(r.id - 1)!!,
+          phi = { rb1, rb2 ->
+            rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH * 1.25
+          })
     }
 // endregion
 

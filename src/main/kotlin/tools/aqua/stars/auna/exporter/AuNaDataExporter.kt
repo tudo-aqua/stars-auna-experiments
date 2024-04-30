@@ -174,13 +174,13 @@ private fun thresholdTrajectories(robot: Robot, tick: tools.aqua.stars.data.av.t
             robot.acceleration,
             valueColors =
                 listOf(
-                    ACCELERATION_DECELERATION_STRONG_THRESHOLD to "#0000FF",
-                    ACCELERATION_DECELERATION_STRONG_THRESHOLD + 0.000001 to "#18daf0",
-                    ACCELERATION_DECELERATION_WEAK_THRESHOLD to "#18daf0",
-                    ACCELERATION_DECELERATION_WEAK_THRESHOLD + 0.0000001 to "#000000",
-                    ACCELERATION_ACCELERATION_WEAK_THRESHOLD - 0.0000001 to "#000000",
-                    ACCELERATION_ACCELERATION_WEAK_THRESHOLD to "#f09733",
-                    ACCELERATION_ACCELERATION_STRONG_THRESHOLD - 0.000001 to "#f09733",
+                    ACCELERATION_DECELERATION_STRONG_THRESHOLD to "#0010ff",
+                    ACCELERATION_DECELERATION_STRONG_THRESHOLD + 0.000001 to "#006bff",
+                    ACCELERATION_DECELERATION_WEAK_THRESHOLD to "#006bff",
+                    ACCELERATION_DECELERATION_WEAK_THRESHOLD + 0.0000001 to "#1de100",
+                    ACCELERATION_ACCELERATION_WEAK_THRESHOLD - 0.0000001 to "#1de100",
+                    ACCELERATION_ACCELERATION_WEAK_THRESHOLD to "#ff8000",
+                    ACCELERATION_ACCELERATION_STRONG_THRESHOLD - 0.000001 to "#ff8000",
                     ACCELERATION_ACCELERATION_STRONG_THRESHOLD to "#FF0000")),
         // Velocity
         gradientColorValue(
@@ -287,6 +287,19 @@ private fun gradientColorValue(value: Double, valueColors: List<Pair<Double, Str
   require(valueColors.count() > 1) { "At least two valueColors are required" }
 
   val valueColorsSorted = valueColors.sortedBy { it.first }
+
+  // If the value is smaller than the smallest valueColor, return the color of the smallest
+  // valueColor
+  if (value <= valueColorsSorted.first().first) {
+    return valueColorsSorted.first().second
+  }
+
+  // If the value is greater than the greatest valueColor, return the color of the greatest
+  // valueColor
+  if (value >= valueColorsSorted.last().first) {
+    return valueColorsSorted.last().second
+  }
+
   valueColorsSorted.forEachIndexed { index, valueColor ->
     if (value < valueColor.first) {
       val lowerBound = if (index == 0) valueColor else valueColorsSorted[index - 1]
@@ -298,33 +311,39 @@ private fun gradientColorValue(value: Double, valueColors: List<Pair<Double, Str
 }
 
 /**
- * Interpolates between two hex colors.
+ * Interpolates between two hex colors with alpha values (RGBA format).
  *
- * @param color1 The first color in hex notation.
- * @param color2 The second color in hex notation.
+ * @param color1 The first color in hex notation (with optional alpha at the end (AA = 255
+ *   otherwise)).
+ * @param color2 The second color in hex notation (with optional alpha at the end (AA = 255
+ *   otherwise)).
  * @param ratio The ratio to interpolate between the two colors.
- * @return The interpolated color in hex notation.
+ * @return The interpolated color in hex notation with optional alpha (AA = 255 otherwise).
  */
 private fun interpolateHexColor(color1: String, color2: String, ratio: Double): String {
-  val hex1 = color1.substring(1).toInt(16)
-  val hex2 = color2.substring(1).toInt(16)
+  val hex1 = color1.substring(1)
+  val hex2 = color2.substring(1)
 
-  val r1 = hex1 shr 16 and 0xFF
-  val g1 = hex1 shr 8 and 0xFF
-  val b1 = hex1 and 0xFF
+  val alpha1 = hex1.length == 8
+  val alpha2 = hex2.length == 8
 
-  val r2 = hex2 shr 16 and 0xFF
-  val g2 = hex2 shr 8 and 0xFF
-  val b2 = hex2 and 0xFF
+  val r1 = hex1.substring(0, 2).toInt(16)
+  val g1 = hex1.substring(2, 4).toInt(16)
+  val b1 = hex1.substring(4, 6).toInt(16)
+  val a1 = if (alpha1) hex1.substring(6, 8).toInt(16) else 255
+
+  val r2 = hex2.substring(0, 2).toInt(16)
+  val g2 = hex2.substring(2, 4).toInt(16)
+  val b2 = hex2.substring(4, 6).toInt(16)
+  val a2 = if (alpha2) hex2.substring(6, 8).toInt(16) else 255
 
   val r = (r1 + (r2 - r1) * ratio).toInt()
   val g = (g1 + (g2 - g1) * ratio).toInt()
   val b = (b1 + (b2 - b1) * ratio).toInt()
-
-  val interpolatedColor = (r shl 16) or (g shl 8) or (b)
+  val a = (a1 + (a2 - a1) * ratio).toInt()
 
   // convert to hex
-  val interpolatedColorHex = String.format("#%06X", 0xFFFFFF and interpolatedColor)
+  val interpolatedColorHex = String.format("#%02X%02X%02X%02X", r, g, b, a)
   return interpolatedColorHex
 }
 

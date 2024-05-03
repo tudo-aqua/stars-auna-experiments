@@ -101,7 +101,7 @@ val hardSteering =
 /** Low steering is defined in the interval ([STEERING_ANGLE_LOW] ... [STEERING_ANGLE_HARD]). */
 val lowSteering =
     predicate(Robot::class) { ctx, r ->
-      eventually(r, phi = { abs(it.steeringAngle) in STEERING_ANGLE_LOW..STEERING_ANGLE_HARD }) &&
+      eventually(r, phi = { abs(it.steeringAngle) >= STEERING_ANGLE_LOW }) &&
           !hardSteering.holds(ctx, r)
     }
 

@@ -48,7 +48,7 @@ val normalLateralOffset =
  */
 
 /** Distance in m to front vehicle must globally be greater than breaking distance. */
-val minDistanceToFrontVehicleExceeded =
+val minDistanceToPrecedingVehicle =
     predicate(Robot::class) { _, r ->
       globally(
           r,
@@ -65,7 +65,7 @@ val minDistanceToFrontVehicleExceeded =
  * Exceeding the maximum distance to the front vehicle is defined
  * as > [DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH] * 1.25.
  */
-val maxDistanceToFrontVehicleExceeded =
+val maxDistanceToPrecedingVehicle =
     predicate(Robot::class) { _, r ->
       globally(
           r,

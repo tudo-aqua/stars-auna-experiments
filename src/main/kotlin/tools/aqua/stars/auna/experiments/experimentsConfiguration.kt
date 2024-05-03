@@ -15,26 +15,16 @@
  * limitations under the License.
  */
 
-@file:Suppress("MayBeConstant")
-
 package tools.aqua.stars.auna.experiments
 
-// The download size is approximately 60MB!
-// Manual download via: DRIVING_DATA_DOWNLOAD_URL and TRACK_DATA_DOWNLOAD_URL
-val DOWNLOAD_EXPERIMENTS_DATA = true
-
-val DRIVING_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/iYG2SXDAmzLt5Lb/download"
-val TRACK_DATA_DOWNLOAD_URL = "https://tu-dortmund.sciebo.de/s/OKFiTtZ4Bby0Y5p/download"
-
-val DOWNLOAD_FOLDER_NAME = "stars-auna-json-files"
-val SIMULATION_RUN_FOLDER = ".\\$DOWNLOAD_FOLDER_NAME\\3_0_m_s"
-val WAYPOINTS_FILE_NAME = "flw_waypoints.json"
+const val DYNAMIC_DATA_DIRECTORY = ".\\stars-auna-json-files\\3_0_m_s"
+const val STATIC_DATA_FILE = ".\\stars-auna-json-files\\flw_waypoints.json"
 
 /** The size of the window for the moving average acceleration in ms. */
-val ACCELERATION_WINDOW_SIZE = 100
+const val ACCELERATION_WINDOW_SIZE = 100
 
 /** The minimum ticks per segment. */
-val MIN_TICKS_PER_SEGMENT = 10
+const val MIN_TICKS_PER_SEGMENT = 10
 
 /** The hardware limit of the steering angle in radians. */
-val STEERING_ANGLE_LIMIT = 0.4
+const val STEERING_ANGLE_LIMIT = 0.4

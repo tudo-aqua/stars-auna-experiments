@@ -18,10 +18,6 @@
 package tools.aqua.stars.auna.experiments
 
 import java.io.File
-import java.net.URL
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.zip.ZipFile
 import tools.aqua.stars.auna.experiments.slicer.SliceAcceleration
 import tools.aqua.stars.auna.importer.Message
 import tools.aqua.stars.auna.importer.importDrivingData
@@ -56,21 +52,7 @@ import tools.aqua.stars.data.av.track.*
 
 /** Executes the experiments. */
 fun main() {
-  downloadAndUnzipExperimentsData()
-  downloadWaypointsData()
-  println("Finished downloading files")
-
   val tsc = tsc()
-
-  println("Projections:")
-  tsc.buildProjections().forEach {
-    println("TSC for Projection $it:")
-    println(it.tsc)
-    println("All possible instances:")
-    println(it.possibleTSCInstances.size)
-    println()
-  }
-  println("-----------------")
 
   println("Import Track Data")
   val track = importTrackData()
@@ -82,10 +64,7 @@ fun main() {
   val ticks = loadTicks(lanes)
 
   println("Create Segments")
-  // val slicer = NoSlicing()
-  // val slicer = SliceEqualChunkSize()
-  val slicer = SliceAcceleration()
-  val segments = slicer.slice(ticks, listOf(2, 3))
+  val segments = SliceAcceleration().slice(ticks, listOf(2, 3))
 
   println("Found ${segments.toList().size} segments.")
 
@@ -149,7 +128,7 @@ fun main() {
  * @return A [List] of [TickData].
  */
 fun loadTicks(lanes: List<Lane>): List<TickData> {
-  val path = File(SIMULATION_RUN_FOLDER).toPath()
+  val path = File(DYNAMIC_DATA_DIRECTORY).toPath()
   val messages =
       importDrivingData(path)
           .flatMap { (_, entries) -> entries.filterIsInstance<Message>() }
@@ -160,116 +139,3 @@ fun loadTicks(lanes: List<Lane>): List<TickData> {
 
   return getTicksFromMessages(messages, waypoints = waypoints)
 }
-
-/** Holds the name of the downloaded file used for this experiment setup. */
-val DOWNLOAD_FILE_NAME = "$DOWNLOAD_FOLDER_NAME.zip"
-
-/**
- * Checks if the experiments data is available. Otherwise, it is downloaded and extracted to the
- * correct folder.
- */
-fun downloadAndUnzipExperimentsData() {
-  if (!File(DOWNLOAD_FOLDER_NAME).exists()) {
-    println("The experiments data is missing.")
-    if (!File(DOWNLOAD_FILE_NAME).exists()) {
-      println("The experiments data zip file is missing.")
-      if (DOWNLOAD_EXPERIMENTS_DATA) {
-        println("Start with downloading the experiments data. This may take a while.")
-        downloadExperimentsData()
-        println("Finished downloading.")
-      } else {
-        simulationDataMissing()
-      }
-    }
-    if (!File(DOWNLOAD_FILE_NAME).exists()) {
-      simulationDataMissing()
-    }
-    println("Extract experiments data from zip file.")
-    extractZipFile(
-        zipFile = File(DOWNLOAD_FILE_NAME), extractTo = File("./$DOWNLOAD_FOLDER_NAME"), true)
-  }
-  if (!File(DOWNLOAD_FOLDER_NAME).exists()) {
-    simulationDataMissing()
-  }
-}
-
-/**
- * Throws an exception when the experiments data is not available and when the
- * [DOWNLOAD_EXPERIMENTS_DATA] is set to false.
- */
-fun simulationDataMissing() {
-  error(
-      "The experiments data is not available. " +
-          "Either download it: $DRIVING_DATA_DOWNLOAD_URL and $TRACK_DATA_DOWNLOAD_URL or set " +
-          "DOWNLOAD_EXPERIMENTS_DATA to 'true'")
-}
-
-/** Download the experiments data and saves it in the root directory of the project. */
-fun downloadExperimentsData() {
-  URL(DRIVING_DATA_DOWNLOAD_URL).openStream().use { Files.copy(it, Paths.get(DOWNLOAD_FILE_NAME)) }
-}
-
-/** Download the waypoint data and saves it in the root directory of the project. */
-fun downloadWaypointsData() {
-  val waypointsFileName = WAYPOINTS_FILE_NAME
-  if (!File(waypointsFileName).exists()) {
-    println("The waypoints data is missing.")
-    if (DOWNLOAD_EXPERIMENTS_DATA) {
-      println("Start with downloading the waypoints data.")
-      URL(TRACK_DATA_DOWNLOAD_URL).openStream().use {
-        Files.copy(it, Paths.get(WAYPOINTS_FILE_NAME))
-      }
-      println("Finished downloading.")
-    } else {
-      simulationDataMissing()
-    }
-  }
-  if (!File(WAYPOINTS_FILE_NAME).exists()) {
-    simulationDataMissing()
-  }
-}
-
-/**
- * Extract a zip file into any directory.
- *
- * @param zipFile src zip file.
- * @param extractTo directory to extract into. There will be new folder with the zip's name inside
- *   [extractTo] directory.
- * @param extractHere no extra folder will be created and will be extracted directly inside
- *   [extractTo] folder.
- * @return the extracted directory i.e, [extractTo] folder if [extractHere] is `true` and
- *   [extractTo]\zipFile\ folder otherwise.
- */
-@Suppress("SameParameterValue")
-private fun extractZipFile(
-    zipFile: File,
-    extractTo: File,
-    extractHere: Boolean = false,
-): File? =
-    try {
-      val outputDir =
-          if (extractHere) {
-            extractTo
-          } else {
-            File(extractTo, zipFile.nameWithoutExtension)
-          }
-
-      ZipFile(zipFile).use { zip ->
-        zip.entries().asSequence().forEach { entry ->
-          zip.getInputStream(entry).use { input ->
-            if (entry.isDirectory) {
-              File(outputDir, entry.name).mkdirs()
-            } else {
-              File(outputDir, entry.name).let {
-                it.parentFile?.mkdirs()
-                it.outputStream().use { output -> input.copyTo(output) }
-              }
-            }
-          }
-        }
-      }
-      extractTo
-    } catch (e: Exception) {
-      e.printStackTrace()
-      null
-    }

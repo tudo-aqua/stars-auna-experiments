@@ -123,12 +123,8 @@ fun tsc() =
               monitor("CAM message location change") { camMessagePositionChange.holds(it) }
               monitor("CAM message rotation change") { camMessageHeadingChange.holds(it) }
               monitor("Maximum deceleration") { maxDecelerationExceeded.holds(it) }
-              monitor("Minimum distance to front robot") {
-                minDistanceToPrecedingVehicle.holds(it)
-              }
-              monitor("Maximum distance to front robot") {
-                maxDistanceToPrecedingVehicle.holds(it)
-              }
+              monitor("Minimum distance to front robot") { minDistanceToPrecedingVehicle.holds(it) }
+              monitor("Maximum distance to front robot") { maxDistanceToPrecedingVehicle.holds(it) }
             }
           }
         })

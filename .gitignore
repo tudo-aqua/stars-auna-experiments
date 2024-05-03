@@ -1,13 +1,4 @@
 ### Project ###
-/analysis-result-logs
-/stars-auna-json-files
-/stars-auna-json-files.zip
-flw_waypoints.json
-/stars-auna-export
-
-# Exclude astah .lock files
-*.lock
-
 **/.gradle
 **/build
 .idea

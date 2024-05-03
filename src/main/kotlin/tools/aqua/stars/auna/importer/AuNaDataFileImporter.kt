@@ -24,7 +24,7 @@ import kotlin.io.path.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import tools.aqua.stars.auna.experiments.WAYPOINTS_FILE_NAME
+import tools.aqua.stars.auna.experiments.STATIC_DATA_FILE
 import tools.aqua.stars.data.av.track.DataSource
 
 /**
@@ -68,7 +68,7 @@ fun importDrivingData(folderPath: Path): Map<DataSource, List<Any>> {
  *
  * @return The parsed [Track] object.
  */
-fun importTrackData(): Track = getJsonContentOfPath(Path(WAYPOINTS_FILE_NAME))
+fun importTrackData(): Track = getJsonContentOfPath(Path(STATIC_DATA_FILE))
 
 /**
  * Returns the parsed Json content for the given [inputFilePath]. Currently supported file

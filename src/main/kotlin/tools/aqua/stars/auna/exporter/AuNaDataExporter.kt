@@ -55,9 +55,6 @@ val json = Json { encodeDefaults = true }
 /** Exports calculated [Segment]s to the import format used by the STARS-Visualizer tool. */
 fun main() {
   println("Export Experiments Data")
-  downloadAndUnzipExperimentsData()
-  downloadWaypointsData()
-  print("Finished downloading files")
 
   println("Import Track Data")
   val track = importTrackData()

@@ -21,7 +21,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Transform. */
 data class Transform(
-    @SerialName("translation") val translation: Vector,
-    @SerialName("rotation") val rotation: Quaternion
+    @SerialName("translation")
+    /** The translation. */
+    val translation: Vector,
+    @SerialName("rotation")
+    /** The rotation. */
+    val rotation: Quaternion
 )

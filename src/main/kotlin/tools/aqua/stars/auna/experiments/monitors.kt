@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-@file:Suppress("MayBeConstant")
+@file:Suppress("MayBeConstant", "MagicNumber")
 
 package tools.aqua.stars.auna.experiments
 
@@ -52,7 +52,7 @@ val minDistanceToPrecedingVehicle =
     predicate(Robot::class) { _, r ->
       globally(
           r,
-          r.tickData.getEntityById(r.id - 1)!!,
+          checkNotNull(r.tickData.getEntityById(r.id - 1)),
           phi = { rb1, rb2,
             ->
             // Distance in m to front vehicle is smaller than breaking distance,
@@ -69,7 +69,7 @@ val maxDistanceToPrecedingVehicle =
     predicate(Robot::class) { _, r ->
       globally(
           r,
-          r.tickData.getEntityById(r.id - 1)!!,
+          checkNotNull(r.tickData.getEntityById(r.id - 1)),
           phi = { rb1, rb2 ->
             rb1.distanceToOther(rb2) < DISTANCE_TO_FRONT_ROBOT_THRESHOLD_HIGH * 1.25
           })

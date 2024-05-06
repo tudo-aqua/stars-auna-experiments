@@ -21,7 +21,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Twist with covariance. */
 data class TwistWithCovariance(
-    @SerialName("twist") val twist: Twist,
-    @SerialName("covariance") val covariance: List<Double>
+    @SerialName("twist")
+    /** The [Twist]. */
+    val twist: Twist,
+    @SerialName("covariance")
+    /** The covariance vector. */
+    val covariance: List<Double>
 )

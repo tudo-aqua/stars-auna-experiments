@@ -21,10 +21,21 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Ackermann drive. */
 data class AckermannDrive(
-    @SerialName("steering_angle") val steeringAngle: Double,
-    @SerialName("steering_angle_velocity") val steeringAngleVelocity: Double,
-    @SerialName("speed") val speed: Double,
-    @SerialName("acceleration") val acceleration: Double,
-    @SerialName("jerk") val jerk: Double,
+    @SerialName("steering_angle")
+    /** The steering angle. */
+    val steeringAngle: Double,
+    @SerialName("steering_angle_velocity")
+    /** The steering angle velocity. */
+    val steeringAngleVelocity: Double,
+    @SerialName("speed")
+    /** The speed. */
+    val speed: Double,
+    @SerialName("acceleration")
+    /** The acceleration. */
+    val acceleration: Double,
+    @SerialName("jerk")
+    /** The jerk. */
+    val jerk: Double,
 )

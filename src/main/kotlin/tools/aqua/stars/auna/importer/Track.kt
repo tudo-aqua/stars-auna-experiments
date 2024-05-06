@@ -20,4 +20,10 @@ package tools.aqua.stars.auna.importer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable data class Track(@SerialName("lanes") val lanes: List<Lane>)
+@Serializable
+/** Track. */
+data class Track(
+    @SerialName("lanes")
+    /** The lanes. */
+    val lanes: List<Lane>
+)

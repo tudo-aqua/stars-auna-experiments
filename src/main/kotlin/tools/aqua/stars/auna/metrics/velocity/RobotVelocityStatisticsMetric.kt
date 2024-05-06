@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("InjectDispatcher")
+
 package tools.aqua.stars.auna.metrics.velocity
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -25,9 +27,10 @@ import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the velocity statistics of a robot. */
 class RobotVelocityStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
-  private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
+  private val segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
 
   override fun evaluate(
@@ -37,7 +40,7 @@ class RobotVelocityStatisticsMetric(private val plotSegments: Boolean = true) :
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
 
-  @Suppress("DuplicatedCode")
+  @Suppress("DuplicatedCode", "StringLiteralDuplication", "LongMethod")
   override fun writePlots() {
     val folderName = "robot-velocity-statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
@@ -62,9 +65,12 @@ class RobotVelocityStatisticsMetric(private val plotSegments: Boolean = true) :
                 combinedValuesMap[legendEntry] = xValues to yValues
 
                 synchronized(allValuesMap) {
-                  allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
-                  allValuesMap[legendEntry]!!.first += xValues
-                  allValuesMap[legendEntry]!!.second += yValues
+                  allValuesMap
+                      .getOrPut(legendEntry) { mutableListOf<Number>() to mutableListOf() }
+                      .let {
+                        it.first += xValues
+                        it.second += yValues
+                      }
                 }
 
                 if (plotSegments) {

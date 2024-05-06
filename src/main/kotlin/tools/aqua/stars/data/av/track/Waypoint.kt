@@ -18,12 +18,12 @@
 package tools.aqua.stars.data.av.track
 
 /**
- * This class represent simple (x,y)-coordinates
+ * This class represent simple (x,y)-coordinates.
  *
- * @param x The x value for this coordinate
- * @param y The y value for this coordinate
- * @param distanceToStart The distance to the start of the [Lane]
- * @param lane The [Lane] this waypoint belongs to
+ * @property x The x value for this coordinate
+ * @property y The y value for this coordinate
+ * @property distanceToStart The distance to the start of the [Lane]
+ * @property lane The [Lane] this waypoint belongs to
  */
 data class Waypoint(
     val x: Double,
@@ -31,7 +31,6 @@ data class Waypoint(
     var distanceToStart: Double = -1.0,
     var lane: Lane
 ) {
-  override fun toString(): String {
-    return "Waypoint(x=$x, y=$y, distanceToStart=$distanceToStart, lane=${lane})"
-  }
+  override fun toString(): String =
+      "Waypoint(x=$x, y=$y, distanceToStart=$distanceToStart, lane=${lane})"
 }

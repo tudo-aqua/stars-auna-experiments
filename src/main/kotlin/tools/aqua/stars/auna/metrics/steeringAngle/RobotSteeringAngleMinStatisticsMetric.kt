@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.steering_angle
+package tools.aqua.stars.auna.metrics.steeringAngle
 
 import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
@@ -24,39 +24,36 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotSteeringAngleAverageStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-steering-angle-average-statistics")
+/** Metric to calculate the average steering angle of a robot. */
+class RobotSteeringAngleMinStatisticsMetric(
+    override val logger: Logger = Loggable.getLogger("robot-steering-angle-minimum-statistics")
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,
     Stateful {
 
-  private var averageSteeringAngle: MutableMap<Int, Double> = mutableMapOf()
-  private var tickCount: MutableMap<Int, Int> = mutableMapOf()
+  private val currentMin: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
   ) {
     val robotIdToRobotStateMap = segment.tickData.map { it.entities }.flatten().groupBy { it.id }
 
-    val robotIdToSumOfSteeringAngle =
-        robotIdToRobotStateMap.map { it.key to it.value.sumOf { t -> t.steeringAngle } }
-
-    robotIdToSumOfSteeringAngle.forEach {
+    val minimumRobotSteeringAngle =
+        robotIdToRobotStateMap.map { it.key to it.value.minOf { t -> t.steeringAngle } }
+    minimumRobotSteeringAngle.forEach {
+      currentMin[it.first] =
+          minOf(currentMin.getOrDefault(it.first, Double.POSITIVE_INFINITY), it.second)
       logFiner(
-          "The average steering angle of robot with ID '${it.first}' in Segment $segment is ${it.second / segment.tickData.size}")
-
-      averageSteeringAngle[it.first] = averageSteeringAngle.getOrDefault(it.first, 0.0) + it.second
-      tickCount[it.first] = tickCount.getOrDefault(it.first, 0) + segment.tickData.size
+          "The minimum steering angle of robot with ID '${it.first}' in Segment `${segment.getSegmentIdentifier()}` is ${it.second}.")
     }
   }
 
-  override fun getState(): Map<Int, Double> =
-      averageSteeringAngle.map { it.key to it.value / (tickCount[it.key] ?: 0) }.toMap()
+  override fun getState(): Map<Int, Double> = currentMin
 
   override fun printState() {
-    getState().forEach { (actorId, averageVelocity) ->
-      logFine("The average steering angle of robot with ID '$actorId' is '$averageVelocity'")
+    currentMin.forEach { (actorId, minSteeringAngle) ->
+      logFine("The minimum steering angle of robot with ID '$actorId' is '$minSteeringAngle'")
     }
   }
 }

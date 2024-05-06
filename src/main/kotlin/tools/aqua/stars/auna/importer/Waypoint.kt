@@ -21,8 +21,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Waypoint. */
 data class Waypoint(
-    @SerialName("x") val x: Double,
-    @SerialName("y") val y: Double,
-    @SerialName("distanceToStart") var distanceToStart: Double
+    @SerialName("x")
+    /** The x ordinate. */
+    val x: Double,
+    @SerialName("y")
+    /** The y ordinate. */
+    val y: Double,
+    @SerialName("distanceToStart")
+    /** The distance to the start. */
+    var distanceToStart: Double
 )

@@ -21,12 +21,20 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Vector. */
 data class Vector(
-    @SerialName("x") val x: Double,
-    @SerialName("y") val y: Double,
-    @SerialName("z") val z: Double,
+    @SerialName("x")
+    /** The x ordinate. */
+    val x: Double,
+    @SerialName("y")
+    /** The y ordinate. */
+    val y: Double,
+    @SerialName("z")
+    /** The z ordinate. */
+    val z: Double,
 ) {
   companion object {
+    /** Zero vector. */
     val zero: Vector = Vector(0.0, 0.0, 0.0)
   }
 }

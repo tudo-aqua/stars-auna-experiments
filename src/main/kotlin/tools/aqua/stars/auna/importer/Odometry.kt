@@ -23,13 +23,19 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Odometry. */
 data class Odometry(
-    @SerialName("msg") override val header: Header,
-    @SerialName("pose") val pose: PoseWithCovariance,
-    @SerialName("twist") val twist: TwistWithCovariance
+    @SerialName("msg")
+    /** The [Header]. */
+    override val header: Header,
+    @SerialName("pose")
+    /** The pose. */
+    val pose: PoseWithCovariance,
+    @SerialName("twist")
+    /** The twist. */
+    val twist: TwistWithCovariance
 ) : Message {
-  fun getVelocity(): Double {
-    val velocityVector = this.twist.twist.linear
-    return sqrt(velocityVector.x.pow(2) + velocityVector.y.pow(2) + velocityVector.z.pow(2))
-  }
+  /** Returns the velocity. */
+  fun getVelocity(): Double =
+      this.twist.twist.linear.let { sqrt(it.x.pow(2) + it.y.pow(2) + it.z.pow(2)) }
 }

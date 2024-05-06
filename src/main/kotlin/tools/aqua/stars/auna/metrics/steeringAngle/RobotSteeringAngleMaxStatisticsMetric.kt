@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.steering_angle
+package tools.aqua.stars.auna.metrics.steeringAngle
 
 import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
@@ -24,6 +24,7 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the maximum steering angle of a robot. */
 class RobotSteeringAngleMaxStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-steering-angle-maximum-statistics")
 ) :
@@ -31,7 +32,7 @@ class RobotSteeringAngleMaxStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var currentMax: MutableMap<Int, Double> = mutableMapOf()
+  private val currentMax: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
@@ -49,9 +50,7 @@ class RobotSteeringAngleMaxStatisticsMetric(
     }
   }
 
-  override fun getState(): Map<Int, Double> {
-    return currentMax
-  }
+  override fun getState(): Map<Int, Double> = currentMax
 
   override fun printState() {
     currentMax.forEach { (actorId, maxSteeringAngle) ->

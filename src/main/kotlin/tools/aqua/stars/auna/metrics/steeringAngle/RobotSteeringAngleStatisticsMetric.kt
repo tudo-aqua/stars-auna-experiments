@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.acceleration
+@file:Suppress("InjectDispatcher")
+
+package tools.aqua.stars.auna.metrics.steeringAngle
 
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
@@ -27,9 +29,10 @@ import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
-class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boolean = true) :
+/** Metric to calculate the steering angle statistics of a robot. */
+class RobotSteeringAngleStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
-  private var segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
+  private val segmentToRobotIdToRobotStateMap: MutableList<Pair<Segment, Map<Int, List<Robot>>>> =
       mutableListOf()
 
   override fun evaluate(
@@ -39,9 +42,9 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
     segmentToRobotIdToRobotStateMap += segment as Segment to robotIdToRobotStateMap
   }
 
-  @Suppress("DuplicatedCode")
+  @Suppress("DuplicatedCode", "StringLiteralDuplication", "LongMethod")
   override fun writePlots() {
-    val folderName = "robot-acceleration-statistics"
+    val folderName = "steering_angle_statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
     val finished = AtomicInteger(0)
 
@@ -58,15 +61,18 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.acceleration }
+                val yValues = robotStates.map { it.steeringAngle }
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
 
                 synchronized(allValuesMap) {
-                  allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
-                  allValuesMap[legendEntry]!!.first += xValues
-                  allValuesMap[legendEntry]!!.second += yValues
+                  allValuesMap
+                      .getOrPut(legendEntry) { mutableListOf<Number>() to mutableListOf() }
+                      .let {
+                        it.first += xValues
+                        it.second += yValues
+                      }
                 }
 
                 if (plotSegments) {
@@ -77,21 +83,26 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
                               xValues = xValues,
                               yValues = yValues,
                               "tick",
-                              "acceleration (m/s^2)",
-                              "Acceleration for"),
+                              "steering angle (°)",
+                              "Steering angle for"),
                       folder = folderName,
                       subFolder = subFolderName,
                       fileName = fileName)
 
                   plotDataAsLineChart(
-                      plot = getPlot(combinedValuesMap, "time", "acceleration", "Acceleration for"),
+                      plot =
+                          getPlot(
+                              combinedValuesMap.toSortedMap(),
+                              "tick",
+                              "steering angle",
+                              "Steering angle for"),
                       folder = folderName,
                       subFolder = subFolderName,
                       fileName = "${subFolderName}_combined")
 
                   finished.incrementAndGet().let { i ->
                     print(
-                        "\rWriting Plots for Robot acceleration: " +
+                        "\rWriting Plots for Robot steering angle: " +
                             "$i/${segmentToRobotIdToRobotStateMap.size} " +
                             "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
                             "on ${Thread.currentThread()}")
@@ -111,12 +122,12 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
                   xValues = values.first,
                   yValues = values.second,
                   xAxisName = "tick",
-                  yAxisName = "acceleration (m/s^2)",
-                  legendHeader = "Acceleration for"),
+                  yAxisName = "steering angle (°)",
+                  legendHeader = "steering angle for"),
           size = 2500 to 500,
           folder = folderName,
           subFolder = "all",
-          fileName = "acceleration_all_${legendEntry}")
+          fileName = "steering_angle_all_${legendEntry}")
 
       plotDataAsHistogram(
           plot =
@@ -124,12 +135,12 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
                   legendEntry = legendEntry,
                   xValues = values.second,
                   yValues = values.second,
-                  xAxisName = "acceleration (m/s^2)",
+                  xAxisName = "steering angle (°)",
                   yAxisName = "frequency",
-                  legendHeader = "Acceleration for"),
+                  legendHeader = "steering angle for"),
           folder = folderName,
           subFolder = "all",
-          fileName = "acceleration_hist_all_lin_${legendEntry}")
+          fileName = "steering_angle_hist_all_lin_${legendEntry}")
 
       plotDataAsHistogram(
           plot =
@@ -137,23 +148,24 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
                   legendEntry = legendEntry,
                   xValues = values.second,
                   yValues = values.second,
-                  xAxisName = "acceleration (m/s^2)",
-                  legendHeader = "Acceleration for"),
+                  xAxisName = "steering angle (°)",
+                  yAxisName = "frequency",
+                  legendHeader = "steering angle for"),
           logScaleY = true,
           folder = folderName,
           subFolder = "all",
-          fileName = "acceleration_hist_all_log_${legendEntry}")
+          fileName = "steering_angle_hist_all_log_${legendEntry}")
     }
 
     plotDataAsLineChart(
         plot =
-            getPlot(allValuesMap.toSortedMap(), "tick", "acceleration (m/s^2)", "Acceleration for"),
+            getPlot(allValuesMap.toSortedMap(), "tick", "steering angle (°)", "Steering angle for"),
         size = 2500 to 500,
         folder = folderName,
         subFolder = "all",
-        fileName = "acceleration_all_combined")
+        fileName = "steering_angle_all_combined")
 
-    println("\rWriting PLots for Robot acceleration: finished")
+    println("\rWriting Plots for Robot steering angle: finished")
   }
 
   @Suppress("DuplicatedCode")
@@ -168,13 +180,13 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
               val robotIdToRobotStates = it.second
 
               val combinedValuesMap = mutableMapOf<String, Pair<List<Number>, List<Number>>>()
-              val folderName = "robot-acceleration-statistics"
+              val folderName = "robot-steering-angle-statistics"
               val subFolderName = segment.getSegmentIdentifier()
 
               robotIdToRobotStates.forEach { (robotId, robotStates) ->
                 val legendEntry = "Robot $robotId"
                 val fileName = "${subFolderName}_robot_$robotId"
-                val yValues = robotStates.map { it.acceleration }
+                val yValues = robotStates.map { it.steeringAngle }
                 val xValues = robotStates.map { it.tickData.currentTick.toSeconds() }
 
                 combinedValuesMap[legendEntry] = xValues to yValues
@@ -196,7 +208,7 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
 
               finished.incrementAndGet().let { i ->
                 print(
-                    "\rWriting CSV for Robot acceleration: " +
+                    "\rWriting CSV for Robot steering angle: " +
                         "$i/${segmentToRobotIdToRobotStateMap.size} " +
                         "(${i * 100 / segmentToRobotIdToRobotStateMap.size}%) " +
                         "on ${Thread.currentThread()}")
@@ -206,7 +218,7 @@ class RobotAccelerationStatisticsMetricOverlapping(private val plotSegments: Boo
           .forEach { it.join() }
     }
     println(
-        "\rWriting CSV for Robot acceleration: " +
+        "\rWriting CSV for Robot steering angle: " +
             "${segmentToRobotIdToRobotStateMap.size}/${segmentToRobotIdToRobotStateMap.size} (100%)")
   }
 }

@@ -21,6 +21,7 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
+/** Slicer implementation that creates segments of equal size. */
 class SliceEqualChunkSize : Slicer() {
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> {
     // Split ticks by line change

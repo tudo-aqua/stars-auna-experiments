@@ -24,6 +24,7 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the minimum acceleration of a robot in a segment. */
 class RobotAccelerationMinStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-acceleration-minimum-statistics")
 ) :
@@ -31,7 +32,7 @@ class RobotAccelerationMinStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var currentMin: MutableMap<Int, Double> = mutableMapOf()
+  private val currentMin: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
@@ -48,9 +49,7 @@ class RobotAccelerationMinStatisticsMetric(
     }
   }
 
-  override fun getState(): Map<Int, Double> {
-    return currentMin
-  }
+  override fun getState(): Map<Int, Double> = currentMin
 
   override fun printState() {
     currentMin.forEach { (actorId, minAcceleration) ->

@@ -22,14 +22,22 @@ import kotlin.math.roundToLong
 import tools.aqua.stars.core.types.TickUnit
 
 @Suppress("MemberVisibilityCanBePrivate")
+/**
+ * Time unit implementation for AuNa.
+ *
+ * @property nanos The time in nanoseconds.
+ */
 class AuNaTimeUnit(val nanos: BigInteger) : TickUnit<AuNaTimeUnit, AuNaTimeDifference> {
 
+  /** Time cut to seconds. */
   val seconds
     get() = nanos / 1e9.toLong().toBigInteger()
 
+  /** Time cut to milliseconds. */
   val millis
     get() = nanos / 1e6.toLong().toBigInteger()
 
+  /** Time cut to microseconds. */
   val micros
     get() = nanos / 1e3.toLong().toBigInteger()
 
@@ -49,18 +57,28 @@ class AuNaTimeUnit(val nanos: BigInteger) : TickUnit<AuNaTimeUnit, AuNaTimeDiffe
   override fun plus(other: AuNaTimeDifference): AuNaTimeUnit =
       AuNaTimeUnit(nanos + other.differenceNanos)
 
+  /** Returns the time in seconds. */
   fun toSeconds(): Double = (nanos.toBigDecimal().divide(1e9.toBigDecimal())).toDouble()
 
+  /** Returns the time in milliseconds. */
   fun toMillis(): Double = (nanos.toBigDecimal().divide(1e6.toBigDecimal())).toDouble()
 
   override fun toString(): String =
-      "(${seconds}s, ${millis.mod(1e3.toLong().toBigInteger())}ms, ${micros.mod(1e3.toLong().toBigInteger())}µs, ${nanos.mod(1e3.toLong().toBigInteger())}ns)"
+      "(${seconds}s, " +
+          "${millis.mod(1e3.toLong().toBigInteger())}ms, " +
+          "${micros.mod(1e3.toLong().toBigInteger())}µs, " +
+          "${nanos.mod(1e3.toLong().toBigInteger())}ns)"
 
+  /** Returns a clone of this time unit. */
   fun clone(): AuNaTimeUnit = AuNaTimeUnit(nanos)
 
-  fun equals(other: AuNaTimeUnit): Boolean = nanos == other.nanos
+  override fun equals(other: Any?): Boolean = other is AuNaTimeUnit && nanos == other.nanos
+
+  override fun hashCode(): Int = nanos.hashCode()
 
   companion object {
-    @Suppress("unused") val Zero = AuNaTimeUnit(0.0, 0.0)
+    @Suppress("unused")
+    /** Zero time unit. */
+    val Zero = AuNaTimeUnit(0.0, 0.0)
   }
 }

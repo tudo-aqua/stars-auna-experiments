@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 
+@file:Suppress("MagicNumber", "StringLiteralDuplication")
+
 package tools.aqua.stars.auna.exporter
 
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 import kotlin.math.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -33,11 +36,17 @@ import tools.aqua.stars.data.av.track.Lane
 import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.convertTrackToSingleLane
 
-const val OUTPUT_DIR = "./stars-auna-export/"
-const val OUTPUT_FILE_NAME = "auna"
+/** The output directory of the exported files. */
+private const val OUTPUT_DIR = "./stars-auna-export/"
 
-const val DEFAULT_ACTOR_TYPE_ID = "robot"
-const val DEFAULT_LANE_ELEVATION = 0.0
+/** The output file name of the exported files. */
+private const val OUTPUT_FILE_NAME = "auna"
+
+/** Default actor type identifier. */
+private const val DEFAULT_ACTOR_TYPE_ID = "robot"
+
+/** Default lane Z-evaluation. */
+private const val DEFAULT_LANE_ELEVATION = 0.0
 
 /** A [List] of all [ActorType]s used in this experiment. */
 val ACTOR_TYPES =
@@ -105,6 +114,7 @@ private fun exportStaticData(lanes: List<Lane>) {
  * Exports dynamic data to directory specified in [OUTPUT_DIR].
  *
  * @param lanes experiment data as [List] of [Lane]s.
+ * @param slicer The [Slicer] to use for slicing the data.
  */
 @OptIn(ExperimentalSerializationApi::class)
 private fun exportDynamicData(lanes: List<Lane>, slicer: Slicer) {
@@ -340,7 +350,7 @@ private fun interpolateHexColor(color1: String, color2: String, ratio: Double): 
   val a = (a1 + (a2 - a1) * ratio).toInt()
 
   // convert to hex
-  val interpolatedColorHex = String.format("#%02X%02X%02X%02X", r, g, b, a)
+  val interpolatedColorHex = String.format(Locale.getDefault(), "#%02X%02X%02X%02X", r, g, b, a)
   return interpolatedColorHex
 }
 

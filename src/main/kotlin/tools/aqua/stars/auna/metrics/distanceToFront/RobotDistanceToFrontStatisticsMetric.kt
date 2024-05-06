@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("InjectDispatcher")
+
 package tools.aqua.stars.auna.metrics.distanceToFront
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -27,9 +29,10 @@ import tools.aqua.stars.core.metric.utils.*
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the distance to the front robot statistics. */
 class RobotDistanceToFrontStatisticsMetric(private val plotSegments: Boolean = true) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>, Plottable {
-  private var robotIdToDistanceAtTickMap: MutableMap<Int, List<Pair<TickData, Double>>> =
+  private val robotIdToDistanceAtTickMap: MutableMap<Int, List<Pair<TickData, Double>>> =
       mutableMapOf()
 
   override fun evaluate(
@@ -49,11 +52,11 @@ class RobotDistanceToFrontStatisticsMetric(private val plotSegments: Boolean = t
         }
 
     robotIdToDistanceAtTickMap[primaryEntityId] =
-        robotIdToDistanceAtTickMap.getOrDefault(primaryEntityId, listOf()) +
+        robotIdToDistanceAtTickMap.getOrDefault(primaryEntityId, emptyList()) +
             distanceToFrontForPrimaryEntityInSegment
   }
 
-  @Suppress("DuplicatedCode")
+  @Suppress("DuplicatedCode", "StringLiteralDuplication", "LongMethod")
   override fun writePlots() {
     val folderName = "robot-distance-to-front-statistics"
     val allValuesMap = mutableMapOf<String, Pair<MutableList<Number>, MutableList<Number>>>()
@@ -77,9 +80,12 @@ class RobotDistanceToFrontStatisticsMetric(private val plotSegments: Boolean = t
               combinedValuesMap[legendEntry] = xValues to yValues
 
               synchronized(allValuesMap) {
-                allValuesMap.putIfAbsent(legendEntry, mutableListOf<Number>() to mutableListOf())
-                allValuesMap[legendEntry]!!.first += xValues
-                allValuesMap[legendEntry]!!.second += yValues
+                allValuesMap
+                    .getOrPut(legendEntry) { mutableListOf<Number>() to mutableListOf() }
+                    .let {
+                      it.first += xValues
+                      it.second += yValues
+                    }
               }
 
               if (plotSegments) {

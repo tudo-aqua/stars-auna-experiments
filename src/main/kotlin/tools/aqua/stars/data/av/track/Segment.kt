@@ -22,10 +22,10 @@ import tools.aqua.stars.core.types.SegmentType
 /**
  * This class implements the [SegmentType] and holds the sliced analysis data in semantic segments.
  *
- * @param segmentId The id of this [Segment].
- * @param ticks The [TickData]s relevant for the [Segment].
- * @param previousSegment The [Segment] before this [Segment].
- * @param nextSegment The [Segment] after this [Segment].
+ * @property segmentId The id of this [Segment].
+ * @property ticks The [TickData]s relevant for the [Segment].
+ * @property previousSegment The [Segment] before this [Segment].
+ * @property nextSegment The [Segment] after this [Segment].
  */
 data class Segment(
     val segmentId: Int,

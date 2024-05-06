@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("TooManyFunctions")
+
 package tools.aqua.stars.data.av.track
 
 import de.sciss.kdtree.KdPoint
@@ -82,8 +84,13 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
       }
       .also { println() }
 
-  // Calculate Acceleration
-  val tickArray = ticks.toTypedArray()
+  ticks.calculateAccelerations()
+  ticks.forEachIndexed { index, tickData -> tickData.id = index }
+  return ticks
+}
+
+private fun MutableList<TickData>.calculateAccelerations() {
+  val tickArray = this.toTypedArray()
   val windowStep = ACCELERATION_WINDOW_SIZE / 2
   val start = tickArray[0].currentTick.toMillis()
   val end = tickArray.last().currentTick.toMillis()
@@ -119,9 +126,6 @@ fun getTicksFromMessages(messages: List<Message>, waypoints: List<Waypoint>): Li
             "\rCalculated ${index+1}/${tickArray.size} average accelerations (${(index+1) * 100 / tickArray.size}%)")
       }
       .also { println("\rCalculated ${tickArray.size} average accelerations (100%)") }
-
-  ticks.forEachIndexed { index, tickData -> tickData.id = index }
-  return ticks
 }
 
 /**

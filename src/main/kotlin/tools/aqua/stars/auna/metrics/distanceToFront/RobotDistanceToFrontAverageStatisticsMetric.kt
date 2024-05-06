@@ -24,6 +24,7 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the average distance to the front robot in a segment. */
 class RobotDistanceToFrontAverageStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-distance-to-front-average-statistics")
 ) :
@@ -31,8 +32,8 @@ class RobotDistanceToFrontAverageStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var averageDistanceToFront: MutableMap<Int, Double> = mutableMapOf()
-  private var tickCount: MutableMap<Int, Int> = mutableMapOf()
+  private val averageDistanceToFront: MutableMap<Int, Double> = mutableMapOf()
+  private val tickCount: MutableMap<Int, Int> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>

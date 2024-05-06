@@ -32,6 +32,7 @@ import tools.aqua.stars.data.av.track.TickData
  */
 class SliceAcceleration : Slicer() {
 
+  @Suppress("NestedBlockDepth")
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> {
     // Determine whether to start with an acceleration or deceleration phase
     var wasAccelerating = determineFirstPhase(ticks, egoRobot.id)

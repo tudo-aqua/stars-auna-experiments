@@ -21,7 +21,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Ackermann drive stamped. */
 data class AckermannDriveStamped(
-    @SerialName("msg") override val header: Header,
-    @SerialName("drive") val ackermannDrive: AckermannDrive
+    @SerialName("msg")
+    /** The [Header]. */
+    override val header: Header,
+    @SerialName("drive")
+    /** The [AckermannDrive] message. */
+    val ackermannDrive: AckermannDrive
 ) : Message

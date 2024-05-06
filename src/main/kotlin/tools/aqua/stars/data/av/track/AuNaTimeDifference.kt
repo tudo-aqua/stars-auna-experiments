@@ -21,14 +21,23 @@ import java.math.BigInteger
 import kotlin.math.roundToLong
 import tools.aqua.stars.core.types.TickDifference
 
+@Suppress("MemberVisibilityCanBePrivate")
+/**
+ * Time difference implementation for AuNa.
+ *
+ * @property differenceNanos The difference in nanoseconds.
+ */
 class AuNaTimeDifference(val differenceNanos: BigInteger) : TickDifference<AuNaTimeDifference> {
 
+  /** Time cut to seconds. */
   val seconds
     get() = differenceNanos / 1e9.toLong().toBigInteger()
 
+  /** Time cut to milliseconds. */
   val millis
     get() = differenceNanos / 1e6.toLong().toBigInteger()
 
+  /** Time cut to microseconds. */
   val micros
     get() = differenceNanos / 1e3.toLong().toBigInteger()
 
@@ -51,5 +60,8 @@ class AuNaTimeDifference(val differenceNanos: BigInteger) : TickDifference<AuNaT
       AuNaTimeDifference(differenceNanos + other.differenceNanos)
 
   override fun toString(): String =
-      "(${seconds}s, ${millis.mod(1e3.toLong().toBigInteger())}ms, ${micros.mod(1e3.toLong().toBigInteger())}µs, ${differenceNanos.mod(1e3.toLong().toBigInteger())}ns)"
+      "(${seconds}s, " +
+          "${millis.mod(1e3.toLong().toBigInteger())}ms, " +
+          "${micros.mod(1e3.toLong().toBigInteger())}µs, " +
+          "${differenceNanos.mod(1e3.toLong().toBigInteger())}ns)"
 }

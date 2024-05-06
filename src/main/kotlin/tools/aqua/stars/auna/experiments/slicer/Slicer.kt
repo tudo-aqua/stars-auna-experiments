@@ -22,6 +22,7 @@ import tools.aqua.stars.data.av.track.Robot
 import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
+/** Abstract slicer. Provides functions for implementations of this class. */
 abstract class Slicer {
   /**
    * Slices ticks into segments.
@@ -60,6 +61,7 @@ abstract class Slicer {
     }
   }
 
+  /** Creates segment object from [segmentTicks]. */
   fun createSegments(segmentTicks: List<List<TickData>>): List<Segment> {
     val segments: MutableList<Segment> = mutableListOf()
     var previousSegment: Segment? = null
@@ -84,5 +86,6 @@ abstract class Slicer {
     return segments
   }
 
+  /** Slices ticks into segments. */
   abstract fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment>
 }

@@ -24,6 +24,7 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the maximum acceleration of a robot in a segment. */
 class RobotAccelerationMaxStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-acceleration-maximum-statistics")
 ) :
@@ -31,7 +32,7 @@ class RobotAccelerationMaxStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var currentMax: MutableMap<Int, Double> = mutableMapOf()
+  private val currentMax: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
@@ -48,9 +49,7 @@ class RobotAccelerationMaxStatisticsMetric(
     }
   }
 
-  override fun getState(): Map<Int, Double> {
-    return currentMax
-  }
+  override fun getState(): Map<Int, Double> = currentMax
 
   override fun printState() {
     currentMax.forEach { (actorId, maxAcceleration) ->

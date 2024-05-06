@@ -22,6 +22,7 @@ import tools.aqua.stars.data.av.track.Segment
 import tools.aqua.stars.data.av.track.TickData
 
 @Suppress("unused")
+/** Slicer implementation that creates exactly one segment. */
 class NoSlicing : Slicer() {
   override fun slice(ticks: List<TickData>, egoRobot: Robot): List<Segment> =
       createSegments(listOf(ticks))

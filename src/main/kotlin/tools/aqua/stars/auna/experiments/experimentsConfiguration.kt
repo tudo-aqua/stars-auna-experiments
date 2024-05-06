@@ -17,7 +17,10 @@
 
 package tools.aqua.stars.auna.experiments
 
+/** Directory of the dynamic data json files. */
 const val DYNAMIC_DATA_DIRECTORY = ".\\stars-auna-json-files\\3_0_m_s"
+
+/** Directory of the static data json file. */
 const val STATIC_DATA_FILE = ".\\stars-auna-json-files\\flw_waypoints.json"
 
 /** The size of the window for the moving average acceleration in ms. */

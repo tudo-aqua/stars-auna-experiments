@@ -21,7 +21,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Twist. */
 data class Twist(
-    @SerialName("linear") val linear: Vector,
-    @SerialName("angular") val angular: Vector
+    @SerialName("linear")
+    /** Linear component. */
+    val linear: Vector,
+    @SerialName("angular")
+    /** Angular component. */
+    val angular: Vector
 )

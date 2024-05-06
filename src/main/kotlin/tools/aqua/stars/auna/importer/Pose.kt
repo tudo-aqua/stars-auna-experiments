@@ -21,7 +21,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Pose. */
 data class Pose(
-    @SerialName("position") val position: Point,
-    @SerialName("orientation") val orientation: Quaternion
+    @SerialName("position")
+    /** The position. */
+    val position: Point,
+    @SerialName("orientation")
+    /** The orientation. */
+    val orientation: Quaternion
 )

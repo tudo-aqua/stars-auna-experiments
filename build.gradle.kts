@@ -20,6 +20,7 @@ plugins {
   application
   id("com.diffplug.spotless") version "6.25.0"
   kotlin("plugin.serialization") version "1.9.21"
+  id("io.gitlab.arturbosch.detekt") version "1.23.6"
 }
 
 group = "tools.aqua"
@@ -60,6 +61,8 @@ spotless {
     ktfmt()
   }
 }
+
+detekt { config.setFrom(files("contrib/detekt-rules.yml")) }
 
 tasks.test { useJUnitPlatform() }
 

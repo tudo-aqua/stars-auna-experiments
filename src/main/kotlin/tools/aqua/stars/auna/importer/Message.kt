@@ -21,6 +21,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Message interface. */
 sealed interface Message {
-  @SerialName("msg") val header: Header
+  @SerialName("msg")
+  /** The [Header]. */
+  val header: Header
 }

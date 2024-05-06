@@ -24,8 +24,9 @@ import tools.aqua.stars.core.types.TickDataType
  * This class implements the [TickDataType] and holds a specific timestamp (see [currentTick]) and
  * the states of all [EntityType]s (see [Robot]) at the timestamp.
  *
- * @param entities The [List] of [Robot]s for the [currentTick]
- * @property currentTick The current timestamp in seconds
+ * @property currentTick The current timestamp in seconds.
+ * @property entities The [List] of [Robot]s for the [currentTick].
+ * @property id The id of this [TickData].
  */
 data class TickData(
     override val currentTick: AuNaTimeUnit,
@@ -48,7 +49,7 @@ data class TickData(
    * @return The cloned [TickData] object.
    */
   fun clone(): TickData {
-    val newTick = TickData(currentTick.clone(), listOf(), -1)
+    val newTick = TickData(currentTick.clone(), emptyList(), -1)
     val entityCopies = entities.map { it.copyToNewTick(newTick) }
     newTick.entities = entityCopies
     newTick.id = id
@@ -61,7 +62,5 @@ data class TickData(
   override fun equals(other: Any?): Boolean =
       if (other is TickData) this.currentTick == other.currentTick else super.equals(other)
 
-  override fun hashCode(): Int {
-    return currentTick.hashCode()
-  }
+  override fun hashCode(): Int = currentTick.hashCode()
 }

@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package tools.aqua.stars.auna.importer
 
 import kotlin.math.PI
@@ -24,11 +26,20 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Quaternion. */
 data class Quaternion(
-    @SerialName("x") val x: Double,
-    @SerialName("y") val y: Double,
-    @SerialName("z") val z: Double,
-    @SerialName("w") val w: Double
+    @SerialName("x")
+    /** The x value. */
+    val x: Double,
+    @SerialName("y")
+    /** The y value. */
+    val y: Double,
+    @SerialName("z")
+    /** The z value. */
+    val z: Double,
+    @SerialName("w")
+    /** The w value. */
+    val w: Double
 ) {
 
   /** Calculate the roll value for this quaternion. */
@@ -56,6 +67,7 @@ data class Quaternion(
     }
 
   companion object {
+    /** The zero quaternion. */
     val zero: Quaternion = Quaternion(0.0, 0.0, 0.0, 0.0)
   }
 }

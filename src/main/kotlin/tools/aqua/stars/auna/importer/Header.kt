@@ -21,7 +21,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** The header for messages. */
 data class Header(
-    @SerialName("stamp") val timeStamp: Time,
-    @SerialName("frame_id") val frameId: String,
+    @SerialName("stamp")
+    /** The timestamp. */
+    val timeStamp: Time,
+    @SerialName("frame_id")
+    /** The frame identifier. */
+    val frameId: String,
 )

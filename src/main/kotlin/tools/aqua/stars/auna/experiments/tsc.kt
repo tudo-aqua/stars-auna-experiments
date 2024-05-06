@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("StringLiteralDuplication")
+
 package tools.aqua.stars.auna.experiments
 
 import tools.aqua.stars.core.tsc.*
@@ -23,6 +25,8 @@ import tools.aqua.stars.core.tsc.projection.proj
 import tools.aqua.stars.core.tsc.projection.projRec
 import tools.aqua.stars.data.av.track.*
 
+@Suppress("LongMethod")
+/** The TSC for the AuNa experiments. */
 fun tsc() =
     TSC(
         root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {

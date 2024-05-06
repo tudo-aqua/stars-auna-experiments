@@ -21,7 +21,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Pose with covariance. */
 data class PoseWithCovariance(
-    @SerialName("pose") val pose: Pose,
-    @SerialName("covariance") val covariance: List<Double>
+    @SerialName("pose")
+    /** The [Pose]. */
+    val pose: Pose,
+    @SerialName("covariance")
+    /** The covariance vector. */
+    val covariance: List<Double>
 )

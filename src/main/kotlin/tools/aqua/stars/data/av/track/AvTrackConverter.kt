@@ -40,7 +40,7 @@ fun convertTrackToLanes(track: Track, segmentsPerLane: Int): List<Lane> {
                       laneID = index * segmentsPerLane + index2,
                       length = lane.length,
                       width = lane.width,
-                      waypoints = listOf(),
+                      waypoints = emptyList(),
                       laneCurvature =
                           when (index % 4) {
                             0 -> Lane.LaneCurvature.WIDE_CURVE
@@ -92,12 +92,12 @@ fun convertTrackToSingleLane(track: Track): Lane {
           laneSegment = Lane.LaneSegment.ENTERING,
           width = track.lanes[0].width,
           length = track.lanes[0].length,
-          waypoints = listOf())
+          waypoints = emptyList())
   newLane.waypoints =
       track.lanes
           .map { it.waypoints.map { wp -> Waypoint(wp.x, wp.y, wp.distanceToStart, newLane) } }
           .flatten()
           .toMutableList()
-          .also { it.addAll(it.subList(0, 10).map { it.copy() }) }
+          .also { it.addAll(it.subList(0, 10).map { t -> t.copy() }) }
   return newLane
 }

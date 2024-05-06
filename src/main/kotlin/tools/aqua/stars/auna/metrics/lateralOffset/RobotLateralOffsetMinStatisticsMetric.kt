@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.lateral_offset
+package tools.aqua.stars.auna.metrics.lateralOffset
 
 import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
@@ -24,6 +24,7 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the average lateral offset of a robot. */
 class RobotLateralOffsetMinStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-lateral-offset-minimum-statistics")
 ) :
@@ -31,7 +32,7 @@ class RobotLateralOffsetMinStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var currentMin: MutableMap<Int, Double> = mutableMapOf()
+  private val currentMin: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
@@ -49,9 +50,7 @@ class RobotLateralOffsetMinStatisticsMetric(
     }
   }
 
-  override fun getState(): Map<Int, Double> {
-    return currentMin
-  }
+  override fun getState(): Map<Int, Double> = currentMin
 
   override fun printState() {
     currentMin.forEach { (actorId, minAcceleration) ->

@@ -22,13 +22,29 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+/** Lane. */
 data class Lane(
-    @SerialName("id") val id: Int,
-    @SerialName("waypoints") val waypoints: List<Waypoint>,
-    @SerialName("length") val length: Double,
-    @SerialName("width") val width: Double = 1.4
+    @SerialName("id")
+    /** The lane identifier. */
+    val id: Int,
+    @SerialName("waypoints")
+    /** The [List] of [Waypoint]s on the [Lane]. */
+    val waypoints: List<Waypoint>,
+    @SerialName("length")
+    /** The length of the [Lane]. */
+    val length: Double,
+    @SerialName("width")
+    /** The width of the Lane. */
+    val width: Double = 1.4
 ) {
   companion object {
+    /**
+     * Creates a [Lane] from the given [id] and [waypoints].
+     *
+     * @param id The identifier of the [Lane].
+     * @param waypoints The [List] of [Waypoint]s on the [Lane].
+     * @return The created [Lane].
+     */
     operator fun invoke(id: Int, waypoints: List<Waypoint>): Lane {
       waypoints.forEachIndexed { index, waypoint ->
         if (index == 0) {

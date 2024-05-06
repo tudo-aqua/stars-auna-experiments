@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package tools.aqua.stars.auna.metrics.lateral_offset
+package tools.aqua.stars.auna.metrics.lateralOffset
 
 import java.util.logging.Logger
 import tools.aqua.stars.core.metric.providers.Loggable
@@ -24,6 +24,7 @@ import tools.aqua.stars.core.metric.providers.Stateful
 import tools.aqua.stars.core.types.SegmentType
 import tools.aqua.stars.data.av.track.*
 
+/** Metric to calculate the maximum lateral offset of a robot. */
 class RobotLateralOffsetMaxStatisticsMetric(
     override val logger: Logger = Loggable.getLogger("robot-lateral-offset-maximum-statistics")
 ) :
@@ -31,7 +32,7 @@ class RobotLateralOffsetMaxStatisticsMetric(
     Loggable,
     Stateful {
 
-  private var currentMax: MutableMap<Int, Double> = mutableMapOf()
+  private val currentMax: MutableMap<Int, Double> = mutableMapOf()
 
   override fun evaluate(
       segment: SegmentType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>
@@ -48,9 +49,7 @@ class RobotLateralOffsetMaxStatisticsMetric(
     }
   }
 
-  override fun getState(): Map<Int, Double> {
-    return currentMax
-  }
+  override fun getState(): Map<Int, Double> = currentMax
 
   override fun printState() {
     currentMax.forEach { (actorId, maxVelocity) ->

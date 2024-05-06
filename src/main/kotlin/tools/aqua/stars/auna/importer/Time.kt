@@ -22,11 +22,15 @@ import kotlinx.serialization.Serializable
 import tools.aqua.stars.data.av.track.AuNaTimeUnit
 
 @Serializable
+/** Time. */
 data class Time(
-    @SerialName("seconds") val seconds: Double,
-    @SerialName("nanoseconds") val nanoseconds: Double
+    @SerialName("seconds")
+    /** The seconds. */
+    val seconds: Double,
+    @SerialName("nanoseconds")
+    /** The nanoseconds. */
+    val nanoseconds: Double
 ) {
-  fun toAuNaTimeUnit(): AuNaTimeUnit {
-    return AuNaTimeUnit(seconds, nanoseconds)
-  }
+  /** Convert to [AuNaTimeUnit]. */
+  fun toAuNaTimeUnit(): AuNaTimeUnit = AuNaTimeUnit(seconds, nanoseconds)
 }

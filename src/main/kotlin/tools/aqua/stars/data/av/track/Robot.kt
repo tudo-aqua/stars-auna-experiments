@@ -36,7 +36,9 @@ import tools.aqua.stars.core.types.EntityType
  * @property velocity The velocity of the Robot for the current [TickData].
  * @property acceleration The acceleration of the Robot for the current [TickData].
  * @property position The latest ViconPose transform position for the current [TickData].
+ * @property positionCAM The latest CAM position for the current [TickData].
  * @property rotation The latest ViconPose transform rotation for the current [TickData].
+ * @property thetaCAM The latest CAM rotation for the current [TickData].
  * @property posOnLaneCAM The latest CAM position on the [Lane], which is the distance to the
  *   beginning of the [Lane] in meters.
  * @property lateralOffsetCAM The latest CAM offset to the optimal line of the [lane]. A positive
@@ -71,7 +73,7 @@ data class Robot(
     val steeringAngle: Double = 0.0,
 ) : EntityType<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
 
-  /** Dummy constructor */
+  /** Dummy constructor. */
   constructor(
       tickData: TickData
   ) : this(

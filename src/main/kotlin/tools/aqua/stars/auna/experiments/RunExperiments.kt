@@ -84,8 +84,9 @@ fun main() {
       MissedTSCInstancesPerProjectionMetric(),
       MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric),
       FailedMonitorsMetric(validTSCInstancesPerProjectionMetric),
-      FailedMonitorsGroupedMetric(validTSCInstancesPerProjectionMetric),
-      FailedMonitorsGroupedByNodeMetric(validTSCInstancesPerProjectionMetric, onlyLeafNodes = true),
+      FailedMonitorsGroupedByTSCInstanceMetric(validTSCInstancesPerProjectionMetric),
+      FailedMonitorsGroupedByTSCNodeMetric(
+          validTSCInstancesPerProjectionMetric, onlyLeafNodes = true),
 
       // Velocity
       RobotVelocityStatisticsMetric(plotSegments),

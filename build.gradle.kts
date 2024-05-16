@@ -25,21 +25,21 @@ plugins {
 
 group = "tools.aqua"
 
-version = "0.2.2"
+version = "0.3"
 
 repositories {
   mavenCentral()
   mavenLocal()
 }
 
-// var starsVersion = "0.2.2"
+var starsVersion = "0.3"
 
 dependencies {
   testImplementation(kotlin("test"))
-  implementation("tools.aqua:stars-core")
-  implementation("tools.aqua:stars-logic-kcmftbl")
-  implementation("tools.aqua:stars-data-av")
-  implementation("tools.aqua:stars-importer-carla")
+  implementation("tools.aqua:stars-core:$starsVersion")
+  implementation("tools.aqua:stars-logic-kcmftbl:$starsVersion")
+  implementation("tools.aqua:stars-data-av:$starsVersion")
+  implementation("tools.aqua:stars-importer-carla:$starsVersion")
   implementation("de.sciss:kdtree:0.1.1")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.5.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")

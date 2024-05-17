@@ -51,6 +51,16 @@ Therefore, we extracted these 4 coordinates for the two straights. We identified
 - (x=-6.09016702472381,y=3.17436982808834) (upper left corner)
 - (x=2.7643231790252, y=4.33303506387608) (upper right corner)
 
+## Domain Model
+Here you can find the domain model that is used for this experiments.
+All interfaces marked in green come from the [STARS
+framework](https://github.com/tudo-aqua/stars) and are implemented with concrete classes in this repository.
+The left-hand part of the diagram displays the structure of the messages
+that are sent by the platooning vehicles. The right-hand part of the diagram
+shows all classes that are necessary for our analysis.
+
+![Platooning Data Model.svg](astah/Platooning_Data_Model.svg)
+
 #### (Optional) Git Hooks
 If you want to use our proposed Git Hooks you can execute the following command:
 ```shell

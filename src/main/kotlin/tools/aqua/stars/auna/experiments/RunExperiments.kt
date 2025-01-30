@@ -30,6 +30,7 @@ import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontAverage
 import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontMinStatisticsMetric
 import tools.aqua.stars.auna.metrics.distanceToFront.RobotDistanceToFrontStatisticsMetric
+import tools.aqua.stars.auna.metrics.heading.RobotHeadingStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateralOffset.RobotLateralOffsetAverageStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateralOffset.RobotLateralOffsetMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.lateralOffset.RobotLateralOffsetMinStatisticsMetric
@@ -117,6 +118,9 @@ fun main() {
       RobotDistanceToFrontAverageStatisticsMetric(),
       RobotDistanceToFrontMinStatisticsMetric(),
       RobotDistanceToFrontMaxStatisticsMetric(),
+
+      // Heading
+      RobotHeadingStatisticsMetric(plotSegments),
   )
   println("Run Evaluation")
   tscEvaluation.runEvaluation(writePlots = true, writePlotDataCSV = true)

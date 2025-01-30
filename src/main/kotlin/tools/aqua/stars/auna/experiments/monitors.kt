@@ -20,6 +20,7 @@
 package tools.aqua.stars.auna.experiments
 
 import kotlin.math.*
+import kotlin.math.abs
 import tools.aqua.stars.core.evaluation.UnaryPredicate.Companion.predicate
 import tools.aqua.stars.data.av.track.AuNaTimeDifference
 import tools.aqua.stars.data.av.track.DataSource
@@ -107,17 +108,14 @@ fun nextCAMMessageInTime(millis: Int = 0) =
           phi = { r1 -> r !== r1 && r.id == r1.id && r1.dataSource == DataSource.CAM },
           interval =
               AuNaTimeDifference(0) to AuNaTimeDifference(millis * 1_000_000 + CAM_SLACK_NANOS))
-    }
-
-/** There are no more ticks [millis] ms from now. default: 0ms. */
-fun noMoreTicks(millis: Int = 0) =
-    predicate(Robot::class) { _, r ->
-      !eventually(
-          r,
-          phi = { true },
-          interval =
-              AuNaTimeDifference(millis * 1_000_000 + CAM_SLACK_NANOS) to
-                  AuNaTimeDifference(Long.MAX_VALUE))
+      // No more ticks
+      ||
+          !eventually(
+              r,
+              phi = { true },
+              interval =
+                  AuNaTimeDifference(millis * 1_000_000 + CAM_SLACK_NANOS) to
+                      AuNaTimeDifference(Long.MAX_VALUE))
     }
 
 /** There are no more speed changes in this segment. */
@@ -152,7 +150,6 @@ val camMessageTimeout =
             // This tick is no CAM message
             r.id != r1.id ||
                 r1.dataSource != DataSource.CAM ||
-                noMoreTicks(1000).holds(ctx, r1) ||
                 nextCAMMessageInTime(1000).holds(ctx, r1)
           })
     }
@@ -177,8 +174,8 @@ val camMessageSpeedChange =
                     phi = { r2 ->
                       r1 !== r2 &&
                           r1.id == r2.id &&
-                          abs(r1.velocityCAM - r2.velocity) >= 0.05 &&
-                          (noMoreTicks().holds(ctx, r2) || nextCAMMessageInTime().holds(ctx, r2))
+                          velDiff(r1, r2) >= 0.05 &&
+                          nextCAMMessageInTime().holds(ctx, r2)
                     })
           })
     }
@@ -204,13 +201,10 @@ val camMessagePositionChange =
                       r1 !== r2 &&
                           r1.id == r2.id &&
                           posDiff(r1, r2) >= 0.4 &&
-                          (noMoreTicks().holds(ctx, r2) || nextCAMMessageInTime().holds(ctx, r2))
+                          nextCAMMessageInTime().holds(ctx, r2)
                     })
           })
     }
-
-private fun posDiff(r1: Robot, r2: Robot) =
-    sqrt((r1.positionCAM.x - r2.position.x).pow(2) + (r1.positionCAM.y - r2.position.y).pow(2))
 
 /**
  * A CAM message must be sent within [CAM_SLACK_NANOS] after heading change.
@@ -233,10 +227,19 @@ val camMessageHeadingChange =
                       r1 !== r2 &&
                           r1.id == r2.id &&
                           yawDiff(r1, r2) >= (4 * PI / 180) &&
-                          (noMoreTicks().holds(ctx, r2) || nextCAMMessageInTime().holds(ctx, r2))
+                          nextCAMMessageInTime().holds(ctx, r2)
                     })
           })
     }
 
-private fun yawDiff(r1: Robot, r2: Robot) = abs(r1.thetaCAM - r2.rotation.yaw)
+/** Calculates the absolute velocity difference */
+private fun velDiff(r1: Robot, r2: Robot) = abs(r1.velocityCAM - r2.velocity)
+
+/** Calculates the absolute position difference using the Euclidean distance */
+private fun posDiff(r1: Robot, r2: Robot) =
+    sqrt((r1.positionCAM.x - r2.position.x).pow(2) + (r1.positionCAM.y - r2.position.y).pow(2))
+
+/** Calculates the absolute heading change. Wraps on changes passing 360 degrees */
+private fun yawDiff(r1: Robot, r2: Robot) =
+    abs(((r1.thetaCAM - r2.rotation.yaw + 180) % 360 + 360) % 360 - 180)
 // endregion

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The STARS AuNa Experiments Authors
+ * Copyright 2023-2025 The STARS AuNa Experiments Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,10 +31,10 @@ repositories { mavenCentral() }
 
 dependencies {
   testImplementation(kotlin("test"))
-  implementation("tools.aqua:stars-core:0.3")
-  implementation("tools.aqua:stars-logic-kcmftbl:0.3")
-  implementation("tools.aqua:stars-data-av:0.3")
-  implementation("tools.aqua:stars-importer-carla:0.3")
+  implementation("tools.aqua:stars-core:0.5")
+  implementation("tools.aqua:stars-logic-kcmftbl:0.5")
+  implementation("tools.aqua:stars-data-av:0.5")
+  implementation("tools.aqua:stars-importer-carla:0.5")
   implementation("de.sciss:kdtree:0.1.1")
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.5.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")

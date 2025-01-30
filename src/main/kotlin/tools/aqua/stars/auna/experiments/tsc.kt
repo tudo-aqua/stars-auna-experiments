@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The STARS AuNa Experiments Authors
+ * Copyright 2023-2025 The STARS AuNa Experiments Authors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,6 @@ package tools.aqua.stars.auna.experiments
 
 import tools.aqua.stars.core.tsc.*
 import tools.aqua.stars.core.tsc.builder.*
-import tools.aqua.stars.core.tsc.projection.proj
-import tools.aqua.stars.core.tsc.projection.projRec
 import tools.aqua.stars.data.av.track.*
 
 @Suppress("LongMethod")
@@ -31,96 +29,99 @@ fun tsc() =
     TSC(
         root<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference> {
           all("TSCRoot") {
-            projectionIDs =
-                mapOf(
-                    projRec("all"),
-                    proj("Driving situation"),
-                    proj("Position on Track"),
-                    proj("Distance to front vehicle"),
-                    proj("Velocity"),
-                    proj("Driving maneuver"),
-                    proj("Acceleration"),
-                    proj("Steering Angle"))
+            projections {
+              projectionRecursive("all")
+              projection("Driving situation")
+              projection("Position on Track")
+              projection("Distance to front vehicle")
+              projection("Velocity")
+              projection("Driving maneuver")
+              projection("Acceleration")
+              projection("Steering Angle")
+            }
 
             all("Driving situation") {
-              projectionIDs =
-                  mapOf(
-                      projRec("Driving situation"),
-                      proj("Position on Track"),
-                      proj("Distance to front vehicle"),
-                      proj("Velocity"))
+              projections {
+                projectionRecursive("Driving situation")
+                projection("Position on Track")
+                projection("Distance to front vehicle")
+                projection("Velocity")
+              }
 
               all("Position on Track") {
-                projectionIDs = mapOf(projRec("Position on Track"))
+                projections { projectionRecursive("Position on Track") }
 
                 exclusive("Lane Type") {
-                  leaf("Top Straight") { condition = { ctx -> topStraight.holds(ctx) } }
-                  leaf("Bottom Straight") { condition = { ctx -> bottomStraight.holds(ctx) } }
-                  leaf("Wide Curve") { condition = { ctx -> wideCurve.holds(ctx) } }
-                  leaf("Tight Curve") { condition = { ctx -> tightCurve.holds(ctx) } }
+                  leaf("Top Straight") { condition { ctx -> topStraight.holds(ctx) } }
+                  leaf("Bottom Straight") { condition { ctx -> bottomStraight.holds(ctx) } }
+                  leaf("Wide Curve") { condition { ctx -> wideCurve.holds(ctx) } }
+                  leaf("Tight Curve") { condition { ctx -> tightCurve.holds(ctx) } }
                 }
 
                 exclusive("Lane Section") {
-                  leaf("Entering") { condition = { ctx -> entering.holds(ctx) } }
-                  leaf("Middle") { condition = { ctx -> middle.holds(ctx) } }
-                  leaf("Exiting") { condition = { ctx -> leaving.holds(ctx) } }
+                  leaf("Entering") { condition { ctx -> entering.holds(ctx) } }
+                  leaf("Middle") { condition { ctx -> middle.holds(ctx) } }
+                  leaf("Exiting") { condition { ctx -> leaving.holds(ctx) } }
                 }
               }
 
               exclusive("Distance to front vehicle") {
-                projectionIDs = mapOf(projRec("Distance to front vehicle"))
+                projections { projectionRecursive("Distance to front vehicle") }
                 leaf("High distance to front vehicle") {
-                  condition = { ctx -> highDistanceToFrontVehicle.holds(ctx) }
+                  condition { ctx -> highDistanceToFrontVehicle.holds(ctx) }
                 }
                 leaf("Normal distance to front vehicle") {
-                  condition = { ctx -> normalDistanceToFrontVehicle.holds(ctx) }
+                  condition { ctx -> normalDistanceToFrontVehicle.holds(ctx) }
                 }
                 leaf("Low distance to front vehicle") {
-                  condition = { ctx -> lowDistanceToFrontVehicle.holds(ctx) }
+                  condition { ctx -> lowDistanceToFrontVehicle.holds(ctx) }
                 }
               }
 
               exclusive("Velocity") {
-                projectionIDs = mapOf(projRec("Velocity"))
-                leaf("Low Velocity") { condition = { ctx -> lowVelocity.holds(ctx) } }
-                leaf("High Velocity") { condition = { ctx -> highVelocity.holds(ctx) } }
-                leaf("Max Velocity") { condition = { ctx -> maxVelocity.holds(ctx) } }
+                projections { projectionRecursive("Velocity") }
+                leaf("Low Velocity") { condition { ctx -> lowVelocity.holds(ctx) } }
+                leaf("High Velocity") { condition { ctx -> highVelocity.holds(ctx) } }
+                leaf("Max Velocity") { condition { ctx -> maxVelocity.holds(ctx) } }
               }
             }
 
             all("Driving maneuver") {
-              projectionIDs =
-                  mapOf(projRec("Driving maneuver"), proj("Acceleration"), proj("Steering Angle"))
+              projections {
+                projectionRecursive("Driving maneuver")
+                projection("Acceleration")
+                projection("Steering Angle")
+              }
 
               exclusive("Acceleration") {
-                projectionIDs = mapOf(projRec("Acceleration"))
-                leaf("Weak Deceleration") { condition = { ctx -> weakDeceleration.holds(ctx) } }
-                leaf("Strong Deceleration") { condition = { ctx -> strongDeceleration.holds(ctx) } }
-                leaf("Weak Acceleration") { condition = { ctx -> weakAcceleration.holds(ctx) } }
-                leaf("Strong Acceleration") { condition = { ctx -> strongAcceleration.holds(ctx) } }
+                projections { projectionRecursive("Acceleration") }
+                leaf("Weak Deceleration") { condition { ctx -> weakDeceleration.holds(ctx) } }
+                leaf("Strong Deceleration") { condition { ctx -> strongDeceleration.holds(ctx) } }
+                leaf("Weak Acceleration") { condition { ctx -> weakAcceleration.holds(ctx) } }
+                leaf("Strong Acceleration") { condition { ctx -> strongAcceleration.holds(ctx) } }
               }
 
               any("Steering Angle") {
-                projectionIDs = mapOf(projRec("Steering Angle"))
+                projections { projectionRecursive("Steering Angle") }
                 leaf("No Steering") {
-                  condition = { ctx ->
+                  condition { ctx ->
                     ctx.entityIds.any { entityId -> noSteering.holds(ctx, entityId = entityId) }
                   }
                 }
                 leaf("Low Steering") {
-                  condition = { ctx ->
+                  condition { ctx ->
                     ctx.entityIds.any { entityId -> lowSteering.holds(ctx, entityId = entityId) }
                   }
                 }
                 leaf("Hard Steering") {
-                  condition = { ctx ->
+                  condition { ctx ->
                     ctx.entityIds.any { entityId -> hardSteering.holds(ctx, entityId = entityId) }
                   }
                 }
               }
             }
 
-            all("Monitors") {
+            monitors {
               monitor("Max lateral offset") { normalLateralOffset.holds(it) }
               monitor("CAM message timeout") { camMessageTimeout.holds(it) }
               monitor("CAM message speed change") { camMessageSpeedChange.holds(it) }

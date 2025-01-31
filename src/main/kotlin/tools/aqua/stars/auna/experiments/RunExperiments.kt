@@ -73,7 +73,7 @@ fun main() {
   println("Found ${segments.toList().size} segments.")
 
   val tscEvaluation =
-      TSCEvaluation(tscList = tsc.buildProjections(), writePlots = true, writePlotDataCSV = true)
+      TSCEvaluation(tscList = tsc.buildProjections(), writePlots = false, writePlotDataCSV = false)
 
   val validTSCInstancesPerTSCMetric =
       ValidTSCInstancesPerTSCMetric<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()

@@ -37,6 +37,8 @@ data class Lane(
     /** The width of the Lane. */
     val width: Double = 1.4
 ) {
+
+  /** Companion. */
   companion object {
     /**
      * Creates a [Lane] from the given [id] and [waypoints].

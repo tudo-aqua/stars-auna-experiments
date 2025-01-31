@@ -26,7 +26,8 @@ import tools.aqua.stars.data.av.track.*
 
 /** Metric to calculate the average velocity of a robot. */
 class RobotVelocityAverageStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-velocity-average-statistics")
+    override val loggerIdentifier: String = "robot-velocity-average-statistics",
+    override val logger: Logger = Loggable.getLogger(loggerIdentifier)
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,

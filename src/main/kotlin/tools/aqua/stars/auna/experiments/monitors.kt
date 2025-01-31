@@ -232,14 +232,14 @@ val camMessageHeadingChange =
           })
     }
 
-/** Calculates the absolute velocity difference */
+/** Calculates the absolute velocity difference. */
 private fun velDiff(r1: Robot, r2: Robot) = abs(r1.velocityCAM - r2.velocity)
 
-/** Calculates the absolute position difference using the Euclidean distance */
+/** Calculates the absolute position difference using the Euclidean distance. */
 private fun posDiff(r1: Robot, r2: Robot) =
     sqrt((r1.positionCAM.x - r2.position.x).pow(2) + (r1.positionCAM.y - r2.position.y).pow(2))
 
-/** Calculates the absolute heading change. Wraps on changes passing 360 degrees */
+/** Calculates the absolute heading change. Wraps on changes passing 360 degrees. */
 private fun yawDiff(r1: Robot, r2: Robot) =
     abs(((r1.thetaCAM - r2.rotation.yaw + 180) % 360 + 360) % 360 - 180)
 // endregion

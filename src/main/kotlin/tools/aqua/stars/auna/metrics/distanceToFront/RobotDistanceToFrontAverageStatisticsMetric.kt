@@ -26,7 +26,8 @@ import tools.aqua.stars.data.av.track.*
 
 /** Metric to calculate the average distance to the front robot in a segment. */
 class RobotDistanceToFrontAverageStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-distance-to-front-average-statistics")
+    override val loggerIdentifier: String = "robot-distance-to-front-average-statistics",
+    override val logger: Logger = Loggable.getLogger(loggerIdentifier)
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,

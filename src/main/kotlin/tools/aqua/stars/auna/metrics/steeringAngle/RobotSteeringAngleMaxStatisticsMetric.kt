@@ -26,7 +26,8 @@ import tools.aqua.stars.data.av.track.*
 
 /** Metric to calculate the maximum steering angle of a robot. */
 class RobotSteeringAngleMaxStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-steering-angle-maximum-statistics")
+    override val loggerIdentifier: String = "robot-steering-angle-maximum-statistics",
+    override val logger: Logger = Loggable.getLogger(loggerIdentifier)
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,

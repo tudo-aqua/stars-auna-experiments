@@ -113,7 +113,7 @@ private fun MutableList<TickData>.calculateAccelerations() {
 
         val endValue =
             tickArray[
-                (index + 1 ..< tickArray.size).first { t ->
+                (index + 1..<tickArray.size).first { t ->
                   tickArray[t].currentTick.toMillis() >= currentTick + windowStep
                 }]
 

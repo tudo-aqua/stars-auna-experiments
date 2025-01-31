@@ -76,9 +76,10 @@ class AuNaTimeUnit(val nanos: BigInteger) : TickUnit<AuNaTimeUnit, AuNaTimeDiffe
 
   override fun hashCode(): Int = nanos.hashCode()
 
+  /** The zero time unit. */
   companion object {
     @Suppress("unused")
-    /** Zero time unit. */
+    /** The zero time unit. */
     val Zero = AuNaTimeUnit(0.0, 0.0)
   }
 }

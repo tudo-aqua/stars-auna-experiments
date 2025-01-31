@@ -26,7 +26,8 @@ import tools.aqua.stars.data.av.track.*
 
 /** Metric to calculate the average lateral offset of a robot. */
 class RobotLateralOffsetMinStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-lateral-offset-minimum-statistics")
+    override val loggerIdentifier: String = "robot-lateral-offset-minimum-statistics",
+    override val logger: Logger = Loggable.getLogger(loggerIdentifier)
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,

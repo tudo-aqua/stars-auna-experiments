@@ -26,7 +26,8 @@ import tools.aqua.stars.data.av.track.*
 
 /** Metric to calculate the minimum acceleration of a robot in a segment. */
 class RobotAccelerationMinStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-acceleration-minimum-statistics")
+    override val loggerIdentifier: String = "robot-acceleration-minimum-statistics",
+    override val logger: Logger = Loggable.getLogger(loggerIdentifier)
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,

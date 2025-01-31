@@ -44,11 +44,14 @@ import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMaxStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityMinStatisticsMetric
 import tools.aqua.stars.auna.metrics.velocity.RobotVelocityStatisticsMetric
 import tools.aqua.stars.core.evaluation.TSCEvaluation
-import tools.aqua.stars.core.metric.metrics.evaluation.InvalidTSCInstancesPerProjectionMetric
-import tools.aqua.stars.core.metric.metrics.evaluation.MissedTSCInstancesPerProjectionMetric
+import tools.aqua.stars.core.metric.metrics.evaluation.InvalidTSCInstancesPerTSCMetric
+import tools.aqua.stars.core.metric.metrics.evaluation.MissedTSCInstancesPerTSCMetric
 import tools.aqua.stars.core.metric.metrics.evaluation.SegmentCountMetric
-import tools.aqua.stars.core.metric.metrics.evaluation.ValidTSCInstancesPerProjectionMetric
-import tools.aqua.stars.core.metric.metrics.postEvaluation.*
+import tools.aqua.stars.core.metric.metrics.evaluation.ValidTSCInstancesPerTSCMetric
+import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsGroupedByTSCInstanceMetric
+import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsGroupedByTSCNodeMetric
+import tools.aqua.stars.core.metric.metrics.postEvaluation.FailedMonitorsMetric
+import tools.aqua.stars.core.metric.metrics.postEvaluation.MissedPredicateCombinationsPerTSCMetric
 import tools.aqua.stars.data.av.track.*
 
 /** Executes the experiments. */
@@ -70,24 +73,22 @@ fun main() {
   println("Found ${segments.toList().size} segments.")
 
   val tscEvaluation =
-      TSCEvaluation(tsc = tsc, segments = segments, projectionIgnoreList = listOf(""))
+      TSCEvaluation(tscList = tsc.buildProjections(), writePlots = true, writePlotDataCSV = true)
 
-  val validTSCInstancesPerProjectionMetric =
-      ValidTSCInstancesPerProjectionMetric<
-          Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
+  val validTSCInstancesPerTSCMetric =
+      ValidTSCInstancesPerTSCMetric<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>()
 
   val plotSegments = true
   tscEvaluation.registerMetricProviders(
       // Generic metrics
       SegmentCountMetric(),
-      validTSCInstancesPerProjectionMetric,
-      InvalidTSCInstancesPerProjectionMetric(),
-      MissedTSCInstancesPerProjectionMetric(),
-      MissingPredicateCombinationsPerProjectionMetric(validTSCInstancesPerProjectionMetric),
-      FailedMonitorsMetric(validTSCInstancesPerProjectionMetric),
-      FailedMonitorsGroupedByTSCInstanceMetric(validTSCInstancesPerProjectionMetric),
-      FailedMonitorsGroupedByTSCNodeMetric(
-          validTSCInstancesPerProjectionMetric, onlyLeafNodes = true),
+      validTSCInstancesPerTSCMetric,
+      InvalidTSCInstancesPerTSCMetric(),
+      MissedTSCInstancesPerTSCMetric(),
+      MissedPredicateCombinationsPerTSCMetric(validTSCInstancesPerTSCMetric),
+      FailedMonitorsMetric(validTSCInstancesPerTSCMetric),
+      FailedMonitorsGroupedByTSCInstanceMetric(validTSCInstancesPerTSCMetric),
+      FailedMonitorsGroupedByTSCNodeMetric(validTSCInstancesPerTSCMetric, onlyLeafNodes = true),
 
       // Velocity
       RobotVelocityStatisticsMetric(plotSegments),
@@ -123,7 +124,7 @@ fun main() {
       RobotHeadingStatisticsMetric(plotSegments),
   )
   println("Run Evaluation")
-  tscEvaluation.runEvaluation(writePlots = true, writePlotDataCSV = true)
+  tscEvaluation.runEvaluation(segments = segments)
 }
 
 /**

@@ -19,9 +19,14 @@ package tools.aqua.stars.data.av.track
 
 /** This enum holds all possible triggers for new value updates of the [Robot]s. */
 enum class DataSource {
+  /** Pose from the vicon positioning. */
   VICON_POSE,
+  /** Odometry. */
   ODOMETRY,
+  /** Cooperative awareness message. */
   CAM,
+  /** Ackermann command. */
   ACKERMANN_CMD,
+  /** Unset. */
   NOT_SET
 }

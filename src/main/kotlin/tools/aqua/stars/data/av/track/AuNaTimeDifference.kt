@@ -59,6 +59,10 @@ class AuNaTimeDifference(val differenceNanos: BigInteger) : TickDifference<AuNaT
   override fun plus(other: AuNaTimeDifference): AuNaTimeDifference =
       AuNaTimeDifference(differenceNanos + other.differenceNanos)
 
+  override fun serialize(): String = differenceNanos.toString()
+
+  override fun deserialize(str: String): AuNaTimeDifference = AuNaTimeDifference(str.toBigInteger())
+
   override fun toString(): String =
       "(${seconds}s, " +
           "${millis.mod(1e3.toLong().toBigInteger())}ms, " +

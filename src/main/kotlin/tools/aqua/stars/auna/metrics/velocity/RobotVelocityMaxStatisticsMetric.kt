@@ -26,7 +26,8 @@ import tools.aqua.stars.data.av.track.*
 
 /** Metric to calculate the maximum velocity of a robot. */
 class RobotVelocityMaxStatisticsMetric(
-    override val logger: Logger = Loggable.getLogger("robot-velocity-maximum-statistics")
+    override val loggerIdentifier: String = "robot-velocity-maximum-statistics",
+    override val logger: Logger = Loggable.getLogger(loggerIdentifier)
 ) :
     SegmentMetricProvider<Robot, TickData, Segment, AuNaTimeUnit, AuNaTimeDifference>,
     Loggable,

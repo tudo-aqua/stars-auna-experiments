@@ -46,16 +46,23 @@ data class Lane(
 
   /** The Lane curvature. */
   enum class LaneCurvature {
+    /** The wide curve. */
     WIDE_CURVE,
+    /** The top straight. */
     TOP_STRAIGHT,
+    /** The tight curve. */
     TIGHT_CURVE,
+    /** The bottom straight. */
     BOTTOM_STRAIGHT
   }
 
   /** The Lane segment. */
   enum class LaneSegment {
+    /** The entering segment. */
     ENTERING,
+    /** The middle segment. */
     MIDDLE,
+    /** The leaving segment. */
     LEAVING
   }
 }

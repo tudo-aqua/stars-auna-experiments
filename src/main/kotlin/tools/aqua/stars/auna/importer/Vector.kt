@@ -33,6 +33,7 @@ data class Vector(
     /** The z ordinate. */
     val z: Double,
 ) {
+  /** The zero vector. */
   companion object {
     /** Zero vector. */
     val zero: Vector = Vector(0.0, 0.0, 0.0)

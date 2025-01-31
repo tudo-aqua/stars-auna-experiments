@@ -66,6 +66,7 @@ data class Quaternion(
       return atan2(sinyCosp, cosyCosp)
     }
 
+  /** The zero quaternion. */
   companion object {
     /** The zero quaternion. */
     val zero: Quaternion = Quaternion(0.0, 0.0, 0.0, 0.0)
